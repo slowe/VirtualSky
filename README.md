@@ -6,22 +6,22 @@ A browser-based planetarium that can be customised and embedded in web pages.
 Features
 --------
 The following options can be specified (defaults in brackets):
-  * id ('starmap') - The ID for the HTML element where you want the sky inserted
-  * projection ('polar')
-    * Polar (polar)
-    * Stereographic (stereo) - with a fixed horizon
-    * Lambert (lambert) - with a fixed horizon
-    * Equirectangular (equirectangular)
-    * Mollweide (mollweide)
-    * Plane chart (planechart)
-    * Orthographic (ortho)
-    * Fish-eye (fisheye)
-  * width (500) - Set the width of the sky unless you've set the width of the element
-  * height (250) - Set the height of the sky unless you've set the height of the element
-  * planets - either an object containing an array of planets or a JSON file
-  * magnitude (5) - the magnitude limit of displayed stars
-  * longitude (53.0) - the longitude of the observer
-  * latitude (-2.5) - the latitude of the observer
+  * `id` ('starmap') - The ID for the HTML element where you want the sky inserted
+  * `projection` (`polar`)
+    * Polar (`polar`)
+    * Stereographic (`stereo`) - with a fixed horizon
+    * Lambert (`lambert`) - with a fixed horizon
+    * Equirectangular (`equirectangular`)
+    * Mollweide (`mollweide`)
+    * Plane chart (`planechart`)
+    * Orthographic (`ortho`)
+    * Fish-eye (`fisheye`)
+  * `width` (500) - Set the width of the sky unless you've set the width of the element
+  * `height` (250) - Set the height of the sky unless you've set the height of the element
+  * `planets` - either an object containing an array of planets or a JSON file
+  * `magnitude` (5) - the magnitude limit of displayed stars
+  * `longitude` (53.0) - the longitude of the observer
+  * `latitude` (-2.5) - the latitude of the observer
   * clock (now) - a Javascript Date() object with the starting date/time
   * background ('rgba(0,0,0,0)') - the background colour
   * az (180) - an azimuthal offset with 0 = north and 90 = east
