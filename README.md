@@ -1,7 +1,7 @@
 VirtualSky
 ==========
 
-A browser-based planetarium that can be customised and embedded in web pages. See [a live version](http://lcogt.net/virtualsky/) and [customize it to embed on your own site](http://lcogt.net/virtualsky/embed/custom.html).
+A browser-based planetarium that can be [customized and embedded in web pages](http://lcogt.net/virtualsky/embed/custom.html). Some [live versions](http://lcogt.net/virtualsky/) and [full-window](http://lcogt.net/virtualsky/embed/index.html).
 
 Usage
 -----
