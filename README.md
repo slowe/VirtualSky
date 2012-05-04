@@ -3,7 +3,22 @@ VirtualSky
 
 A browser-based planetarium that can be customised and embedded in web pages.
 
-Features
+Usage
+-----
+
+    <!--[if lt IE 9]><script src="http://lcogt.net/virtualsky/embed/excanvas.js" type="text/javascript"></script><![endif]-->
+    <script src="http://lcogt.net/virtualsky/embed/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="http://lcogt.net/virtualsky/embed/virtualsky.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    <!--
+        $(document).ready(function(){
+            planetarium = $.virtualsky({id:'starmapper',projection:'polar'}); // Assumes you want to draw this to a <div> with the id 'starmapper'
+        });
+    // -->
+    </script>
+
+
+Options
 --------
 The following options can be specified (defaults in brackets):
   * `id` ('starmap') - The ID for the HTML element where you want the sky inserted
@@ -22,26 +37,26 @@ The following options can be specified (defaults in brackets):
   * `magnitude` (5) - the magnitude limit of displayed stars
   * `longitude` (53.0) - the longitude of the observer
   * `latitude` (-2.5) - the latitude of the observer
-  * clock (now) - a Javascript Date() object with the starting date/time
-  * background ('rgba(0,0,0,0)') - the background colour
-  * az (180) - an azimuthal offset with 0 = north and 90 = east
-  * negative (false) - invert the default colours i.e. to black on white
-  * sky_gradient (true) - reduce the brightness of stars near the horizon
-  * cardinalpoints (true) - show/hide the N/E/S/W labels
-  * constellations (false) - show/hide the constellation lines
-  * constellationlabels (false) - show/hide the constellation labels
-  * showplanets (true) - show/hide the planets
-  * showplanetlabels (true) - show/hide the planets
-  * showstarlabels (false) - show/hide the planets
-  * showorbits (false) - show/hide the orbits of the planets
-  * showdate (true) - show/hide the date and time
-  * showposition (true) - show/hide the latitude and longitude
-  * ground (false) - show/hide the local ground (for full sky projections)
-  * keyboard (true) - allow keyboard controls
-  * mouse (true) - allow mouse controls
-  * gridlines_az (false) - show/hide the azimuth/elevation grid lines
-  * gridlines_eq (false) - show/hide the RA/Dec grid lines
-  * gridstep (30) - the size of the grid step when showing grid lines</li>
+  * `clock` (now) - a Javascript Date() object with the starting date/time
+  * `background` ('rgba(0,0,0,0)') - the background colour
+  * `az` (180) - an azimuthal offset with 0 = north and 90 = east
+  * `negative` (false) - invert the default colours i.e. to black on white
+  * `sky_gradient` (true) - reduce the brightness of stars near the horizon
+  * `cardinalpoints` (true) - show/hide the N/E/S/W labels
+  * `constellations` (false) - show/hide the constellation lines
+  * `constellationlabels` (false) - show/hide the constellation labels
+  * `showplanets` (true) - show/hide the planets
+  * `showplanetlabels` (true) - show/hide the planets
+  * `showstarlabels` (false) - show/hide the planets
+  * `showorbits` (false) - show/hide the orbits of the planets
+  * `showdate` (true) - show/hide the date and time
+  * `showposition` (true) - show/hide the latitude and longitude
+  * `ground` (false) - show/hide the local ground (for full sky projections)
+  * `keyboard` (true) - allow keyboard controls
+  * `mouse` (true) - allow mouse controls
+  * `gridlines_az` (false) - show/hide the azimuth/elevation grid lines
+  * `gridlines_eq` (false) - show/hide the RA/Dec grid lines
+  * `gridstep` (30) - the size of the grid step when showing grid lines</li>
 
 
 Author
