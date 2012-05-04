@@ -30,14 +30,14 @@ Options
 The following options can be specified (defaults in brackets):
   * `id` ('starmap') - The ID for the HTML element where you want the sky inserted
   * `projection` (`polar`)
-    * Polar (`polar`)
-    * Stereographic (`stereo`) - with a fixed horizon
-    * Lambert (`lambert`) - with a fixed horizon
-    * Equirectangular (`equirectangular`)
-    * Mollweide (`mollweide`)
-    * Plane chart (`planechart`)
-    * Orthographic (`ortho`)
-    * Fish-eye (`fisheye`)
+    * Polar - `polar`
+    * Stereographic - `stereo` - with a fixed horizon
+    * Lambert - `lambert` - with a fixed horizon
+    * Equirectangular - `equirectangular`
+    * Mollweide - `mollweide`
+    * Plane chart - `planechart`
+    * Orthographic - `ortho`
+    * Fish-eye - `fisheye`
   * `width` (500) - Set the width of the sky unless you've set the width of the element
   * `height` (250) - Set the height of the sky unless you've set the height of the element
   * `planets` - either an object containing an array of planets or a JSON file
