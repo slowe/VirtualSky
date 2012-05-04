@@ -5,6 +5,7 @@ A browser-based planetarium that can be customised and embedded in web pages.
 
 Usage
 -----
+    <head>
 
     <!--[if lt IE 9]><script src="excanvas.js" type="text/javascript"></script><![endif]-->
     <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
@@ -12,11 +13,17 @@ Usage
     <script type="text/javascript">
     <!--
         $(document).ready(function(){
-            planetarium = $.virtualsky({id:'starmapper',projection:'polar'}); // Assumes you want to draw this to a <div> with the id 'starmapper'
+            planetarium = $.virtualsky({id:'starmap',projection:'polar'}); // Assumes you want to draw this to a <div> with the id 'starmapper'
         });
     // -->
     </script>
 
+    </head>
+    <body>
+    
+        <div id="starmap" style="width:944x;height:400px;"></div>
+    
+    </body>
 
 Options
 --------
