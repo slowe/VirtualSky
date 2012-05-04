@@ -1,0 +1,57 @@
+<html>
+<head>
+	<title>Virtual Sky - Canvas Experiment</title>
+	<!--
+		Virtual Sky <canvas> application
+		(c) 2010 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+	-->
+	<style>
+	body {
+		font-family: 'Trebuchet MS',Tahoma,Helvetica,Verdana,sans-serif;
+		color: black;
+	}
+	ol { margin: 0px; padding: 0px;}
+	li { margin-bottom: 50px; }
+	</style>
+	<!--[if lt IE 9]><script src="excanvas.min.js"></script><![endif]-->
+	<script src="jquery-1.7.1.min.js"></script>
+	<script src="virtualsky.js" type="text/javascript"></script>
+	<script>
+	$(document).ready(function() {
+		planetarium = $.virtualsky({id:'starmap1',projection:'stereo'});
+		planetarium2 = $.virtualsky({id:'starmap2', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
+		planetarium3 = $.virtualsky({id:'starmap3', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
+		planetarium4 = $.virtualsky({id:'starmap4', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});
+		planetarium5 = $.virtualsky({id:'starmap5', projection:'mollweide', showstarlabels:true, az:180, ground:true});
+	});
+	</script>
+</head>
+
+<body>
+	<div style="width:940px;margin:auto;">
+
+		<h1>VirtualSky</h1>
+
+		<p>Virtual Sky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
+
+		<ol>
+		<li>A default view with a <code>stereo</code> projection.			
+			<div id="starmap1" style="width:944x;height:400px;"></div>
+		</li>
+		<li>A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:<br><br><code>planetarium2 = $.virtualsky({id:'starmap2', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});</code>
+			<div id="starmap2" style="width:500px;height:500px;"></div>
+		</li>
+		<li>A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:<br><br><code>planetarium3 = $.virtualsky({id:'starmap3', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});</code>
+			<div id="starmap3" style="width:500px;height:300px;"></div>
+		</li>
+		<li>A <code>stereo</code> projection with no keyboard or mouse input and with an equatorial grid. The view is facing south from Hill Valley, California at 1:21 am on October 25, 1985.<br><br><code>planetarium4 = $.virtualsky({id:'starmap4', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});</code>
+			<div id="starmap4" style="width:650px;height:300px;"></div>
+		</li>
+		<li>A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.<br><br><code>planetarium5 = $.virtualsky({id:'starmap5', projection:'mollweide', showstarlabels:true, az:180, ground:true});</code>
+			<div id="starmap5" style="width:920px;height:460px;"></div>
+		</li>
+		</ol>
+	</div>	
+</body>
+</html>
+
