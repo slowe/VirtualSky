@@ -6,9 +6,9 @@ A browser-based planetarium that can be customised and embedded in web pages.
 Usage
 -----
 
-    <!--[if lt IE 9]><script src="http://lcogt.net/virtualsky/embed/excanvas.js" type="text/javascript"></script><![endif]-->
-    <script src="http://lcogt.net/virtualsky/embed/jquery-1.7.1.min.js" type="text/javascript"></script>
-    <script src="http://lcogt.net/virtualsky/embed/virtualsky.js" type="text/javascript"></script>
+    <!--[if lt IE 9]><script src="excanvas.js" type="text/javascript"></script><![endif]-->
+    <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="virtualsky.js" type="text/javascript"></script>
     <script type="text/javascript">
     <!--
         $(document).ready(function(){
