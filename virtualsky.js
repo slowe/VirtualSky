@@ -63,7 +63,7 @@ function is(a,b){ return (typeof a == b) ? true : false; }
 
 function VirtualSky(input){
 
-	this.version = "0.3.9";
+	this.version = "0.3.10";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -238,7 +238,7 @@ function VirtualSky(input){
 	},{
 		"code" : "es",
 		"name" : "Espa&#241;ol",
-		"constellations": ['AndrÃ³meda','Maquina Neumatica','Ave del Paraiso','Acuario','Aguila','Altar','Carnero','Cochero','Boyero','Cincel o El Buril','Jirafa','Cangrejo','Perros de Caza','Can Mayor','Can Menor','Capricornio o\nLa Cabra','La Quilla','Casiopea','Centauro','Cefeo','Ballena','CamaleÃ³n','CompÃ¡s','Paloma','La Cabellera\nde Berenice','Corona\nAustral','Corona Boreal','Cuervo','La Copa','Cruz del Sur','Cisne','DelfÃ­n','Pez Dorado','DragÃ³n','Caballito o\nPotrillo','El RÃ­o Eridano','Horno','Los Gemelos','Grulla','HÃ©rcules','El Reloj','Hidra Hembra','Hidra Macho','Indio','Lagarto','El LeÃ³n','LeÃ³n Menor','Liebre','Balanza','Lobo','Lince','Lira','Mesa','Microscopio','Unicornio','Mosca','Escuadra/Regla','Octante','Ofiuco','OriÃ³n','Pavo','Pegaso','Perseo','Ave FÃ©nix','Caballete de Pintor','Los Peces','Pez Austral','Popa','BrÃºjula','RetÃ­culo/Red','Flecha','Sagitario','EscorpiÃ³n','Escultor','El Escudo','Serpiente','Sextante','Tauro o el Toro','Telescopio','TriÃ¡ngulo','TriÃ¡ngulo\nAustral','TucÃ¡n','Osa Mayor','Osa Menor','Vela','La Virgen','Pez Volador','Zorra o El Zorro']
+		"constellations": ['Andromeda','Maquina Neumatica','Ave del Paraiso','Acuario','Aguila','Altar','Carnero','Cochero','Boyero','Cincel o El Buril','Jirafa','Cangrejo','Perros de Caza','Can Mayor','Can Menor','Capricornio o\nLa Cabra','La Quilla','Casiopea','Centauro','Cefeo','Ballena','CamaleÃ³n','CompÃ¡s','Paloma','La Cabellera\nde Berenice','Corona\nAustral','Corona Boreal','Cuervo','La Copa','Cruz del Sur','Cisne','DelfÃ­n','Pez Dorado','DragÃ³n','Caballito o\nPotrillo','El RÃ­o Eridano','Horno','Los Gemelos','Grulla','HÃ©rcules','El Reloj','Hidra Hembra','Hidra Macho','Indio','Lagarto','El LeÃ³n','LeÃ³n Menor','Liebre','Balanza','Lobo','Lince','Lira','Mesa','Microscopio','Unicornio','Mosca','Escuadra/Regla','Octante','Ofiuco','OriÃ³n','Pavo','Pegaso','Perseo','Ave FÃ©nix','Caballete de Pintor','Los Peces','Pez Austral','Popa','BrÃºjula','RetÃ­culo/Red','Flecha','Sagitario','EscorpiÃ³n','Escultor','El Escudo','Serpiente','Sextante','Tauro o el Toro','Telescopio','TriÃ¡ngulo','TriÃ¡ngulo\nAustral','TucÃ¡n','Osa Mayor','Osa Menor','Vela','La Virgen','Pez Volador','Zorra o El Zorro']
 	}];
 	this.col = {
 		'black':"rgb(0,0,0)",
@@ -965,9 +965,9 @@ VirtualSky.prototype.draw = function(proj){
 				if(e.data.sky.wide < w) w = e.data.sky.wide;
 				e.data.sky.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
 				$('#'+id+'_calendar').css({width:w});
-				$('#'+id+'_calendar_close').bind('click',{sky:e.data.sky},function(e){
+				$('#'+id+'_calendar input').bind('change',{sky:e.data.sky},function(e){
 					e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
-					e.data.sky.draw();
+					e.data.sky.advanceTime(0,0);
 				});
 			}
 			e.data.sky.lightbox($('#'+id+'_calendar'));
