@@ -105,6 +105,7 @@ function VirtualSky(input){
 	this.islive = false;				// Update the sky in real time
 	this.fullscreen = false;			// Should it take up the full browser window
 	this.transparent = false;			// Show the sky background or not
+	this.credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? false : true;
 	this.callback = {geo:'',mouseenter:'',mouseout:''};
 
 	// Data for stars < mag 4 or that are a vertex for a constellation line - 19 kB
@@ -214,6 +215,9 @@ function VirtualSky(input){
 		"code" : "en",
 		"name" : "English",
 		"constellations": ['Andromeda','Antlia','Apus','Aquarius','Aquila','Ara','Aries','Auriga','Bootes','Caelum','Camelopardalis','Cancer','Canes Venatici','Canis Major','Canis Minor','Capricornus','Carina','Cassiopeia','Centaurus','Cepheus','Cetus','Chamaeleon','Circinus','Columba','Coma Berenices','Corona\nAustrina','Corona Borealis','Corvus','Crater','Crux','Cygnus','Delphinus','Dorado','Draco','Equuleus','Eridanus','Fornax','Gemini','Grus','Hercules','Horologium','Hydra','Hydrus','Indus','Lacerta','Leo','Leo Minor','Lepus','Libra','Lupus','Lynx','Lyra','Mensa','Microscopium','Monoceros','Musca','Norma','Octans','Ophiuchus','Orion','Pavo','Pegasus','Perseus','Phoenix','Pictor','Pisces','Piscis Austrinus','Puppis','Pyxis','Reticulum','Sagitta','Sagittarius','Scorpius','Sculptor','Scutum','Serpens','Sextans','Taurus','Telescopium','Triangulum','Triangulum\nAustrale','Tucana','Ursa Major','Ursa Minor','Vela','Virgo','Volans','Vulpecula'],
+		"planets": ["Mercury","Venus","Mars","Jove","Saturn","Uranus","Neptune"],
+		"sun":"Sun",
+		"moon":"Moon",
 		"date": "Date &amp; Time",
 		"datechange": "Change the date/time",
 		"close": "close",
@@ -240,6 +244,9 @@ function VirtualSky(input){
 		"name" : "Espa&#241;ol",
 		"position": "Latitud &amp; Longitud",
 		"W": "O",
+		"planets": ["Mercurio","Venus","Marte","J&uacute;piter","Saturno","Urano","Neptuno"],
+		"sun":"Sol",
+		"moon":"Luna",
 		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so','Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero','Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor','El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro','Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma','La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo','La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n','El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules','Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n','Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira','La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco','Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor','Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha','Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante','Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n','Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
 	}];
 	this.col = {
@@ -341,6 +348,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.height,n)) this.tall = d.height;
 	if(is(d.live,b)) this.islive = d.live;
 	if(is(d.fullscreen,b)) this.fullscreen = d.fullscreen;
+	if(is(d.credit,b)) this.credit = d.credit;
 	if(is(d.transparent,b)) this.transparent = d.transparent;
 	if(is(d.lang,s) && d.lang.length==2) this.langcode = d.lang;
 	if(is(d.callback,o)){
@@ -365,8 +373,10 @@ VirtualSky.prototype.htmlDecode = function(input){
 VirtualSky.prototype.getPhrase = function(key,key2){
 	if(key=="constellations"){
 		if(key2 < this.lang.constellations.length) return this.htmlDecode(this.lang.constellations[key2]);
-		return "";
-	}else return (this.lang[key]) ? this.lang[key] : this.langs[0][key];
+	}else if(key=="planets"){
+		if(key2 < this.lang.planets.length) return this.htmlDecode(this.lang.planets[key2]);
+	}else return (this.lang[key]) ? this.lang[key] : (this.langs[0][key] ? this.langs[0][key] : "");
+	return "";
 }
 VirtualSky.prototype.resize = function(w,h){
 	if(!this.canvas) return;
@@ -948,10 +958,10 @@ VirtualSky.prototype.draw = function(proj){
 	}
 
 	// Credit line
-	var credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? "" : this.getPhrase('power');
-	this.ctx.beginPath(); 
-	if(credit) this.ctx.fillText(credit,5,this.tall-5)
-	if(credit){
+	if(this.credit){
+		var credit = this.getPhrase('power');
+		this.ctx.beginPath(); 
+		this.ctx.fillText(credit,5,this.tall-5)
 		var metric_credit = this.ctx.measureText(credit).width;
 		// Float a transparent link on top of the credit text
 		if($('#'+this.id+'_credit').length == 0){
@@ -1132,7 +1142,7 @@ VirtualSky.prototype.drawPlanets = function(){
 				}
 			}
 			if(d < 1.5) d = 1.5;
-			this.drawPlanet(pos.x,pos.y,d,colour,this.planets[p][0]);
+			this.drawPlanet(pos.x,pos.y,d,colour,p);
 		}
 		if(this.showorbits && this.isVisible(pos.el) && mag < this.magnitude){
 			this.ctx.beginPath();
@@ -1168,10 +1178,10 @@ VirtualSky.prototype.drawPlanets = function(){
 		var pos;
 		// Draw the Sun
 		pos = this.ecliptic2xy(this.sun.lon,this.sun.lat,this.times.LST);
-		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"Sun");
+		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"sun");
 		pos = this.ecliptic2xy(this.moon.lon,this.moon.lat,this.times.LST);
 		// Draw Moon last as it is closest
-		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"Moon");
+		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"moon");
 
 	}
 	return this;
@@ -1182,6 +1192,7 @@ VirtualSky.prototype.drawPlanet = function(x,y,d,colour,label){
 	this.ctx.strokeStyle = colour;
 	this.ctx.moveTo(x+d,y+d);
 	if(this.showplanets) this.ctx.arc(x,y,d,0,Math.PI*2,true);
+	label = (typeof label==="string") ? this.getPhrase(label) : this.getPhrase('planets',label);
 	if(this.showplanetlabels) this.drawLabel(x,y,d,colour,label);
 	this.ctx.fill();
 	return this;
