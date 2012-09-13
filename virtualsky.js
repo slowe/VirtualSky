@@ -238,7 +238,9 @@ function VirtualSky(input){
 	},{
 		"code" : "es",
 		"name" : "Espa&#241;ol",
-		"constellations": ['Andromeda','Maquina Neumatica','Ave del Paraiso','Acuario','Aguila','Altar','Carnero','Cochero','Boyero','Cincel o El Buril','Jirafa','Cangrejo','Perros de Caza','Can Mayor','Can Menor','Capricornio o\nLa Cabra','La Quilla','Casiopea','Centauro','Cefeo','Ballena','CamaleÃ³n','CompÃ¡s','Paloma','La Cabellera\nde Berenice','Corona\nAustral','Corona Boreal','Cuervo','La Copa','Cruz del Sur','Cisne','DelfÃ­n','Pez Dorado','DragÃ³n','Caballito o\nPotrillo','El RÃ­o Eridano','Horno','Los Gemelos','Grulla','HÃ©rcules','El Reloj','Hidra Hembra','Hidra Macho','Indio','Lagarto','El LeÃ³n','LeÃ³n Menor','Liebre','Balanza','Lobo','Lince','Lira','Mesa','Microscopio','Unicornio','Mosca','Escuadra/Regla','Octante','Ofiuco','OriÃ³n','Pavo','Pegaso','Perseo','Ave FÃ©nix','Caballete de Pintor','Los Peces','Pez Austral','Popa','BrÃºjula','RetÃ­culo/Red','Flecha','Sagitario','EscorpiÃ³n','Escultor','El Escudo','Serpiente','Sextante','Tauro o el Toro','Telescopio','TriÃ¡ngulo','TriÃ¡ngulo\nAustral','TucÃ¡n','Osa Mayor','Osa Menor','Vela','La Virgen','Pez Volador','Zorra o El Zorro']
+		"position": "Latitud &amp; Longitud",
+		"W": "O",
+		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so','Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero','Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor','El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro','Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma','La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo','La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n','El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules','Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n','Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira','La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco','Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor','Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha','Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante','Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n','Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
 	}];
 	this.col = {
 		'black':"rgb(0,0,0)",
@@ -355,9 +357,14 @@ VirtualSky.prototype.changeLanguage = function(code){
 	this.lang = this.langs[0];
 	return this;
 }
+VirtualSky.prototype.htmlDecode = function(input){
+	var e = document.createElement('div');
+	e.innerHTML = input;
+	return e.childNodes[0].nodeValue;
+}
 VirtualSky.prototype.getPhrase = function(key,key2){
 	if(key=="constellations"){
-		if(key2 < this.lang.constellations.length) return this.lang.constellations[key2];
+		if(key2 < this.lang.constellations.length) return this.htmlDecode(this.lang.constellations[key2]);
 		return "";
 	}else return (this.lang[key]) ? this.lang[key] : this.langs[0][key];
 }
