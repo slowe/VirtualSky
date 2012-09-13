@@ -63,7 +63,7 @@ function is(a,b){ return (typeof a == b) ? true : false; }
 
 function VirtualSky(input){
 
-	this.version = "0.3.10";
+	this.version = "0.3.11";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -119,7 +119,7 @@ function VirtualSky(input){
 		name: 'polar',
 		azel2xy: function(az,el,w,h,vs){
 			var radius = h/2;
-			var r = radius*(90-el)/90
+			var r = radius*(90-el)/90;
 			y = radius-r*Math.cos(az*vs.d2r);
 			x = w/2-r*Math.sin(az*vs.d2r);
 			return {x:x,y:y};
@@ -134,7 +134,7 @@ function VirtualSky(input){
 			var sinaz = Math.sin((az-180)*vs.d2r);
 			var sinel = Math.sin(el*vs.d2r);
 			var cosel = Math.cos(el*vs.d2r);
-			var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz)
+			var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
 			x = w/2+0.42*k*h*cosel*sinaz;
 			y = h-0.42*k*h*(cosel1*sinel-sinel1*cosel*cosaz);
 			return {x:x,y:y};
@@ -194,7 +194,7 @@ function VirtualSky(input){
 		fullsky:true
 	}];
 	this.polartype = true;				// True for polar-type projections
-	this.selectProjection('polar')	// Set the default
+	this.selectProjection('polar');	// Set the default
 
 	
 	// Load in the planet data from separate json file
