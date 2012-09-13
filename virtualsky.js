@@ -688,7 +688,7 @@ VirtualSky.prototype.selectProjection = function(proj){
 	if(this.projections[proj]){
 		this.projection = this.projections[proj];
 		this.fullsky = (typeof this.projection.fullsky=="boolean") ? this.projection.fullsky : false;
-		this.polartype = (typeof this.projection.polartype=="boolean") ? this.projections.polartype : false;		
+		this.polartype = (typeof this.projection.polartype=="boolean") ? this.projection.polartype : false;
 	}
 }
 VirtualSky.prototype.isVisible = function(el){
