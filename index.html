@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
 	<title>Virtual Sky - Canvas Experiment</title>
 	<!--
 		Virtual Sky <canvas> application
@@ -21,10 +22,11 @@
 	<script>
 	$(document).ready(function() {
 		planetarium = $.virtualsky({id:'starmap1',projection:'stereo'});
-		planetarium2 = $.virtualsky({id:'starmap2', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
-		planetarium3 = $.virtualsky({id:'starmap3', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
-		planetarium4 = $.virtualsky({id:'starmap4', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});
-		planetarium5 = $.virtualsky({id:'starmap5', projection:'mollweide', showstarlabels:true, az:180, ground:true});
+		planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',constellations:true});
+		planetarium3 = $.virtualsky({id:'starmap3', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
+		planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
+		planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});
+		planetarium6 = $.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
 	});
 	</script>
 </head>
@@ -40,17 +42,20 @@
 		<li>A default view with a <code>stereo</code> projection.			
 			<div id="starmap1" style="width:944x;height:400px;"></div>
 		</li>
+		<li>A default view with a <code>stereo</code> projection and constellation lines.
+			<div id="starmap2" style="width:944x;height:400px;"></div>
+		</li>
 		<li>A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:<br><br><code>planetarium2 = $.virtualsky({id:'starmap2', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});</code>
-			<div id="starmap2" style="width:500px;height:500px;"></div>
+			<div id="starmap3" style="width:500px;height:500px;"></div>
 		</li>
 		<li>A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:<br><br><code>planetarium3 = $.virtualsky({id:'starmap3', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});</code>
-			<div id="starmap3" style="width:500px;height:300px;"></div>
+			<div id="starmap4" style="width:500px;height:300px;"></div>
 		</li>
 		<li>A <code>stereo</code> projection with no keyboard or mouse input and with an equatorial grid. The view is facing south from Hill Valley, California at 1:21 am on October 25, 1985.<br><br><code>planetarium4 = $.virtualsky({id:'starmap4', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});</code>
-			<div id="starmap4" style="width:650px;height:300px;"></div>
+			<div id="starmap5" style="width:650px;height:300px;"></div>
 		</li>
 		<li>A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.<br><br><code>planetarium5 = $.virtualsky({id:'starmap5', projection:'mollweide', showstarlabels:true, az:180, ground:true});</code>
-			<div id="starmap5" style="width:920px;height:460px;"></div>
+			<div id="starmap6" style="width:920px;height:460px;"></div>
 		</li>
 		</ol>
 	</div>	
