@@ -970,7 +970,8 @@ VirtualSky.prototype.draw = function(proj){
 
 	this.now = this.clock;
 
-	if(this.constellations || this.constellationlabels) this.drawConstellationLines()
+	if(this.constellations || this.constellationlabels) this.drawConstellationLines();
+	if(this.constellationboundaries) this.drawConstellationBoundaries();
 
 	tmp = this.ctx.fillStyle;
 	this.ctx.beginPath();
@@ -1322,10 +1323,17 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 		}
 	}
 	this.ctx.stroke();
-
-	colour = (this.negative) ? this.col.black : this.col.constellationboundary;
+}
+VirtualSky.prototype.drawConstellationBoundaries = function(colour){
+	if(!colour) colour = (this.negative) ? this.col.black : this.col.constellationboundary;
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
+	this.ctx.fillStyle = colour;
+	this.ctx.lineWidth = 0.75
+	var fontsize = 12;
+	this.ctx.font = fontsize+"px Helvetica";
+	if(typeof this.lines==="string") return this;
+	var posa, posb;
 	var ra,dc,dra,ddc,b3;
 	var n = 5;
 	if(this.constellationboundaries){
