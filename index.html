@@ -22,7 +22,7 @@
 	<script>
 	$(document).ready(function() {
 		planetarium = $.virtualsky({id:'starmap1',projection:'stereo'});
-		planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',constellations:true});
+		planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',constellations:true,constellationboundaries:true});
 		planetarium3 = $.virtualsky({id:'starmap3', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
 		planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
 		planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});
