@@ -419,6 +419,8 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.planets,s) || is(d.planets,o)) this.planets = d.planets;
+	if(is(d.lines,s) || is(d.lines,o)) this.lines = d.lines;
+	if(is(d.boundaries,s) || is(d.boundaries,o)) this.boundaries = d.boundaries;
 	if(is(d.width,n)) this.wide = d.width;
 	if(is(d.height,n)) this.tall = d.height;
 	if(is(d.live,b)) this.islive = d.live;
@@ -490,6 +492,23 @@ VirtualSky.prototype.setWH = function(w,h){
 VirtualSky.prototype.hide = function(){ this.container.hide(); return this; }
 VirtualSky.prototype.show = function(){ this.container.show(); return this; }
 VirtualSky.prototype.toggle = function(){ this.container.toggle(); return this; }
+VirtualSky.prototype.loadJSON = function(file,callback){
+	if(typeof file!=="string") return this;
+	$.ajax({ dataType: "json", url: file, context: this, success: callback });
+	return this;
+}
+VirtualSky.prototype.loadPlanets = function(file){
+	return this.loadJSON(file,function(data){ this.planets = data.planets; this.draw(); });
+}
+VirtualSky.prototype.loadLines = function(file){
+	return this.loadJSON(file,function(data){ this.lines = data.lines; this.draw(); });
+}
+VirtualSky.prototype.loadBoundaries = function(file){
+	return this.loadJSON(file,function(data){ this.boundaries = data.boundaries; this.draw(); });
+}
+VirtualSky.prototype.loadDeepStars = function(file){
+	return this.loadJSON(file,function(data){ this.stars = this.stars.concat(data.stars); this.draw(); });
+}
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
 	this.times = this.astronomicalTimes();
@@ -501,54 +520,19 @@ VirtualSky.prototype.createSky = function(){
 	}
 	this.container.css('position','relative');
 	$(window).resize({me:this},function(e){ e.data.me.resize(); });
+
 	// Get the planet data
-	if(typeof this.planets==="string"){
-		$.ajax({
-			dataType: "json", 
-			url: this.planets,
-			context: this,
-			success: function(data){
-				this.planets = data.planets;
-				this.draw();
-			}
-		});
-	}
+	if(typeof this.planets==="string") this.loadPlanets(this.planets);
+
 	// Get the constellation line data
-	if(typeof this.lines==="string"){
-		$.ajax({
-			dataType: "json", 
-			url: this.lines,
-			context: this,
-			success: function(data){
-				this.lines = data.lines;
-				this.draw();
-			}
-		});
-	}
+	if(typeof this.lines==="string") this.loadLines(this.lines);
+	
 	// Get the constellation line data
-	if(typeof this.boundaries==="string"){
-		$.ajax({
-			dataType: "json", 
-			url: this.boundaries,
-			context: this,
-			success: function(data){
-				this.boundaries = data.boundaries;
-				this.draw();
-			}
-		});
-	}
+	if(typeof this.boundaries==="string") this.loadBoundaries(this.boundaries);
+	
 	// Get the faint star data
-	if(typeof this.starsdeep==="string"){
-		$.ajax({
-			dataType: "json", 
-			url: this.starsdeep,
-			context: this,
-			success: function(data){
-				this.stars = this.stars.concat(data.stars);
-				this.draw();
-			}
-		});
-	}
+	if(typeof this.starsdeep==="string") this.loadDeepStars(this.starsdeep);
+
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
 	if(this.wide > 0) this.container.css('width',this.wide);
@@ -661,7 +645,6 @@ VirtualSky.prototype.createSky = function(){
 		}
 	}
 	this.draw();
-	//console.log("Time until end of create Sky:" + (new Date() - this.clock) + "ms");
 }
 VirtualSky.prototype.whichPointer = function(x,y){
 	for(i = 0 ; i < this.pointers.length ; i++){

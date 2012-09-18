@@ -22,7 +22,11 @@
 	<script>
 	$(document).ready(function() {
 		planetarium = $.virtualsky({id:'starmap1',projection:'stereo'});
-		planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',constellations:true,constellationboundaries:true});
+		planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',constellations:true,constellationboundaries:true,boundaries:[
+			["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+			["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+				]
+		});
 		planetarium3 = $.virtualsky({id:'starmap3', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
 		planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
 		planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00")});
@@ -42,7 +46,7 @@
 		<li>A default view with a <code>stereo</code> projection.			
 			<div id="starmap1" style="width:944x;height:400px;"></div>
 		</li>
-		<li>A default view with a <code>stereo</code> projection and constellation lines.
+		<li>A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
 			<div id="starmap2" style="width:944x;height:400px;"></div>
 		</li>
 		<li>A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:<br><br><code>planetarium2 = $.virtualsky({id:'starmap2', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});</code>
