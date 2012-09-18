@@ -65,7 +65,7 @@ function is(a,b){ return (typeof a == b) ? true : false; }
 
 function VirtualSky(input){
 
-	this.version = "0.3.12";
+	this.version = "0.3.13";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
