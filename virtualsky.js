@@ -35,6 +35,7 @@
 		cardinalpoints (true) - show/hide the N/E/S/W labels
 		constellations (false) - show/hide the constellation lines
 		constellationlabels (false) - show/hide the constellation labels
+		constellationboundaries (false) - show/hide the constellation boundaries (IAU)
 		showstars (true) - show/hide the stars
 		showplanets (true) - show/hide the planets
 		showorbits (false) - show/hide the orbits of the planets
