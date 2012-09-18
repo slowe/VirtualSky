@@ -37,6 +37,7 @@
 		constellationlabels (false) - show/hide the constellation labels
 		constellationboundaries (false) - show/hide the constellation boundaries (IAU)
 		showstars (true) - show/hide the stars
+		showstarlabels (false) - show/hide the star labels for brightest stars
 		showplanets (true) - show/hide the planets
 		showorbits (false) - show/hide the orbits of the planets
 		showdate (true) - show/hide the date and time
@@ -90,6 +91,7 @@ function VirtualSky(input){
 	this.constellations = false;		// Draw the constellation lines
 	this.constellationboundaries = false;// Draw the constellation boundaries
 	this.constellationlabels = false;	// Display the constellation name labels
+	this.meteorshowers = false;			// Display meteor shower radiants
 	this.negative = false;				// Invert colours to make it better for printing
 	this.showstars = true;				// Display current positions of the stars
 	this.showstarlabels = false;		// Display names for named stars
@@ -275,6 +277,9 @@ function VirtualSky(input){
 	// Load in the planet data from separate json file
 	this.planets = "planets.json";
 
+	// Load in the planet data from separate json file
+	this.showers = "showers.json";
+
 	this.hipparcos = new Array();
 	this.az_step = 0;
 	this.az_off = 0;
@@ -333,6 +338,7 @@ function VirtualSky(input){
 		'cardinal':'rgba(163,228,255, 1)',
 		'constellation':"rgba(180,180,255,0.8)",
 		'constellationboundary':"rgba(255,255,100,0.6)",
+		"showers":"rgba(100,255,100,0.8)",
 		'az':"rgba(100,100,255,0.4)",
 		'eq':"rgba(255,100,100,0.4)"
 	};
@@ -397,6 +403,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.constellations,b)) this.constellations = d.constellations;
 	if(is(d.constellationboundaries,b)) this.constellationboundaries = d.constellationboundaries;
 	if(is(d.constellationlabels,b)) this.constellationlabels = d.constellationlabels;
+	if(is(d.meteorshowers,b)) this.meteorshowers = d.meteorshowers;
 	if(is(d.showstars,b)) this.showstars = d.showstars;
 	if(is(d.showstarlabels,b)) this.showstarlabels = d.showstarlabels;
 	if(is(d.starnames,o)) this.starnames = d.starnames;
@@ -507,6 +514,9 @@ VirtualSky.prototype.loadLines = function(file){
 VirtualSky.prototype.loadBoundaries = function(file){
 	return this.loadJSON(file,function(data){ this.boundaries = data.boundaries; this.draw(); });
 }
+VirtualSky.prototype.loadMeteorShowers = function(file){
+	return this.loadJSON(file,function(data){ this.showers = data.showers; this.draw(); });
+}
 VirtualSky.prototype.loadDeepStars = function(file){
 	return this.loadJSON(file,function(data){ this.stars = this.stars.concat(data.stars); this.draw(); });
 }
@@ -533,6 +543,9 @@ VirtualSky.prototype.createSky = function(){
 	
 	// Get the faint star data
 	if(typeof this.starsdeep==="string") this.loadDeepStars(this.starsdeep);
+
+	// Get the meteor showers
+	if(typeof this.showers==="string") this.loadMeteorShowers(this.showers);
 
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
@@ -957,6 +970,7 @@ VirtualSky.prototype.draw = function(proj){
 
 	if(this.constellations || this.constellationlabels) this.drawConstellationLines();
 	if(this.constellationboundaries) this.drawConstellationBoundaries();
+	if(this.meteorshowers) this.drawMeteorShowers();
 
 	tmp = this.ctx.fillStyle;
 	this.ctx.beginPath();
@@ -1296,7 +1310,6 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 			}
 		}
 
-
 		if(this.constellationlabels){
 			pos = this.radec2xy(this.lines[c][1],this.lines[c][2]);
 			if(this.isVisible(pos.el)){
@@ -1368,6 +1381,40 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 		}
 	}
 	this.ctx.stroke();
+	return this;
+}
+VirtualSky.prototype.drawMeteorShowers = function(colour){
+	if(typeof this.showers==="string") return this;
+	if(!colour) colour = (this.negative) ? this.col.black : this.col.showers;
+	this.ctx.beginPath();
+	this.ctx.strokeStyle = colour;
+	this.ctx.fillStyle = colour;
+	this.ctx.lineWidth = 0.75
+	var fontsize = 12;
+	this.ctx.font = fontsize+"px Helvetica";
+	var shower, pos, label, xoff, d, p, start, end, dra, ddc, f;
+	var y = this.clock.getFullYear();
+	for(var s in this.showers){
+		d = this.showers[s].date;
+		p = this.showers[s].pos;
+		start = new Date(y,d[0][0]-1,d[0][1]);
+		end = new Date(y,d[1][0]-1,d[1][1]);
+		if(start > end && this.clock < start) start = new Date(y-1,d[0][0]-1,d[0][1]);
+		if(this.clock > start && this.clock < end){
+			dra = (p[1][0]-p[0][0]);
+			ddc = (p[1][1]-p[0][1]);
+			f = (this.clock-start)/(end-start);
+			pos = this.radec2xy(this.showers[s].pos[0][0]+(dra*f),this.showers[s].pos[0][1]+(ddc*f));
+			if(this.isVisible(pos.el)){
+				label = this.htmlDecode(this.showers[s].name);
+				xoff = (this.ctx.measureText) ? -this.ctx.measureText(label).width/2 : 0;
+				this.ctx.moveTo(pos.x+2,pos.y);
+				this.ctx.arc(pos.x,pos.y,2,0,Math.PI*2,true);
+				this.ctx.fillText(label,pos.x+xoff,pos.y-fontsize/2)
+			}
+		}
+	}
+	this.ctx.fill();
 	return this;
 }
 // type can be "az" or "eq"
@@ -1548,7 +1595,7 @@ VirtualSky.prototype.setClock = function(seconds){
 	if(typeof seconds=="string" && seconds=='now'){	
 		if(!this.input.clock) this.clock = new Date();
 		else {
-			this.clock = this.input.clock.replace(/%20/g,' ');
+			this.clock = (typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock;
 			if(typeof this.clock=="string") this.clock = new Date(this.clock);
 		}
 	}else if(typeof seconds=="object"){
@@ -1564,6 +1611,7 @@ VirtualSky.prototype.toggleAtmosphere = function(){ this.gradient = !this.gradie
 VirtualSky.prototype.toggleNegative = function(){ this.negative = !this.negative; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationLines = function(){ this.constellations = !this.constellations; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationBoundaries = function(){ this.constellationboundaries = !this.constellationboundaries; this.draw(); return this; }
+VirtualSky.prototype.toggleMeteorShowers = function(){ this.meteorshowers = !this.meteorshowers; this.draw(); return this; }
 VirtualSky.prototype.toggleCardinalPoints = function(){ this.cardinalpoints = !this.cardinalpoints; this.draw(); return this; }
 VirtualSky.prototype.toggleGridlinesAzimuthal = function(){ this.gridlines_az = !this.gridlines_az; this.draw(); return this; }
 VirtualSky.prototype.toggleGround = function(){ this.ground = !this.ground; this.draw(); return this; }
