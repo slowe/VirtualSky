@@ -353,7 +353,7 @@ function VirtualSky(input){
 	this.changeLanguage(this.langcode);
 
 	// Define some VirtualSky styles
-	$('<style type="text/css">.virtualskyhelp { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskyhelp ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskydismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:20px;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;}</style>').appendTo("head");
+	$('<style type="text/css">.virtualskyhelp { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskyhelp ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskydismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;}</style>').appendTo("head");
 
 	this.pointers = new Array();
 
@@ -569,7 +569,7 @@ VirtualSky.prototype.createSky = function(){
 		this.ctx = this.c.getContext('2d');
 		this.ctx.clearRect(0,0,this.wide,this.tall);
 		this.ctx.beginPath();
-		var fs = 12;
+		var fs = this.fontsize();
 		this.ctx.font = fs+"px Helvetica";
 		this.ctx.fillStyle = 'rgb(0,0,0)';
 		this.ctx.lineWidth = 1.5;
@@ -924,10 +924,14 @@ VirtualSky.prototype.vectorMultiply = function(A,B){
 		else return [(A[0][0]*B[0] + A[0][1]*B[1] + A[0][2]*B[2]),(A[1][0]*B[0] + A[1][1]*B[1] + A[1][2]*B[2]),(A[2][0]*B[0] + A[2][1]*B[1] + A[2][2]*B[2])];
 	}
 }
-VirtualSky.prototype.fontsize = function(){ return (this.wide < 350) ? ((this.wide < 300) ? ((this.wide < 250) ? 9 : 10) : 11) : 12; }
+VirtualSky.prototype.setFont = function(){ this.ctx.font = this.fontsize()+"px "+this.canvas.css('font-family'); }
+VirtualSky.prototype.fontsize = function(){
+	var m = Math.min(this.wide,this.tall);
+	return (m < 500) ? ((m < 350) ? ((m < 300) ? ((m < 250) ? 9 : 10) : 11) : 12) : parseInt(this.container.css('font-size'));
+}
 VirtualSky.prototype.positionCredit = function(){
-	var off = $('#'+this.id).position();
-	$('#'+this.id+'_credit').css({position:'absolute',top:off.top+parseFloat(this.tall)-5-this.fontsize(),left:off.left+5});
+	var off = this.container.position();
+	this.container.find('.'+this.id+'_credit').css({position:'absolute',top:off.top+parseFloat(this.tall)-5-this.fontsize(),left:off.left+5});
 }
 VirtualSky.prototype.updateSkyGradient = function(){
 	this.sky_gradient = this.ctx.createLinearGradient(0,0,0,this.tall);
@@ -945,108 +949,101 @@ VirtualSky.prototype.draw = function(proj){
 	var white = this.col.white;
 	var black = this.col.black;
 
-	this.ctx.moveTo(0,0);
-	this.ctx.clearRect(0,0,this.wide,this.tall);
-	this.ctx.fillStyle = (this.polartype || this.fullsky) ? this.background : ((this.negative) ? white : black);
-	this.ctx.fillRect(0,0,this.wide,this.tall);
-	this.ctx.fill();
+	// Shorthands
+	var c = this.ctx;
+	var d = this.container;
+
+	c.moveTo(0,0);
+	c.clearRect(0,0,this.wide,this.tall);
+	c.fillStyle = (this.polartype || this.fullsky) ? this.background : ((this.negative) ? white : black);
+	c.fillRect(0,0,this.wide,this.tall);
+	c.fill();
 
 	if(this.polartype){
-		this.ctx.moveTo(this.wide/2,this.tall/2);
-		this.ctx.closePath();
-		this.ctx.beginPath();
-		this.ctx.arc(this.wide/2,this.tall/2,-0.5+this.tall/2,0,Math.PI*2,true);
-		this.ctx.closePath();
+		c.moveTo(this.wide/2,this.tall/2);
+		c.closePath();
+		c.beginPath();
+		c.arc(this.wide/2,this.tall/2,-0.5+this.tall/2,0,Math.PI*2,true);
+		c.closePath();
 		if(!this.transparent){
-			this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
-			this.ctx.fill();
+			c.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
+			c.fill();
 		}
-		this.ctx.lineWidth = 0.5;
-		this.ctx.strokeStyle = black;
-		this.ctx.stroke();
+		c.lineWidth = 0.5;
+		c.strokeStyle = black;
+		c.stroke();
 	}else if(typeof this.projection.draw==="function") this.projection.draw.call(this);
 
 	this.now = this.clock;
 
-	if(this.constellations || this.constellationlabels) this.drawConstellationLines();
-	if(this.constellationboundaries) this.drawConstellationBoundaries();
-	if(this.meteorshowers) this.drawMeteorShowers();
-
-	tmp = this.ctx.fillStyle;
-	this.ctx.beginPath();
+	tmp = c.fillStyle;
+	c.beginPath();
 	if(this.gradient && !this.polartype && !this.fullsky && !this.negative){
 		if(typeof this.sky_gradient == "undefined") this.updateSkyGradient();
-		this.ctx.fillStyle = this.sky_gradient;
+		c.fillStyle = this.sky_gradient;
 		// draw shapes
-		this.ctx.fillRect(0,0,this.wide,this.tall);
-		this.ctx.fill();
+		c.fillRect(0,0,this.wide,this.tall);
+		c.fill();
 	}
 	
-	this.drawStars();
-	this.drawPlanets();
+	this.drawStars().drawPlanets().drawConstellationLines().drawConstellationBoundaries().drawMeteorShowers().drawCardinalPoints().drawGridlines("az").drawGridlines("eq");
+
 	for(i = 0; i < this.pointers.length ; i++) this.highlight(i);
-	this.drawCardinalPoints().drawGridlines("az").drawGridlines("eq");
 
 	var txtcolour = (this.color!="") ? (this.color) : ((this.negative) ? black : white);
 	if(this.polartype || this.projection.altlabeltext) txtcolour = (this.color!="") ? txtcolour : this.col.grey;
 	fontsize = this.fontsize();
 
-	this.ctx.fillStyle = txtcolour;
-	this.ctx.lineWidth = 1.5;
-	this.ctx.font = fontsize+"px Helvetica";
+	c.fillStyle = txtcolour;
+	c.lineWidth = 1.5;
+	this.setFont();
 
 	// Time line
 	if(this.showdate){
 		var clockstring = this.clock.toDateString()+' '+this.clock.toLocaleTimeString();
-		this.ctx.beginPath(); 
-		this.ctx.fillText(clockstring,5,5+fontsize)
-		var metric_clock = this.ctx.measureText(clockstring).width;
+		var metric_clock = this.drawText(clockstring,5,5+fontsize);
 	}
 
 	// Position line
 	if(this.showposition){
 		var positionstring = Math.abs(this.latitude).toFixed(2) + ((this.latitude>0) ? this.getPhrase('N') : this.getPhrase('S')) + ', ' + Math.abs(this.longitude).toFixed(2) + ((this.longitude>0) ? this.getPhrase('E') : this.getPhrase('W'));
-		this.ctx.beginPath(); 
-		this.ctx.fillText(positionstring,5,5+fontsize+fontsize)
-		var metric_pos = this.ctx.measureText(positionstring).width;
+		var metric_pos = this.drawText(positionstring,5,5+fontsize+fontsize);
 	}
 
 	// Credit line
 	if(this.credit){
 		var credit = this.getPhrase('power');
-		this.ctx.beginPath(); 
-		this.ctx.fillText(credit,5,this.tall-5)
-		var metric_credit = this.ctx.measureText(credit).width;
+		var metric_credit = this.drawText(credit,5,this.tall-5);
 		// Float a transparent link on top of the credit text
-		if($('#'+this.id+'_credit').length == 0){
-			this.container.append('<div id="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" style="width:'+metric_credit+'px;height:'+fontsize+'px;display:block;color:transparent;background-color: transparent;font-size:'+fontsize+'px" title="Created by the Las Cumbres Observatory Global Telescope">Powered by LCOGT</a></div>');
-			$('#'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
-			this.positionCredit();
-		}
+		if(d.find('.'+this.id+'_credit').length == 0) d.append('<div class="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" title="Created by the Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
+		d.find('.'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
+		d.find('.'+this.id+'_credit a').css({display:'block',width:Math.ceil(metric_credit)+'px',height:fontsize+'px','font-size':fontsize+'px'});
+		this.positionCredit();
 	}
-	if($('#'+this.id+'_clock').length == 0){
-		this.container.append('<div id="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
+	if(this.container.find('.'+this.id+'_clock').length == 0){
+		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
 		var off = $('#'+this.id).position();
-		$('#'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
-			var id = e.data.sky.id;
+		this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
+			var s = e.data.sky;
+			var id = s.id;
 			if($('#'+id+'_calendar').length == 0){
 				var off = $('#'+id).offset();
 				var w = 280;
 				var h = 50;
-				if(e.data.sky.wide < w) w = e.data.sky.wide;
-				e.data.sky.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
+				if(s.wide < w) w = s.wide;
+				s.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
 				$('#'+id+'_calendar').css({width:w});
-				$('#'+id+'_calendar input').bind('change',{sky:e.data.sky},function(e){
+				$('#'+id+'_calendar input').bind('change',{sky:s},function(e){
 					e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
 					e.data.sky.advanceTime(0,0);
 				});
 			}
-			e.data.sky.lightbox($('#'+id+'_calendar'));
-			$('#'+id+'_year').val(e.data.sky.clock.getFullYear())
-			$('#'+id+'_month').val(e.data.sky.clock.getMonth()+1)
-			$('#'+id+'_day').val(e.data.sky.clock.getDate())
-			$('#'+id+'_hours').val(e.data.sky.clock.getHours())
-			$('#'+id+'_mins').val(e.data.sky.clock.getMinutes());
+			s.lightbox($('#'+id+'_calendar'));
+			$('#'+id+'_year').val(s.clock.getFullYear());
+			$('#'+id+'_month').val(s.clock.getMonth()+1);
+			$('#'+id+'_day').val(s.clock.getDate());
+			$('#'+id+'_hours').val(s.clock.getHours());
+			$('#'+id+'_mins').val(s.clock.getMinutes());
 		});
 	}
 	if($('#'+this.id+'_position').length == 0){
@@ -1054,27 +1051,28 @@ VirtualSky.prototype.draw = function(proj){
 		var off = $('#'+this.id).position();
 		$('#'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
 		$('#'+this.id+'_position').bind('click',{sky:this},function(e){
-			var id = e.data.sky.id;
+			var s = e.data.sky;
+			var id = s.id;
 			if($('#'+id+'_geo').length == 0){
 				var w = 310;
 				var narrow = '';
-				if(e.data.sky.wide < w){
+				if(s.wide < w){
 					narrow = '<br style="clear:both;margin-top:20px;" />';
 					w = w/2;
 				}
-				e.data.sky.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('position')+'</div><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+e.data.sky.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+e.data.sky.getPhrase('E')+'</div></div>');
+				s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div>');
 				$('#'+id+'_geo').css({width:w,'align':'center'})
 				$('#'+id+'_geo input').css({width:'6em'});
-				$('#'+id+'_geo_close').bind('click',{sky:e.data.sky},function(e){
+				$('#'+id+'_geo_close').bind('click',{sky:s},function(e){
 					e.data.sky.latitude = parseFloat($('#'+id+'_lat').val())
 					e.data.sky.longitude = parseFloat($('#'+id+'_long').val())
 					e.data.sky.draw();
 				});
 			}
-			e.data.sky.lightbox($('#'+id+'_geo'));
-			$('#'+id+'_lat').val(e.data.sky.latitude)
-			$('#'+id+'_long').val(e.data.sky.longitude)
-			if(typeof e.data.sky.callback.geo=="function") e.data.sky.callback.geo.call(e.data.sky);
+			s.lightbox($('#'+id+'_geo'));
+			$('#'+id+'_lat').val(s.latitude)
+			$('#'+id+'_long').val(s.longitude)
+			if(typeof s.callback.geo=="function") s.callback.geo.call(s);
 		});
 	}
 	return this;
@@ -1202,8 +1200,7 @@ VirtualSky.prototype.drawPlanets = function(){
 		if(this.showorbits && this.isVisible(pos.el) && mag < this.magnitude){
 			this.ctx.beginPath();
 			this.ctx.lineWidth = 0.5
-			var fontsize = 12;
-			this.ctx.font = fontsize+"px Helvetica";
+			this.setFont();
 			this.ctx.strokeStyle = this.planets[p][1];
 			this.ctx.lineWidth = 1;
 			var previous = {x:0,y:0,el:0};
@@ -1252,10 +1249,14 @@ VirtualSky.prototype.drawPlanet = function(x,y,d,colour,label){
 	this.ctx.fill();
 	return this;
 }
+VirtualSky.prototype.drawText = function(txt,x,y){
+	this.ctx.beginPath(); 
+	this.ctx.fillText(txt,x,y);
+	return this.ctx.measureText(txt).width;
+}
 // Helper function. You'll need to wrap it with a this.ctx.beginPath() and a this.ctx.fill();
 VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
 	if(colour.length > 0) this.ctx.fillStyle = colour;
-	//this.ctx.font = "12px Helvetica";
 	this.ctx.lineWidth = 1.5;
 	var xoff = d + 2;
 	if((this.polartype) && this.ctx.measureText) xoff = -this.ctx.measureText(label).width-3
@@ -1264,13 +1265,14 @@ VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
 	return this;
 }
 VirtualSky.prototype.drawConstellationLines = function(colour){
+	if(!(this.constellations || this.constellationlabels)) return this;
 	if(!colour) colour = (this.negative) ? this.col.black : this.col.constellation;
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75
-	var fontsize = 12;
-	this.ctx.font = fontsize+"px Helvetica";
+	var fontsize = this.fontsize();
+	this.setFont();
 	if(typeof this.lines==="string") return this;
 	var posa, posb;
 	for(var c = 0; c < this.lines.length; c++){
@@ -1321,15 +1323,15 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 		}
 	}
 	this.ctx.stroke();
+	return this;
 }
 VirtualSky.prototype.drawConstellationBoundaries = function(colour){
+	if(!this.constellationboundaries) return this;
 	if(!colour) colour = (this.negative) ? this.col.black : this.col.constellationboundary;
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75
-	var fontsize = 12;
-	this.ctx.font = fontsize+"px Helvetica";
 	if(typeof this.lines==="string") return this;
 	var posa, posb;
 	var ra,dc,dra,ddc,b3;
@@ -1384,15 +1386,16 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	return this;
 }
 VirtualSky.prototype.drawMeteorShowers = function(colour){
-	if(typeof this.showers==="string") return this;
+	if(!this.meteorshowers || typeof this.showers==="string") return this;
 	if(!colour) colour = (this.negative) ? this.col.black : this.col.showers;
-	this.ctx.beginPath();
-	this.ctx.strokeStyle = colour;
-	this.ctx.fillStyle = colour;
-	this.ctx.lineWidth = 0.75
-	var fontsize = 12;
-	this.ctx.font = fontsize+"px Helvetica";
-	var shower, pos, label, xoff, d, p, start, end, dra, ddc, f;
+	var shower, pos, label, xoff, c, d, p, start, end, dra, ddc, f;
+	c = this.ctx;
+	c.beginPath();
+	c.strokeStyle = colour;
+	c.fillStyle = colour;
+	c.lineWidth = 0.75;
+	var fs = this.fontsize();
+	this.setFont();
 	var y = this.clock.getFullYear();
 	for(var s in this.showers){
 		d = this.showers[s].date;
@@ -1407,14 +1410,14 @@ VirtualSky.prototype.drawMeteorShowers = function(colour){
 			pos = this.radec2xy(this.showers[s].pos[0][0]+(dra*f),this.showers[s].pos[0][1]+(ddc*f));
 			if(this.isVisible(pos.el)){
 				label = this.htmlDecode(this.showers[s].name);
-				xoff = (this.ctx.measureText) ? -this.ctx.measureText(label).width/2 : 0;
-				this.ctx.moveTo(pos.x+2,pos.y);
-				this.ctx.arc(pos.x,pos.y,2,0,Math.PI*2,true);
-				this.ctx.fillText(label,pos.x+xoff,pos.y-fontsize/2)
+				xoff = (c.measureText) ? -c.measureText(label).width/2 : 0;
+				c.moveTo(pos.x+2,pos.y);
+				c.arc(pos.x,pos.y,2,0,Math.PI*2,true);
+				c.fillText(label,pos.x+xoff,pos.y-fs/2);
 			}
 		}
 	}
-	this.ctx.fill();
+	c.fill();
 	return this;
 }
 // type can be "az" or "eq"
@@ -1426,11 +1429,12 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	if(!step || typeof step!="number") step = this.gridstep;
 	var a = 0;
 	var b = 0;
+	var c = this.ctx;
 	var oldx = 0;
 	var oldy = 0;
-	this.ctx.beginPath(); 
-	this.ctx.strokeStyle = colour;
-	this.ctx.lineWidth = 1.0;
+	c.beginPath(); 
+	c.strokeStyle = colour;
+	c.lineWidth = 1.0;
 	var bstep = 2;
 	if(az){
 		var maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb : 90-bstep;
@@ -1449,15 +1453,13 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 			if(show){
 				if(isFinite(x) && isFinite(y)){
 					if(az){
-						if(b == 0) this.ctx.moveTo(x,y);
-						else this.ctx.lineTo(x,y);
+						if(b == 0) c.moveTo(x,y);
+						else c.lineTo(x,y);
 					}else{
 						if(!moved || Math.abs(oldx-x) > this.wide/2){
-							this.ctx.moveTo(x,y);
+							c.moveTo(x,y);
 							moved = true;
-						}else{
-							this.ctx.lineTo(x,y);
-						}
+						}else c.lineTo(x,y);
 					}
 				}
 				oldx = x;
@@ -1465,8 +1467,8 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 			}
 		}
 	}
-	this.ctx.stroke();
-	this.ctx.beginPath(); 
+	c.stroke();
+	c.beginPath(); 
 	if(az){
 		minb = 0;
 		maxb = 90-bstep;
@@ -1484,17 +1486,15 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 			if(show){
 				if(isFinite(x) && isFinite(y)){
 					if(az){
-						if(a == 0) this.ctx.moveTo(x,y);
-						this.ctx.lineTo(x,y);
+						if(a == 0) c.moveTo(x,y);
+						c.lineTo(x,y);
 					}else{
 						// If the last point on this contour is more than a canvas width away
 						// it is probably supposed to be behind us so we won't draw a line 
 						if(!moved || Math.abs(oldx-x) > this.tall/4 || Math.abs(oldy-y) > this.tall/4){
-							this.ctx.moveTo(x,y);
+							c.moveTo(x,y);
 							moved = true;
-						}else{
-							this.ctx.lineTo(x,y);
-						}
+						}else c.lineTo(x,y);
 						oldx = x;
 						oldy = y;
 					}
@@ -1502,7 +1502,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 			}
 		}
 	}
-	this.ctx.stroke();
+	c.stroke();
 	return this;
 }
 VirtualSky.prototype.drawCardinalPoints = function(){
@@ -1512,8 +1512,9 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 	var pt = 15;
 	this.ctx.beginPath();
 	this.ctx.fillStyle = (this.negative) ? this.col.black : this.col.cardinal;
+	var fontsize = this.fontsize();
 	for(var i  = 0 ; i < azs.length ; i++){
-		fontsize = pt/Math.pow(dirs[i].length,0.2);
+		//fontsize = pt/Math.pow(dirs[i].length,0.2);
 		this.ctx.font = fontsize+"px Helvetica";
 
 		if(this.ctx.measureText){
@@ -1546,20 +1547,21 @@ VirtualSky.prototype.highlight = function(i,colour){
 		colour = (this.pointers[i].colour) ? this.pointers[i].colour : ((colour) ? colour : "rgba(255,0,0,1)");
 		if(this.negative) colour = this.getNegative(colour);
 		var pos = this.radec2xy(this.pointers[i].ra, this.pointers[i].dec);
+		var c = this.ctx;
 		if(this.isVisible(pos.el)){
 			this.pointers[i].az = pos.az;
 			this.pointers[i].el = pos.el;
 			this.pointers[i].x = pos.x;
 			this.pointers[i].y = pos.y;
 			this.pointers[i].d = 5;
-			this.ctx.fillStyle = colour;
-			this.ctx.strokeStyle = colour;
-			this.ctx.beginPath(); 
-			this.ctx.fillRect(this.pointers[i].x-d/2,this.pointers[i].y-d/2,5,5);
-			this.ctx.font = "10px Helvetica";
-			this.ctx.lineWidth = 1.5;
-			this.ctx.fill();
-			this.ctx.fillText(this.pointers[i].label,this.pointers[i].x+this.pointers[i].d*1.4,this.pointers[i].y+this.pointers[i].d*0.7)
+			c.fillStyle = colour;
+			c.strokeStyle = colour;
+			c.beginPath(); 
+			c.fillRect(this.pointers[i].x-d/2,this.pointers[i].y-d/2,5,5);
+			c.font = "10px Helvetica";
+			c.lineWidth = 1.5;
+			c.fill();
+			c.fillText(this.pointers[i].label,this.pointers[i].x+this.pointers[i].d*1.4,this.pointers[i].y+this.pointers[i].d*0.7)
 		}
 	}
 	return this;
