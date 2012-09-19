@@ -1060,7 +1060,7 @@ VirtualSky.prototype.draw = function(proj){
 					narrow = '<br style="clear:both;margin-top:20px;" />';
 					w = w/2;
 				}
-				s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div>');
+				s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualskydismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
 				$('#'+id+'_geo').css({width:w,'align':'center'})
 				$('#'+id+'_geo input').css({width:'6em'});
 				$('#'+id+'_geo_close').bind('click',{sky:s},function(e){
