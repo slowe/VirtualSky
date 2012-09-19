@@ -1,4 +1,5 @@
 {
+	"_comment":"Using radiant information from IMO http://www.imo.net/calendar/2012#table6",
 	"showers":{
 		"QUA" : {"name":"Quadrantids","date":[[12,30],[1,10]],"pos":[[228,50],[234,48]] },
 		"DLM" : {"name":"December Leonis Minorids","date":[[12,5],[2,5]],"pos":[[149,37],[234,48]] },

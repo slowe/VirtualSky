@@ -651,8 +651,8 @@ VirtualSky.prototype.createSky = function(){
 						if(code == 37 /* left */){ sky.az_off -= 2; sky.draw(); }
 						else if(code == 39 /* right */){ sky.az_off += 2; sky.draw(); }
 						else if(code == 63){ sky.lightbox($('<div class="virtualskyhelp"><div class="virtualskydismiss" title="close">&times;</div><span>'+sky.getPhrase('keyboard')+'</span><ul><li><strong>l</strong> = '+sky.getPhrase('fast')+'</li><li><strong>k</strong> = '+sky.getPhrase('stop')+'</li><li><strong>j</strong> = '+sky.getPhrase('slow')+'</li><li><strong>n</strong> = '+sky.getPhrase('reset')+'</li><li><strong>q</strong> = '+sky.getPhrase('cardinalchange')+'</li><li><strong>a</strong> = '+sky.getPhrase('toggleaz')+'</li><li><strong>e</strong> = '+sky.getPhrase('toggleeq')+'</li><li><strong>c</strong> = '+sky.getPhrase('togglecon')+'</li><li><strong>v</strong> = '+sky.getPhrase('togglenames')+'</li><li><strong>b</strong> = '+sky.getPhrase('toggleconbound')+'</li><li><strong>p</strong> = '+sky.getPhrase('togglesol')+'</li></ul></div>').appendTo(sky.container)); }
-						else if(code == 107 || code == 61 || code == 187 || code == 33 /* + (107 for Firefox, 187 for Safari, 33 for pageup) */){ sky.magnitude += 0.2; sky.draw(); }
-						else if(code == 109 || code == 189 || code == 34 /* - (109 for Firefox, 189 for Safari, 34 for pagedown)*/){ sky.magnitude -= 0.2; sky.draw(); }
+						else if(code == 38 /* up */){ sky.magnitude += 0.2; sky.draw(); }
+						else if(code == 40 /* down */){ sky.magnitude -= 0.2; sky.draw(); }
 					}
 				}
 			});
