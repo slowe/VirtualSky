@@ -561,7 +561,6 @@ VirtualSky.prototype.loadDeepStars = function(file){
 }
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
-	this.container.addTouch();
 	this.times = this.astronomicalTimes();
 
 	if(this.container.length == 0){
