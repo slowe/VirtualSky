@@ -609,7 +609,7 @@ VirtualSky.prototype.createSky = function(){
 		this.ctx.clearRect(0,0,this.wide,this.tall);
 		this.ctx.beginPath();
 		var fs = this.fontsize();
-		this.ctx.font = fs+"px Helvetica";
+		this.ctx.font = ""+fs+"px Helvetica";
 		this.ctx.fillStyle = 'rgb(0,0,0)';
 		this.ctx.lineWidth = 1.5;
 		var loading = 'Loading sky...';
@@ -967,7 +967,9 @@ VirtualSky.prototype.vectorMultiply = function(A,B){
 VirtualSky.prototype.setFont = function(){ this.ctx.font = this.fontsize()+"px "+this.canvas.css('font-family'); }
 VirtualSky.prototype.fontsize = function(){
 	var m = Math.min(this.wide,this.tall);
-	return (m < 500) ? ((m < 350) ? ((m < 300) ? ((m < 250) ? 9 : 10) : 11) : 12) : parseInt(this.container.css('font-size'));
+	var f = parseInt(this.container.css('font-size'));
+	if(typeof f!=="number") f = 12;
+	return (m < 500) ? ((m < 350) ? ((m < 300) ? ((m < 250) ? 9 : 10) : 11) : 12) : f;
 }
 VirtualSky.prototype.positionCredit = function(){
 	var off = this.container.position();

@@ -104,7 +104,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.14";
+	this.version = "0.3.15";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -280,6 +280,7 @@ function VirtualSky(input){
 				return {x:0,y:0};
 			},
 			radec2xy: function(ra,dec){
+				var outside = false;
 				var normra = (ra+this.az_off)%360-180;
 				var x = -(normra/360)*this.tall*2 + this.wide/2;
 				var y = -(dec/180)*this.tall+ this.tall/2;
