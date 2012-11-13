@@ -106,7 +106,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.17";
+	this.version = "0.3.18";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -689,6 +689,7 @@ VirtualSky.prototype.createSky = function(){
 					else if(c == 'v') sky.toggleConstellationLabels();
 					else if(c == 'b') sky.toggleConstellationBoundaries();
 					else if(c == 'p') sky.togglePlanetHints();
+					else if(c == '[') sky.togglePlanetLabels();
 					else if(c == 'o') sky.toggleOrbits();
 					else if(c == 'z') sky.toggleGridlinesAzimuthal();
 					else if(c == 'e') sky.toggleGridlinesEquatorial();
@@ -1042,7 +1043,7 @@ VirtualSky.prototype.draw = function(proj){
 		c.fill();
 	}
 	
-	this.drawConstellationLines().drawConstellationBoundaries().drawEcliptic().drawStars().drawPlanets().drawMeteorShowers().drawCardinalPoints().drawGridlines("az").drawGridlines("eq").drawGridlines("gal");
+	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawPlanets().drawMeteorShowers().drawCardinalPoints();
 
 	for(i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
@@ -1713,6 +1714,7 @@ VirtualSky.prototype.toggleGridlinesGalactic = function(){ this.grid.gal = !this
 VirtualSky.prototype.toggleEcliptic = function(){ this.ecliptic = !this.ecliptic; this.draw(); return this; }
 VirtualSky.prototype.toggleGround = function(){ this.ground = !this.ground; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetHints = function(){ this.showplanets = !this.showplanets; this.draw(); return this; }
+VirtualSky.prototype.togglePlanetLabels = function(){ this.showplanetlabels = !this.showplanetlabels; this.draw(); return this; }
 VirtualSky.prototype.toggleOrbits = function(){ this.showorbits = !this.showorbits; this.draw(); return this; }
 VirtualSky.prototype.toggleAzimuthMove = function(az){
 	if(this.az_step == 0){
