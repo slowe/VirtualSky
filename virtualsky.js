@@ -40,6 +40,7 @@
 		showstars (true) - show/hide the stars
 		showstarlabels (false) - show/hide the star labels for brightest stars
 		showplanets (true) - show/hide the planets
+		showplanetlabels (true) - show/hide the planet labels
 		showorbits (false) - show/hide the orbits of the planets
 		showdate (true) - show/hide the date and time
 		showposition (true) - show/hide the latitude/longitude
@@ -106,7 +107,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.18";
+	this.version = "0.3.19";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -150,6 +151,7 @@ function VirtualSky(input){
 	this.transparent = false;			// Show the sky background or not
 	this.credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? false : true;
 	this.callback = { geo:'', mouseenter:'', mouseout:'' };
+	this.keys = new Array();
 
 	// Constants
 	this.d2r = Math.PI/180;
@@ -361,6 +363,7 @@ function VirtualSky(input){
 		"toggleconbound": "toggle constellation boundaries",
 		"togglenames": "toggle constellation names",
 		"togglesol": "toggle planets/Sun/Moon",
+		"togglesollabels": "toggle planet/Sun/Moon labels",
 		"toggleorbits": "toggle planet orbits",
 		"power": "Powered by LCOGT"
 	},{
@@ -627,13 +630,13 @@ VirtualSky.prototype.createSky = function(){
 		this.ctx.fillText(loading,(this.wide-this.ctx.measureText(loading).width)/2,(this.tall-fs)/2)
 		this.ctx.fill();
 
-		$("#"+this.id).bind('click',{sky:this},function(e){
+		$("#"+this.id).on('click',{sky:this},function(e){
 			var x = e.pageX - $(this).offset().left - window.scrollX;
 			var y = e.pageY - $(this).offset().top - window.scrollY;
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) $(e.data.sky.canvas).css({cursor:'pointer'});
-		}).bind('mousemove',{sky:this},function(e){
+		}).on('mousemove',{sky:this},function(e){
 			var sky = e.data.sky;
 			// We don't need scrollX/scrollY as pageX/pageY seem to include this
 			var x = e.pageX - $(this).offset().left;
@@ -661,59 +664,87 @@ VirtualSky.prototype.createSky = function(){
 				if(matched >= 0) $(sky.canvas).css({cursor:'pointer'});
 				sky.toggleInfoBox(matched);
 			}	
-		}).bind('mousedown',{sky:this},function(e){
+		}).on('mousedown',{sky:this},function(e){
 			e.data.sky.dragging = true;
-		}).bind('mouseup',{sky:this},function(e){
+		}).on('mouseup',{sky:this},function(e){
 			e.data.sky.dragging = false;
 			e.data.sky.x = "";
-		}).bind('mouseout',{sky:this},function(e){
+		}).on('mouseout',{sky:this},function(e){
 			var s = e.data.sky;
 			s.dragging = false;
 			s.mouseover = false;
 			s.x = "";
 			if(typeof s.callback.mouseout=="function") s.callback.mouseout.call(s);
-		}).bind('mouseenter',{sky:this},function(e){
+		}).on('mouseenter',{sky:this},function(e){
 			var s = e.data.sky;
 			s.mouseover = true;
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		});
-		if(this.keyboard){
-			$(document).bind('keypress',{sky:this},function(e){
-				if(!e) e = window.event;
-				var sky = e.data.sky;
-				if(sky.mouseover && sky.keyboard){
-					var code = e.keyCode || e.charCode || e.which || 0;
-					var c = String.fromCharCode(code).toLowerCase();
-					if(c == 'a') sky.toggleAtmosphere();
-					else if(c == 'c') sky.toggleConstellationLines();
-					else if(c == 'v') sky.toggleConstellationLabels();
-					else if(c == 'b') sky.toggleConstellationBoundaries();
-					else if(c == 'p') sky.togglePlanetHints();
-					else if(c == '[') sky.togglePlanetLabels();
-					else if(c == 'o') sky.toggleOrbits();
-					else if(c == 'z') sky.toggleGridlinesAzimuthal();
-					else if(c == 'e') sky.toggleGridlinesEquatorial();
-					else if(c == 'm') sky.toggleGridlinesGalactic();
-					else if(c == ',') sky.toggleEcliptic();
-					else if(c == 'g') sky.toggleGround();
-					else if(c == 'i') sky.toggleNegative();
-					else if(c == 'q') sky.toggleCardinalPoints();
-					else if(c == 'l') sky.spinIt("up");
-					else if(c == 'j') sky.spinIt("down");
-					else if(c == 'k') sky.spinIt(0);
-					else if(c == 'n') sky.setClock('now');
-					else {
-						if(code == 37 /* left */){ sky.az_off -= 2; sky.draw(); }
-						else if(code == 39 /* right */){ sky.az_off += 2; sky.draw(); }
-						else if(code == 63){ sky.lightbox($('<div class="virtualskyhelp"><div class="virtualskydismiss" title="close">&times;</div><span>'+sky.getPhrase('keyboard')+'</span><ul><li><strong>l</strong> = '+sky.getPhrase('fast')+'</li><li><strong>k</strong> = '+sky.getPhrase('stop')+'</li><li><strong>j</strong> = '+sky.getPhrase('slow')+'</li><li><strong>n</strong> = '+sky.getPhrase('reset')+'</li><li><strong>q</strong> = '+sky.getPhrase('cardinalchange')+'</li><li><strong>a</strong> = '+sky.getPhrase('toggleatmos')+'</li><li><strong>z</strong> = '+sky.getPhrase('toggleaz')+'</li><li><strong>e</strong> = '+sky.getPhrase('toggleeq')+'</li><li><strong>m</strong> = '+sky.getPhrase('togglegal')+'</li><li><strong>,</strong> = '+sky.getPhrase('toggleec')+'</li><li><strong>c</strong> = '+sky.getPhrase('togglecon')+'</li><li><strong>v</strong> = '+sky.getPhrase('togglenames')+'</li><li><strong>b</strong> = '+sky.getPhrase('toggleconbound')+'</li><li><strong>p</strong> = '+sky.getPhrase('togglesol')+'</li><li><strong>o</strong> = '+sky.getPhrase('toggleorbits')+'</li></ul></div>').appendTo(sky.container)); }
-						else if(code == 38 /* up */){ sky.magnitude += 0.2; sky.draw(); }
-						else if(code == 40 /* down */){ sky.magnitude -= 0.2; sky.draw(); }
-					}
-				}
-			});
+		$(document).bind('keypress',{sky:this},function(e){
+			if(!e) e = window.event;
+			var code = e.keyCode || e.charCode || e.which || 0;
+			e.data.sky.keypress(code,e);
+		});
+	}
+
+	this.registerKey('a',function(){ this.toggleAtmosphere(); },'toggleatmos');
+	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
+	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
+	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
+	this.registerKey('p',function(){ this.togglePlanetHints(); },'togglesol');
+	this.registerKey('[',function(){ this.togglePlanetLabels(); },'togglesollabels');
+	this.registerKey('o',function(){ this.toggleOrbits(); },'toggleorbits');
+	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
+	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
+	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
+	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
+	this.registerKey('g',function(){ this.toggleGround(); });
+	this.registerKey('i',function(){ this.toggleNegative(); });
+	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'cardinalchange');
+	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
+	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
+	this.registerKey('k',function(){ this.spinIt(0) },'stop');
+	this.registerKey('n',function(){ this.setClock('now'); },'reset');
+	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
+	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
+	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
+	this.registerKey(40,function(){ this.magnitude -= 0.2; this.draw(); }); // down
+	this.registerKey(63,function(){ this.toggleHelp(); });
+
+	this.draw();
+}
+VirtualSky.prototype.toggleHelp = function(){
+	if($('.virtualskydismiss').length > 0) $('.virtualskydismiss').trigger('click');
+	else{
+		var o = '';
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong>'+String.fromCharCode(this.keys[i].charCode)+'</strong> - '+this.getPhrase(this.keys[i].txt)+'</li>'; }
+		this.lightbox($('<div class="virtualskyhelp"><div class="virtualskydismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul>'+o+'</ul></div>').appendTo(this.container));
+		$('.virtualskyhelp, .virtualsky_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
+	}
+}
+// Register keyboard commands and associated functions
+VirtualSky.prototype.registerKey = function(charCode,fn,txt){
+	if(typeof fn!="function") return this;
+	if(typeof charCode!="object") charCode = [charCode];
+	var aok, ch, c, i;
+	for(c = 0 ; c < charCode.length ; c++){
+		ch = (typeof charCode[c]=="string") ? charCode[c].charCodeAt(0) : charCode[c];
+		aok = true;
+		for(i = 0 ; i < this.keys.length ; i++){ if(this.keys.charCode == ch) aok = false; }
+		if(aok) this.keys.push({'charCode':ch,'char':String.fromCharCode(ch),'fn':fn,'txt':txt});
+	}
+	return this;
+}
+// Work out if the keypress has a function that needs to be called.
+VirtualSky.prototype.keypress = function(charCode,event){
+	if(this.mouseover && this.keyboard){
+		for(i = 0 ; i < this.keys.length ; i++){
+			if(this.keys[i].charCode == charCode){
+				this.keys[i].fn.call(this,{event:event});
+				break;
+			}
 		}
 	}
-	this.draw();
 }
 VirtualSky.prototype.whichPointer = function(x,y){
 	for(i = 0 ; i < this.pointers.length ; i++){
@@ -732,9 +763,7 @@ VirtualSky.prototype.toggleInfoBox = function(i){
 		var x = this.pointers[i].x - Math.round(el.outerWidth()/2);
 		var y = this.pointers[i].y - Math.round(el.outerHeight()/2);
 		el.css({'position':'absolute',left:x,top:y,'z-index':10}).fadeIn("fast");
-	}else{
-		el.hide();
-	}
+	}else el.hide();
 }
 // compute horizon coordinates from utc, ra, dec
 // ra, dec, lat, lon in  degrees
