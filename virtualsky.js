@@ -107,7 +107,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.19";
+	this.version = "0.3.20";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -282,17 +282,17 @@ function VirtualSky(input){
 				return {x:0,y:0};
 			},
 			radec2xy: function(ra,dec){
-				var outside = false;
+				while(ra < 0) ra += 360;
+				while(ra > 360) ra -= 360;
 				var normra = (ra+this.az_off)%360-180;
 				var x = -(normra/360)*this.tall*2 + this.wide/2;
 				var y = -(dec/180)*this.tall+ this.tall/2;
-				if(x > this.wide) outside = true;
 				var coords = this.coord2horizon(ra, dec);
-				return {x:(outside ? -100 : x%this.wide),y:y,el:coords[0]};
+				return {x:x,y:y,el:coords[0]};
 			},
 			draw: function(){
 				if(!this.transparent){
-					this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
+					this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					this.ctx.fillRect((this.wide/2) - (this.tall),0,this.tall*2,this.tall);
 					this.ctx.fill();
 				}
@@ -1514,7 +1514,7 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	if(!colour || typeof colour!="string") colour = this.col.ec;
 	var c = this.ctx;
 	var moved = false;
-	var show;
+	var show, x, y;
 	var oldx = 0;
 	var oldy = 0;
 	c.beginPath(); 
@@ -1523,6 +1523,8 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	for(var a = 0 ; a <= 360 ; a += 2){
 		pos = this.ecliptic2xy(a,0,this.times.LST);
 		show = (this.isVisible(pos.el)) ? true : false;
+		x = pos.x;
+		y = pos.y;
 		if(show){
 			if(isFinite(x) && isFinite(y)){
 				if(!moved || Math.abs(oldx-x) > this.wide/2){
