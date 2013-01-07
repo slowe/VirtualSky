@@ -107,7 +107,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.20";
+	this.version = "0.3.21";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -152,6 +152,7 @@ function VirtualSky(input){
 	this.credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? false : true;
 	this.callback = { geo:'', mouseenter:'', mouseout:'' };
 	this.keys = new Array();
+	this.base = "";
 
 	// Constants
 	this.d2r = Math.PI/180;
@@ -376,21 +377,42 @@ function VirtualSky(input){
 		"moon":"Luna",
 		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so','Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero','Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor','El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro','Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma','La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo','La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n','El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules','Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n','Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira','La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco','Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor','Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha','Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante','Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n','Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
 	}];
-	this.col = {
-		'black':"rgb(0,0,0)",
-		'white':"rgb(255,255,255)",
-		'grey':"rgb(100,100,100)",
-		'sun':'rgb(255,215,0)',
-		'moon':'rgb(150,150,150)',
-		'cardinal':'rgba(163,228,255, 1)',
-		'constellation':"rgba(180,180,255,0.8)",
-		'constellationboundary':"rgba(255,255,100,0.6)",
-		"showers":"rgba(100,255,100,0.8)",
-		'az':"rgba(100,100,255,0.4)",
-		'eq':"rgba(255,100,100,0.4)",
-		'ec':'rgba(255,0,0,0.4)',
-		'gal':'rgba(100,200,255,0.4)'
+	this.colours = { 'normal' : {
+			'txt' : "rgb(255,255,255)",
+			'black':"rgb(0,0,0)",
+			'white':"rgb(255,255,255)",
+			'grey':"rgb(100,100,100)",
+			'stars':'rgb(255,255,255)',
+			'sun':'rgb(255,215,0)',
+			'moon':'rgb(150,150,150)',
+			'cardinal':'rgba(163,228,255, 1)',
+			'constellation':"rgba(180,180,255,0.8)",
+			'constellationboundary':"rgba(255,255,100,0.6)",
+			"showers":"rgba(100,255,100,0.8)",
+			'az':"rgba(100,100,255,0.4)",
+			'eq':"rgba(255,100,100,0.4)",
+			'ec':'rgba(255,0,0,0.4)',
+			'gal':'rgba(100,200,255,0.4)'
+		},
+		'negative':{
+			'txt' : "rgb(0,0,0)",
+			'black':"rgb(0,0,0)",
+			'white':"rgb(255,255,255)",
+			'grey':"rgb(100,100,100)",
+			'stars':'rgb(0,0,0)',
+			'sun':'rgb(0,0,0)',
+			'moon':'rgb(0,0,0)',
+			'cardinal':'rgba(0,0,0,1)',
+			'constellation':"rgba(0,0,0,0.8)",
+			'constellationboundary':"rgba(0,0,0,0.6)",
+			"showers":"rgba(0,0,0,0.8)",
+			'az':"rgba(0,0,255,0.6)",
+			'eq':"rgba(255,100,100,0.8)",
+			'ec':'rgba(255,0,0,0.6)',
+			'gal':'rgba(100,200,255,0.8)'
+		}
 	};
+
 
 	this.input = input;
 
@@ -398,6 +420,9 @@ function VirtualSky(input){
 	this.init(input);
 	
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
+
+	if((this.polartype || this.projection.altlabeltext) && !this.color) this.colours.normal.txt = "rgb(100,100,100)";
+	this.col = (this.negative) ? this.colours.negative : this.colours.normal;
 
 	this.changeLanguage(this.langcode);
 
@@ -478,6 +503,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.background,s)) this.background = d.background;
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
+	if(is(d.base,s)) this.base = d.base;
 	if(is(d.planets,s) || is(d.planets,o)) this.planets = d.planets;
 	if(is(d.lines,s) || is(d.lines,o)) this.lines = d.lines;
 	if(is(d.boundaries,s) || is(d.boundaries,o)) this.boundaries = d.boundaries;
@@ -511,7 +537,16 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 	if(key=="constellations"){
 		if(key2 < this.lang.constellations.length) return this.htmlDecode(this.lang.constellations[key2]);
 	}else if(key=="planets"){
-		if(key2 < this.lang.planets.length) return this.htmlDecode(this.lang.planets[key2]);
+		if(typeof key2==="string"){
+			// Loop over primary language planets to look for a match
+			for(var i = 0; i < this.langs[0].planets.length; i++){
+				if(this.langs[0].planets[i]==key2){
+					key2 = i;
+					continue;
+				}
+			}
+		}
+		if(typeof key2==="number" && key2 < this.lang.planets.length) return this.htmlDecode(this.lang.planets[key2]);
 	}else return (this.lang[key]) ? this.lang[key] : (this.langs[0][key] ? this.langs[0][key] : "");
 	return "";
 }
@@ -554,7 +589,7 @@ VirtualSky.prototype.show = function(){ this.container.show(); return this; }
 VirtualSky.prototype.toggle = function(){ this.container.toggle(); return this; }
 VirtualSky.prototype.loadJSON = function(file,callback){
 	if(typeof file!=="string") return this;
-	$.ajax({ dataType: "json", url: file, context: this, success: callback });
+	$.ajax({ dataType: "json", jsonp: 'onJSONPLoad', url: this.base+file, context: this, success: callback });
 	return this;
 }
 VirtualSky.prototype.loadPlanets = function(file){
@@ -688,11 +723,12 @@ VirtualSky.prototype.createSky = function(){
 	}
 
 	this.registerKey('a',function(){ this.toggleAtmosphere(); },'toggleatmos');
+	this.registerKey('s',function(){ this.toggleStars(); });
 	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
 	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
 	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
+	this.registerKey('u',function(){ this.togglePlanetLabels(); },'togglesollabels');
 	this.registerKey('p',function(){ this.togglePlanetHints(); },'togglesol');
-	this.registerKey('[',function(){ this.togglePlanetLabels(); },'togglesollabels');
 	this.registerKey('o',function(){ this.toggleOrbits(); },'toggleorbits');
 	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
 	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
@@ -704,7 +740,11 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
 	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
-	this.registerKey('n',function(){ this.setClock('now'); },'reset');
+	this.registerKey('8',function(){ this.setClock('now'); },'reset');
+	this.registerKey('-',function(){ this.setClock(-86400); });
+	this.registerKey('=',function(){ this.setClock(86400); });
+	this.registerKey('[',function(){ this.setClock(-86400*7); });
+	this.registerKey(']',function(){ this.setClock(86400*7); });
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
 	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
@@ -717,8 +757,9 @@ VirtualSky.prototype.toggleHelp = function(){
 	if($('.virtualskydismiss').length > 0) $('.virtualskydismiss').trigger('click');
 	else{
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong>'+String.fromCharCode(this.keys[i].charCode)+'</strong> - '+this.getPhrase(this.keys[i].txt)+'</li>'; }
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="width:1em;display:inline-block;text-align:center;">'+String.fromCharCode(this.keys[i].charCode)+'</strong> - <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
 		this.lightbox($('<div class="virtualskyhelp"><div class="virtualskydismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul>'+o+'</ul></div>').appendTo(this.container));
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) $('.virtualsky_'+this.keys[i].txt).on('click',{fn:this.keys[i].fn,me:this},function(e){ e.preventDefault(); e.data.fn.call(e.data.me); }); }
 		$('.virtualskyhelp, .virtualsky_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
 	}
 }
@@ -1076,8 +1117,7 @@ VirtualSky.prototype.draw = function(proj){
 
 	for(i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
-	var txtcolour = (this.color!="") ? (this.color) : ((this.negative) ? black : white);
-	if(this.polartype || this.projection.altlabeltext) txtcolour = (this.color!="") ? txtcolour : this.col.grey;
+	var txtcolour = (this.color!="") ? (this.color) : this.col.txt;
 	fontsize = this.fontsize();
 
 	c.fillStyle = txtcolour;
@@ -1105,6 +1145,11 @@ VirtualSky.prototype.draw = function(proj){
 		d.find('.'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
 		d.find('.'+this.id+'_credit a').css({display:'block',width:Math.ceil(metric_credit)+'px',height:fontsize+'px','font-size':fontsize+'px'});
 		this.positionCredit();
+	}
+	if(this.showhelp){
+		var helpstr = '?';
+		if(d.find('.'+this.id+'_help').length == 0) d.append('<div class="'+this.id+'_help"><a href="#">'+helpstr+'</a></div>').find('.'+this.id+'_help').css({position:'absolute',padding:5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',right:0,top:0,'font-size':fontsize}).find('a').css({'text-decoration':'none',color:txtcolour}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
+		d.find('.'+this.id+'_help').css({'font-size':fontsize}).find('a').css({color:txtcolour});
 	}
 	if(this.container.find('.'+this.id+'_clock').length == 0){
 		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
@@ -1173,10 +1218,11 @@ VirtualSky.prototype.lightbox = function(lb){
 	bg.click({lb:lb,bg:bg},function(e){ lb.hide(); bg.hide(); }).css({'height':this.container.height()+'px'});
 	return this;
 }
+
 VirtualSky.prototype.drawStars = function(){
 	if(!this.showstars && !this.showstarlabels) return this;
 	this.ctx.beginPath();
-	this.ctx.fillStyle = (this.negative) ? this.col.black : this.col.white;
+	this.ctx.fillStyle = this.col.stars;
 	this.az_off = (this.az_off+360)%360;
 	var mag;
 	var scale = (typeof this.scalestars==="number" && this.scalestars!=1) ? true : false;
@@ -1185,13 +1231,14 @@ VirtualSky.prototype.drawStars = function(){
 			mag = this.stars[i][1];
 			var p = this.radec2xy(this.stars[i][2], this.stars[i][3]);
 			if(this.isVisible(p.el) && !isNaN(p.x)){
-				d = 0.8*Math.max(3-mag/2, 0.5);
+				d = 0.8*Math.max(3-mag/2.1, 0.5);
 				// Modify the 'size' of the star by how close to the horizon it is
 				// i.e. smaller when closer to the horizon
 				if(this.gradient && !this.fullsky){
 					z = (90-p.el)*this.d2r;
 					d *= Math.exp(-z*0.6)
 				}
+				if(this.negative) d *= 1.4;
 				if(scale) d *= this.scalestars;
 				this.ctx.moveTo(p.x+d,p.y);
 				if(this.showstars) this.ctx.arc(p.x,p.y,d,0,Math.PI*2,true);
@@ -1247,6 +1294,7 @@ VirtualSky.prototype.drawPlanets = function(){
 	var oldjd = this.jd;
 	this.jd = this.times.JD;
 
+	var colour = this.col.grey;
 	for(var p = 0 ; p < this.planets.length ; p++){
 		// We'll allow 2 formats here:
 		// [Planet name,colour,ra,dec,mag] or [Planet name,colour,[jd_1, ra_1, dec_1, mag_1, jd_2, ra_2, dec_2, mag_2....]]
@@ -1270,8 +1318,8 @@ VirtualSky.prototype.drawPlanets = function(){
 		var pos = this.radec2xy(ra,dec);
 
 
-		var colour = this.planets[p][1];
-		if(this.negative) colour = this.col.grey;
+		if(!this.negative) colour = this.planets[p][1];
+		if(typeof colour==="string") this.ctx.strokeStyle = colour;
 
 		if((this.showplanets || this.showplanetlabels) && this.isVisible(pos.el) && mag < this.magnitude){
 			var d = 0;
@@ -1283,13 +1331,12 @@ VirtualSky.prototype.drawPlanets = function(){
 				}
 			}
 			if(d < 1.5) d = 1.5;
-			this.drawPlanet(pos.x,pos.y,d,colour,p);
+			this.drawPlanet(pos.x,pos.y,d,colour,this.planets[p][0]);
 		}
 		if(this.showorbits && this.isVisible(pos.el) && mag < this.magnitude){
 			this.ctx.beginPath();
 			this.ctx.lineWidth = 0.5
 			this.setFont();
-			this.ctx.strokeStyle = this.planets[p][1];
 			this.ctx.lineWidth = 1;
 			var previous = {x:0,y:0,el:0};
 			for(i = 0 ; i < this.planets[p][2].length-4 ; i+=4){
@@ -1307,7 +1354,7 @@ VirtualSky.prototype.drawPlanets = function(){
 		}
 	}
 	
-	// Moon
+	// Sun & Moon
 	if(this.showplanets || this.showplanetlabels){
 		// Only recalculate the Moon's ecliptic position if the time has changed
 		if(oldjd != this.jd){
@@ -1332,7 +1379,7 @@ VirtualSky.prototype.drawPlanet = function(x,y,d,colour,label){
 	this.ctx.strokeStyle = colour;
 	this.ctx.moveTo(x+d,y+d);
 	if(this.showplanets) this.ctx.arc(x,y,d,0,Math.PI*2,true);
-	label = (typeof label==="string") ? this.getPhrase(label) : this.getPhrase('planets',label);
+	label = this.getPhrase('planets',label);
 	if(this.showplanetlabels) this.drawLabel(x,y,d,colour,label);
 	this.ctx.fill();
 	return this;
@@ -1346,7 +1393,7 @@ VirtualSky.prototype.drawText = function(txt,x,y){
 VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
 	if(colour.length > 0) this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 1.5;
-	var xoff = d + 2;
+	var xoff = d;
 	if((this.polartype) && this.ctx.measureText) xoff = -this.ctx.measureText(label).width-3
 	if((this.polartype) && x < this.wide/2) xoff = d;
 	this.ctx.fillText(label,x+xoff,y-(d+2))
@@ -1354,7 +1401,7 @@ VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
 }
 VirtualSky.prototype.drawConstellationLines = function(colour){
 	if(!(this.constellation.lines || this.constellation.labels)) return this;
-	if(!colour) colour = (this.negative) ? this.col.black : this.col.constellation;
+	if(!colour) colour = this.col.constellation;
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
@@ -1415,7 +1462,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 }
 VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	if(!this.constellation.boundaries) return this;
-	if(!colour) colour = (this.negative) ? this.col.black : this.col.constellationboundary;
+	if(!colour) colour = this.col.constellationboundary;
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
@@ -1475,7 +1522,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 }
 VirtualSky.prototype.drawMeteorShowers = function(colour){
 	if(!this.meteorshowers || typeof this.showers==="string") return this;
-	if(!colour) colour = (this.negative) ? this.col.black : this.col.showers;
+	if(!colour) colour = this.col.showers;
 	var shower, pos, label, xoff, c, d, p, start, end, dra, ddc, f;
 	c = this.ctx;
 	c.beginPath();
@@ -1635,7 +1682,7 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 	var pt = 15;
 	var c = this.ctx;
 	c.beginPath();
-	c.fillStyle = (this.negative) ? this.col.black : this.col.cardinal;
+	c.fillStyle = this.col.cardinal;
 	var fontsize = this.fontsize();
 	for(var i  = 0 ; i < azs.length ; i++){
 		c.font = fontsize+"px Helvetica";
@@ -1733,7 +1780,8 @@ VirtualSky.prototype.setClock = function(seconds){
 	return this;
 }
 VirtualSky.prototype.toggleAtmosphere = function(){ this.gradient = !this.gradient; this.draw(); return this; }
-VirtualSky.prototype.toggleNegative = function(){ this.negative = !this.negative; this.draw(); return this; }
+VirtualSky.prototype.toggleStars = function(){ this.showstars = !this.showstars; this.draw(); return this; }
+VirtualSky.prototype.toggleNegative = function(){ this.negative = !this.negative; this.col = this.colours[(this.negative ? "negative" : "normal")]; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationLines = function(){ this.constellation.lines = !this.constellation.lines; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationBoundaries = function(){ this.constellation.boundaries = !this.constellation.boundaries; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationLabels = function(){ this.constellation.labels = !this.constellation.labels; this.draw(); return this; }
