@@ -107,7 +107,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.21";
+	this.version = "0.3.22";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -308,20 +308,27 @@ function VirtualSky(input){
 	// Data for star names to display (if showstarlabels is set to true) - an array of [Hipparcos number,Label]
 	this.starnames = [[7588,"Achernar"],[11767,"Polaris"],[21421,"Aldebaran"],[24436,"Rigel"],[24608,"Capella"],[27989,"Betelgeuse"],[30438,"Canopus"],[32349,"Sirius"],[33579,"Adara"],[37279,"Procyon"],[37826,"Pollux"],[49669,"Regulus"],[62434,"Mimosa"],[65378,"Mizar"],[65474,"Spica"],[68702,"Hadar"],[69673,"Arcturus"],[71683,"Alpha Centauri A"],[80763,"Antares"],[85927,"Shaula"],[91262,"Vega"],[97649,"Altair"],[102098,"Deneb"],[113368,"Fomalhaut"]];
 
+
+	// Identify the default base directory
+	this.dir = $('script[src*=virtualsky]').attr('src');  // the JS file path
+	var idx = this.dir.lastIndexOf('/');
+	if(idx >= 0) this.dir = this.dir.substring(0,idx+1);
+	else this.dir = "";
+
 	// Data for faint stars - 25 kB
-	this.starsdeep = "stars.json";
+	this.starsdeep = this.dir+"stars.json";
 
 	// Data for constellation lines - 12 kB
-	this.lines = "lines_latin.json";
+	this.lines = this.dir+"lines_latin.json";
 
 	// Data for constellation boundaries - kB
-	this.boundaries = "boundaries.json";
+	this.boundaries = this.dir+"boundaries.json";
 
 	// Load in the planet data from separate json file
-	this.planets = "planets.json";
+	this.planets = this.dir+"planets.json";
 
 	// Load in the planet data from separate json file
-	this.showers = "showers.json";
+	this.showers = this.dir+"showers.json";
 
 	this.hipparcos = new Array();
 	this.az_step = 0;
@@ -547,6 +554,7 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 			}
 		}
 		if(typeof key2==="number" && key2 < this.lang.planets.length) return this.htmlDecode(this.lang.planets[key2]);
+		else if(typeof key2==="string") return this.htmlDecode(this.lang[key2]);
 	}else return (this.lang[key]) ? this.lang[key] : (this.langs[0][key] ? this.langs[0][key] : "");
 	return "";
 }
