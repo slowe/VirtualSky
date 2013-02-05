@@ -1857,7 +1857,7 @@ VirtualSky.prototype.spinIt = function(tick,wait){
 		// this.spin is the number of seconds to update the clock by 
 		if(this.spin == 0) this.spin = (tick == "up") ? t : -t;
 		else{
-			if(Math.abs(this.spin) > 1) s *= 2;
+			if(Math.abs(this.spin) < 1) s *= 2;
 			if(this.spin > 0) this.spin = (tick == "up") ? (this.spin*s) : (this.spin/s);
 			else if(this.spin < 0) this.spin = (tick == "up") ? (this.spin/s) : (this.spin*s);
 			if(this.spin < t && this.spin > -t) this.spin = 0;
