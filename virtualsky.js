@@ -149,6 +149,7 @@ function VirtualSky(input){
 	this.islive = false;				// Update the sky in real time
 	this.fullscreen = false;			// Should it take up the full browser window
 	this.transparent = false;			// Show the sky background or not
+	this.fps = 10;						// Number of frames per second when animating
 	this.credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? false : true;
 	this.callback = { geo:'', mouseenter:'', mouseout:'' };
 	this.keys = new Array();
@@ -1761,14 +1762,16 @@ VirtualSky.prototype.liveSky = function(pos){
 }
 // Increment the clock by the amount specified
 VirtualSky.prototype.advanceTime = function(by,wait){
-	if(!wait) wait = 50;
-	if(typeof by=="undefined") this.clock = new Date();
-	else{
-		this.setClock(parseFloat(by));
-		clearTimeout(this.timer_time)
-		this.timer_time = window.setTimeout(function(mysky,by,wait){ mysky.advanceTime(by,wait); },wait,this,by,wait);
+	if(typeof by=="undefined"){
+		this.clock = new Date();
+		this.times = this.astronomicalTimes();
+	}else{
+		by = parseFloat(by);
+		if(!wait) wait = 1000/this.fps; // ms between frames
+		var fn = function(vs,by){ vs.setClock(by); };
+		clearInterval(this.interval_time)
+		this.interval_time = window.setInterval(fn,wait,this,by);
 	}
-	this.times = this.astronomicalTimes();
 	return this;
 }
 VirtualSky.prototype.setClock = function(seconds){
@@ -1849,14 +1852,18 @@ VirtualSky.prototype.moveIt = function(){
 VirtualSky.prototype.spinIt = function(tick,wait){
 	if(typeof tick == "number") this.spin = (tick == 0) ? 0 : (this.spin+tick);
 	else{
-		if(this.spin == 0) this.spin = (tick == "up") ? 2 : -2;
+		var t = 1.0/this.fps;
+		var s = 2;
+		// this.spin is the number of seconds to update the clock by 
+		if(this.spin == 0) this.spin = (tick == "up") ? t : -t;
 		else{
-			if(this.spin > 0) this.spin = (tick == "up") ? (this.spin*2) : (this.spin/2);
-			else if(this.spin < 0) this.spin = (tick == "up") ? (this.spin/2) : (this.spin*2);
-			if(this.spin < 2 && this.spin > -2) this.spin = 0;
+			if(Math.abs(this.spin) > 1) s *= 2;
+			if(this.spin > 0) this.spin = (tick == "up") ? (this.spin*s) : (this.spin/s);
+			else if(this.spin < 0) this.spin = (tick == "up") ? (this.spin/s) : (this.spin*s);
+			if(this.spin < t && this.spin > -t) this.spin = 0;
 		}
 	}
-	if(typeof this.timer_time!="undefined") clearTimeout(this.timer_time);
+	if(typeof this.interval_time!="undefined") clearInterval(this.interval_time);
 	if(this.spin != 0) this.advanceTime(this.spin,wait);
 	return this;
 }
