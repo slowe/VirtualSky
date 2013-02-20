@@ -1760,6 +1760,17 @@ VirtualSky.prototype.liveSky = function(pos){
 	}
 	return this;
 }
+VirtualSky.prototype.start = function(){
+	this.islive = true;
+	// Clear existing interval
+	if(typeof interval!="undefined") clearInterval(interval);
+	interval = window.setInterval(function(sky){ sky.setClock('now'); },1000,this);
+}
+VirtualSky.prototype.stop = function(){
+	this.islive = false;
+	// Clear existing interval
+	if(typeof interval!="undefined") clearInterval(interval);
+}
 // Increment the clock by the amount specified
 VirtualSky.prototype.advanceTime = function(by,wait){
 	if(typeof by=="undefined"){
