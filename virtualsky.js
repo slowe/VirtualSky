@@ -331,7 +331,7 @@ function VirtualSky(input){
 	// Load in the planet data from separate json file
 	this.showers = this.dir+"showers.json";
 
-	this.hipparcos = new Array();
+	this.hipparcos = {};
 	this.az_step = 0;
 	this.az_off = 0;
 	this.clock = new Date();
@@ -820,7 +820,7 @@ VirtualSky.prototype.toggleInfoBox = function(i){
 // utc is a Date object
 // results returned in hrz_altitude, hrz_azimuth
 VirtualSky.prototype.coord2horizon = function(ra, dec){
-	utc = this.now;
+	var utc = this.now;
 	// compute hour angle in degrees
 	//var times = this.astronomicalTimes(utc);
 	var ha = this.times.LST*15 - ra;
@@ -1013,7 +1013,7 @@ VirtualSky.prototype.radec2xy = function(ra,dec){
 		var coords = this.coord2horizon(ra, dec);
 		// Only return coordinates above the horizon
 		if(coords[0] > 0){
-			pos = this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
+			pos = (typeof this.projection.azel2xy==="function") ? this.projection.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall, this) : this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
 			return {x:pos.x,y:pos.y,az:coords[1],el:coords[0]};
 		}
 	}
@@ -1233,12 +1233,12 @@ VirtualSky.prototype.drawStars = function(){
 	this.ctx.beginPath();
 	this.ctx.fillStyle = this.col.stars;
 	this.az_off = (this.az_off+360)%360;
-	var mag;
+	var mag,i,j,p,d,z;
 	var scale = (typeof this.scalestars==="number" && this.scalestars!=1) ? true : false;
 	for(i = 0; i < this.stars.length; i++){
 		if(this.stars[i][1] < this.magnitude){
 			mag = this.stars[i][1];
-			var p = this.radec2xy(this.stars[i][2], this.stars[i][3]);
+			p = this.radec2xy(this.stars[i][2], this.stars[i][3]);
 			if(this.isVisible(p.el) && !isNaN(p.x)){
 				d = 0.8*Math.max(3-mag/2.1, 0.5);
 				// Modify the 'size' of the star by how close to the horizon it is
@@ -1252,7 +1252,7 @@ VirtualSky.prototype.drawStars = function(){
 				this.ctx.moveTo(p.x+d,p.y);
 				if(this.showstars) this.ctx.arc(p.x,p.y,d,0,Math.PI*2,true);
 				if(this.showstarlabels){
-					for(var j = 0; j < this.starnames.length ; j++){
+					for(j = 0; j < this.starnames.length ; j++){
 						if(this.starnames[j][0] == this.stars[i][0]){
 							this.drawLabel(p.x,p.y,d,"",this.starnames[j][1]);
 							continue;
@@ -1419,29 +1419,32 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	this.setFont();
 	if(typeof this.lines==="string") return this;
 	var posa, posb;
+	var a,b,idx;
 	for(var c = 0; c < this.lines.length; c++){
 		if(this.constellation.lines){
 			for(l = 3; l < this.lines[c].length; l+=2){
-				var a = -1;
-				var b = -1;
-				if(!this.hipparcos[this.lines[c][l]]){
+				a = -1;
+				b = -1;
+				idx1 = ''+this.lines[c][l]+'';
+				idx2 = ''+this.lines[c][l+1]+'';
+				if(!this.hipparcos[idx1]){
 					for(s = 0; s < this.stars.length; s++){
 						if(this.stars[s][0] == this.lines[c][l]){
-							this.hipparcos[this.lines[c][l]] = s;
+							this.hipparcos[idx1] = s;
 							break;
 						}
 					}
 				}
-				if(!this.hipparcos[this.lines[c][l+1]]){
+				if(!this.hipparcos[idx2]){
 					for(s = 0; s < this.stars.length; s++){
 						if(this.stars[s][0] == this.lines[c][l+1]){
-							this.hipparcos[this.lines[c][l+1]] = s;
+							this.hipparcos[idx2] = s;
 							break;
 						}
 					}
 				}
-				a = this.hipparcos[this.lines[c][l]];
-				b = this.hipparcos[this.lines[c][l+1]];
+				a = this.hipparcos[idx1];
+				b = this.hipparcos[idx2];
 				if(a >= 0 && b >= 0 && a < this.stars.length && b < this.stars.length){
 					posa = this.radec2xy(this.stars[a][2], this.stars[a][3]);
 					posb = this.radec2xy(this.stars[b][2], this.stars[b][3]);
@@ -1466,6 +1469,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 			}
 		}
 	}
+	
 	this.ctx.stroke();
 	return this;
 }
