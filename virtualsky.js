@@ -165,9 +165,7 @@ function VirtualSky(input){
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				var r = radius*(90-el)/90;
-				y = radius-r*Math.cos(az*vs.d2r);
-				x = w/2-r*Math.sin(az*vs.d2r);
-				return {x:x,y:y};
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
 			},
 			polartype: true
 		},
@@ -180,9 +178,7 @@ function VirtualSky(input){
 				var sinel = Math.sin(el*vs.d2r);
 				var cosel = Math.cos(el*vs.d2r);
 				var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
-				x = w/2+0.42*k*h*cosel*sinaz;
-				y = h-0.42*k*h*(cosel1*sinel-sinel1*cosel*cosaz);
-				return {x:x,y:y};
+				return {x:(w/2+0.42*k*h*cosel*sinaz),y:(h-0.42*k*h*(cosel1*sinel-sinel1*cosel*cosaz))};
 			}
 		},
 		'lambert':{
@@ -192,18 +188,14 @@ function VirtualSky(input){
 				var sinel = Math.sin(el*vs.d2r);
 				var cosel = Math.cos(el*vs.d2r);
 				var k = Math.sqrt(2/(1+cosel*cosaz));
-				x = w/2+0.6*h*k*cosel*sinaz;
-				y = h-0.6*h*k*(sinel);
-				return {x:x,y:y};
+				return {x:(w/2+0.6*h*k*cosel*sinaz),y:(h-0.6*h*k*(sinel))};
 			}
 		},
 		'ortho':{
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				var r = radius*Math.cos(el*vs.d2r);
-				y = radius-r*Math.cos(az*vs.d2r);
-				x = w/2-r*Math.sin(az*vs.d2r);
-				return {x:x,y:y};
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
 			},
 			polartype:true
 		},
@@ -213,17 +205,13 @@ function VirtualSky(input){
 				// R = 2 * f * sin(theta/2)
 				var r = radius*Math.sin((90-el)*vs.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
 				//var r = radius*(90-el)/95;	// the field of view is bigger than 180 degrees
-				y = radius-r*Math.cos(az*vs.d2r);
-				x = w/2-r*Math.sin(az*vs.d2r);
-				return {x:x,y:y};
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
 			},
 			polartype:true
 		},
 		'equirectangular':{
 			azel2xy: function(az,el,w,h){
-				x = ((az-180)/90)*h + w/2;
-				y = h-(el/90)*h;
-				return {x:x,y:y};
+				return {x:(((az-180)/90)*h + w/2),y:(h-(el/90)*h)};
 			},
 			maxb: 90
 		},
@@ -460,7 +448,7 @@ VirtualSky.prototype.init = function(d){
 	if(!d) return this;
 	var q = location.search;
 	if(q && q != '#'){
-		bits = q.replace(/^\?/,'').replace(/\&$/,'').split('&'); // remove the leading ? and trailing &
+		var bits = q.replace(/^\?/,'').replace(/\&$/,'').split('&'); // remove the leading ? and trailing &
 		var key,val;
 		for(var i = 0; i < bits.length ; i++){
 			key = bits[i].split('=')[0], val = bits[i].split('=')[1];
@@ -788,7 +776,7 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 // Work out if the keypress has a function that needs to be called.
 VirtualSky.prototype.keypress = function(charCode,event){
 	if(this.mouseover && this.keyboard){
-		for(i = 0 ; i < this.keys.length ; i++){
+		for(var i = 0 ; i < this.keys.length ; i++){
 			if(this.keys[i].charCode == charCode){
 				this.keys[i].fn.call(this,{event:event});
 				break;
@@ -797,7 +785,7 @@ VirtualSky.prototype.keypress = function(charCode,event){
 	}
 }
 VirtualSky.prototype.whichPointer = function(x,y){
-	for(i = 0 ; i < this.pointers.length ; i++){
+	for(var i = 0 ; i < this.pointers.length ; i++){
 		if(Math.abs(x-this.pointers[i].x) < 5 && Math.abs(y-this.pointers[i].y) < 5) return i
 	}
 	return -1;
@@ -859,6 +847,7 @@ VirtualSky.prototype.isVisible = function(el){
 VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 	if(typeof clock=="undefined") clock = this.now;
 	if(typeof lon=="undefined") lon = this.longitude;
+	var JD,JD0,S,T,T0,UT,A,GST,d,LST;
 	JD = this.getJD(clock);
 	JD0 = Math.floor(JD-0.5)+0.5;
 	S = JD0-2451545.0;
@@ -878,6 +867,7 @@ VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 }
 // Uses algorithm defined in Practical Astronomy (4th ed) by Peter Duffet-Smith and Jonathan Zwart
 VirtualSky.prototype.moonPos = function(JD,sun){
+	var d2r,JD,sun,lo,Po,No,i,e,l,Mm,N,C,Ev,sinMo,Ae,A3,Mprimem,Ec,A4,lprime,V,lprimeprime,Nprime,lppNp,sinlppNp,y,x,lm,Bm;
 	d2r = this.d2r;
 	if(typeof JD=="undefined") JD = this.times.JD;
 	if(typeof sun=="undefined") sun = this.sunPos(JD);
@@ -915,6 +905,7 @@ VirtualSky.prototype.moonPos = function(JD,sun){
 }
 // Uses algorithm defined in Practical Astronomy (4th ed) by Peter Duffet-Smith and Jonathan Zwart
 VirtualSky.prototype.sunPos = function(JD){
+	var D,eg,wg,e,N,Mo,v,lon,lat;
 	D = (JD-2455196.5);	// Number of days since the epoch of 2010 January 0.0
 	// Calculated for epoch 2010.0. If T is the number of Julian centuries since 1900 January 0.5 = (JD-2415020.0)/36525
 	eg = 279.557208;	// mean ecliptic longitude in degrees = (279.6966778 + 36000.76892*T + 0.0003025*T*T)%360;
@@ -934,6 +925,7 @@ VirtualSky.prototype.sunPos = function(JD){
 // Uses method defined in Practical Astronomy (4th ed) by Peter Duffet-Smith and Jonathan Zwart
 VirtualSky.prototype.meanObliquity = function(JD){
 	if(!JD) JD = this.times.JD;
+	var T,T2,T3;
 	T = (JD-2451545.0)/36525	// centuries since 2451545.0 (2000 January 1.5)
 	T2 = T*T;
 	T3 = T2*T;
@@ -949,29 +941,30 @@ VirtualSky.prototype.ecliptic2azel = function(l,b,LST,lat){
 	if(!lat) lat = this.latitude
 	l *= this.d2r;
 	b *= this.d2r;
-	var sl = Math.sin(l);
-	var cl = Math.cos(l);
-	var sb = Math.sin(b);
-	var cb = Math.cos(b);
-	var v = [cl*cb,sl*cb,sb];
-	var e = this.meanObliquity();
+	var sl,cl,sb,cb,v,e,ce,se,Cprime,s,ST,cST,sST,B,r,sphi,cphi,A,w,theta,psi;
+	sl = Math.sin(l);
+	cl = Math.cos(l);
+	sb = Math.sin(b);
+	cb = Math.cos(b);
+	v = [cl*cb,sl*cb,sb];
+	e = this.meanObliquity();
 	e *= this.d2r;
 	ce = Math.cos(e);
 	se = Math.sin(e);
-	var Cprime = [[1.0,0.0,0.0],[0.0,ce,-se],[0.0,se,ce]];
-	var s = this.vectorMultiply(Cprime,v);
+	Cprime = [[1.0,0.0,0.0],[0.0,ce,-se],[0.0,se,ce]];
+	s = this.vectorMultiply(Cprime,v);
 	ST = LST*15*this.d2r;
-	var cST = Math.cos(ST);
-	var sST = Math.sin(ST);
-	var B = [[cST,sST,0],[sST,-cST,0],[0,0,1]];
-	var r = this.vectorMultiply(B,s);
+	cST = Math.cos(ST);
+	sST = Math.sin(ST);
+	B = [[cST,sST,0],[sST,-cST,0],[0,0,1]];
+	r = this.vectorMultiply(B,s);
 	lat *= this.d2r;
-	var sphi = Math.sin(lat);
-	var cphi = Math.cos(lat);
-	var A = [[-sphi,0,cphi],[0,-1,0],[cphi,0,sphi]];
-	var w = this.vectorMultiply(A,r);
-	var theta = Math.atan2(w[1],w[0]);
-	var psi = Math.asin(w[2]);
+	sphi = Math.sin(lat);
+	cphi = Math.cos(lat);
+	A = [[-sphi,0,cphi],[0,-1,0],[cphi,0,sphi]];
+	w = this.vectorMultiply(A,r);
+	theta = Math.atan2(w[1],w[0]);
+	psi = Math.asin(w[2]);
 	return {az:theta/this.d2r,el:psi/this.d2r}
 }
 // Take input in decimal degrees
@@ -999,7 +992,7 @@ VirtualSky.prototype.ecliptic2xy = function(l,b,LST){
 		return this.radec2xy(pos.ra,pos.dec);
 	}else{
 		var pos = this.ecliptic2azel(l,b,LST);
-		el = pos.el;
+		var el = pos.el;
 		pos = this.azel2xy(pos.az-this.az_off,pos.el,this.wide,this.tall);
 		pos.el = el;
 		return pos;
@@ -1013,7 +1006,7 @@ VirtualSky.prototype.radec2xy = function(ra,dec){
 		var coords = this.coord2horizon(ra, dec);
 		// Only return coordinates above the horizon
 		if(coords[0] > 0){
-			pos = (typeof this.projection.azel2xy==="function") ? this.projection.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall, this) : this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
+			var pos = (typeof this.projection.azel2xy==="function") ? this.projection.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall, this) : this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
 			return {x:pos.x,y:pos.y,az:coords[1],el:coords[0]};
 		}
 	}
@@ -1112,7 +1105,6 @@ VirtualSky.prototype.draw = function(proj){
 
 	this.now = this.clock;
 
-	tmp = c.fillStyle;
 	c.beginPath();
 	if(this.gradient && !this.polartype && !this.fullsky && !this.negative){
 		if(typeof this.sky_gradient == "undefined") this.updateSkyGradient();
@@ -1124,10 +1116,10 @@ VirtualSky.prototype.draw = function(proj){
 	
 	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawPlanets().drawMeteorShowers().drawCardinalPoints();
 
-	for(i = 0; i < this.pointers.length ; i++) this.highlight(i);
+	for(var i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
 	var txtcolour = (this.color!="") ? (this.color) : this.col.txt;
-	fontsize = this.fontsize();
+	var fontsize = this.fontsize();
 
 	c.fillStyle = txtcolour;
 	c.lineWidth = 1.5;
@@ -1418,7 +1410,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	var fontsize = this.fontsize();
 	this.setFont();
 	if(typeof this.lines==="string") return this;
-	var posa, posb;
+	var pos, posa, posb;
 	var a,b,idx;
 	for(var c = 0; c < this.lines.length; c++){
 		if(this.constellation.lines){
@@ -1574,13 +1566,13 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	if(!colour || typeof colour!="string") colour = this.col.ec;
 	var c = this.ctx;
 	var moved = false;
-	var show, x, y;
+	var show, x, y, pos, a;
 	var oldx = 0;
 	var oldy = 0;
 	c.beginPath(); 
 	c.strokeStyle = colour;
 	c.lineWidth = 3;
-	for(var a = 0 ; a <= 360 ; a += 2){
+	for(a = 0 ; a <= 360 ; a += 2){
 		pos = this.ecliptic2xy(a,0,this.times.LST);
 		show = (this.isVisible(pos.el)) ? true : false;
 		x = pos.x;
@@ -1605,7 +1597,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	if(!type || !this.grid[type]) return this;
 	if(!colour || typeof colour!="string") colour = this.col[type];
 	if(!step || typeof step!="number") step = this.grid.step;
-	var maxb,minb,x,y,a,b;
+	var maxb,minb,x,y,a,b,pos;
 	var c = this.ctx;
 	var oldx = 0;
 	var oldy = 0;
@@ -1690,6 +1682,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 }
 VirtualSky.prototype.drawCardinalPoints = function(){
 	if(!this.cardinalpoints) return this;
+	var i, pos, r, x, y, pos, ang, theta;
 	var azs = new Array(0,90,180,270);
 	var dirs = [this.getPhrase('N'),this.getPhrase('E'),this.getPhrase('S'),this.getPhrase('W')];
 	var pt = 15;
@@ -1697,27 +1690,27 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 	c.beginPath();
 	c.fillStyle = this.col.cardinal;
 	var fontsize = this.fontsize();
-	for(var i  = 0 ; i < azs.length ; i++){
+	for(i = 0 ; i < azs.length ; i++){
 		c.font = fontsize+"px Helvetica";
 
 		if(c.measureText){
 			var metrics = c.measureText(dirs[i]);
-			var r = (metrics.width > fontsize) ? metrics.width/2 : fontsize/2;
+			r = (metrics.width > fontsize) ? metrics.width/2 : fontsize/2;
 		}else{
-			var r = fontsize/2;
+			r = fontsize/2;
 		}
 		if(this.polartype){
-			var theta = (azs[i]-this.az_off)*Math.PI/180;
-			var x = -((this.tall/2) - r*1.5)*Math.sin(theta);
-			var y = -((this.tall/2) - r*1.5)*Math.cos(theta);
+			theta = (azs[i]-this.az_off)*Math.PI/180;
+			x = -((this.tall/2) - r*1.5)*Math.sin(theta);
+			y = -((this.tall/2) - r*1.5)*Math.cos(theta);
 			x = isFinite(x) ? this.wide/2 + x - r : 0;
 			y = isFinite(y) ? this.tall/2 + y + r: 0;
 		}else{
 			pos = this.azel2xy(azs[i]-this.az_off,0);
-			var x = isFinite(pos.x) ? pos.x - r : 0;
-			var y = isFinite(pos.y) ? pos.y - pt/2 : 0;
+			x = isFinite(pos.x) ? pos.x - r : 0;
+			y = isFinite(pos.y) ? pos.y - pt/2 : 0;
 			if(x < 0 || x > this.wide-pt) x = -r;
-			var ang = (azs[i]-this.az_off)*Math.PI/180;
+			ang = (azs[i]-this.az_off)*Math.PI/180;
 		}
 		if(x > 0) c.fillText(dirs[i],x,y);
 	}
