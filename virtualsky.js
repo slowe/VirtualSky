@@ -107,7 +107,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.22";
+	this.version = "0.3.23";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -577,7 +577,7 @@ VirtualSky.prototype.setWH = function(w,h){
 	this.wide = w;
 	this.tall = h;
 	// Bug fix for IE 8 which sets a width of zero to a div within the <canvas>
-	if(this.ie && $.browser.version == 8) $('#'+this.id).find('div').css({'width':w,'height':h});
+	if(this.ie && $.browser.version == 8) $('#'+this.idinner).find('div').css({'width':w,'height':h});
 	this.canvas.css({'width':w,'height':h});
 }
 // Some pseudo-jQuery
@@ -639,13 +639,11 @@ VirtualSky.prototype.createSky = function(){
 	if(this.tall > 0) this.container.css('height',this.tall);
 	this.tall = this.container.height();
 
-	// Rename as the holder
-	this.container.attr('id',this.id+'holder');
-
 	// Add a <canvas> to it with the original ID
-	this.container.html('<canvas id="'+this.id+'" style="display:block;"></canvas>');
-	this.canvas = $('#'+this.id);
-	this.c = document.getElementById(this.id);
+	this.idinner = this.id+'_inner';
+	this.container.html('<canvas id="'+this.idinner+'" style="display:block;"></canvas>');
+	this.canvas = $('#'+this.idinner);
+	this.c = document.getElementById(this.idinner);
 	// For excanvas we need to initialise the newly created <canvas>
 	if(this.excanvas) this.c = G_vmlCanvasManager.initElement(this.c);
 
@@ -662,7 +660,7 @@ VirtualSky.prototype.createSky = function(){
 		this.ctx.fillText(loading,(this.wide-this.ctx.measureText(loading).width)/2,(this.tall-fs)/2)
 		this.ctx.fill();
 
-		$("#"+this.id).on('click',{sky:this},function(e){
+		$("#"+this.idinner).on('click',{sky:this},function(e){
 			var x = e.pageX - $(this).offset().left - window.scrollX;
 			var y = e.pageY - $(this).offset().top - window.scrollY;
 			matched = e.data.sky.whichPointer(x,y);
@@ -1154,7 +1152,7 @@ VirtualSky.prototype.draw = function(proj){
 	}
 	if(this.container.find('.'+this.id+'_clock').length == 0){
 		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
-		var off = $('#'+this.id).position();
+		var off = $('#'+this.idinner).position();
 		this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
 			var s = e.data.sky;
 			var id = s.id;
@@ -1180,7 +1178,7 @@ VirtualSky.prototype.draw = function(proj){
 	}
 	if($('#'+this.id+'_position').length == 0){
 		this.container.append('<div id="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
-		var off = $('#'+this.id).position();
+		var off = $('#'+this.idinner).position();
 		$('#'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
 		$('#'+this.id+'_position').bind('click',{sky:this},function(e){
 			var s = e.data.sky;
