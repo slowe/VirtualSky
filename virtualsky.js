@@ -1176,11 +1176,11 @@ VirtualSky.prototype.draw = function(proj){
 			$('#'+id+'_mins').val(s.clock.getMinutes());
 		});
 	}
-	if($('#'+this.id+'_position').length == 0){
-		this.container.append('<div id="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
+	if($('.'+this.id+'_position').length == 0){
+		this.container.append('<div class="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
 		var off = $('#'+this.idinner).position();
-		$('#'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
-		$('#'+this.id+'_position').bind('click',{sky:this},function(e){
+		$('.'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
+		$('.'+this.id+'_position').bind('click',{sky:this},function(e){
 			var s = e.data.sky;
 			var id = s.id;
 			if($('#'+id+'_geo').length == 0){
@@ -1211,7 +1211,7 @@ VirtualSky.prototype.lightbox = function(lb){
 	if(!lb.length) return this;
 	lb.css({'z-index': 100,'position': 'absolute'});
 	if(this.container.find('.virtualsky_bg').length == 0) this.container.append('<div class="virtualsky_bg" style="position:absolute;z-index: 99;left:0px;top: 0px;right: 0px;bottom: 0px;background-color: rgba(0,0,0,0.7);"></div>')
-	bg = this.container.find('.virtualsky_bg').show();
+	var bg = this.container.find('.virtualsky_bg').show();
 	lb.css({left:((this.wide-lb.outerWidth())/2)+'px',top:((this.tall-lb.outerHeight())/2)+'px'}).show();
 	this.container.find('.virtualskydismiss').click({lb:lb,bg:bg},function(e){ lb.remove(); bg.remove(); });
 	bg.click({lb:lb,bg:bg},function(e){ lb.hide(); bg.hide(); }).css({'height':this.container.height()+'px'});
@@ -1742,6 +1742,7 @@ VirtualSky.prototype.highlight = function(i,colour){
 }
 // Expects a latitude,longitude string (comma separated)
 VirtualSky.prototype.setGeo = function(pos){
+	if(typeof pos!=="string") return this;
 	pos = pos.split(',');
 	this.latitude = pos[0];
 	this.longitude = pos[1];
@@ -1781,9 +1782,11 @@ VirtualSky.prototype.advanceTime = function(by,wait){
 	return this;
 }
 VirtualSky.prototype.setClock = function(seconds){
-	if(typeof seconds=="string" && seconds=='now'){	
-		if(!this.input.clock) this.clock = new Date();
-		else {
+	if(typeof seconds=="string"){
+		if(!this.input.clock){
+			if(seconds=="now") this.clock = new Date();
+			else this.clock = new Date(seconds);
+		}else{
 			this.clock = (typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock;
 			if(typeof this.clock=="string") this.clock = new Date(this.clock);
 		}
