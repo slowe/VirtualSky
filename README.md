@@ -56,6 +56,7 @@ The following options can be specified (defaults in brackets):
   * `showplanetlabels` (true) - show/hide the planets
   * `showstarlabels` (false) - show/hide the planets
   * `showorbits` (false) - show/hide the orbits of the planets
+  * `showgalaxy` (false) - show/hide an outline of the Milky Way
   * `showdate` (true) - show/hide the date and time
   * `showposition` (true) - show/hide the latitude and longitude
   * `ground` (false) - show/hide the local ground (for full sky projections)
@@ -63,9 +64,10 @@ The following options can be specified (defaults in brackets):
   * `mouse` (true) - allow mouse controls
   * `gridlines_az` (false) - show/hide the azimuth/elevation grid lines
   * `gridlines_eq` (false) - show/hide the RA/Dec grid lines
+  * `gridlines_gal` (false) - show/hide the Galactic Coordinate grid lines
   * `gridstep` (30) - the size of the grid step when showing grid lines</li>
 
 
 Author
 ------
-Stuart Lowe works for the [Las Cumbres Observatory Global Telescope](http://lcogt.net/). LCOGT is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
+Stuart Lowe developed this at [Las Cumbres Observatory Global Telescope](http://lcogt.net/). LCOGT is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
