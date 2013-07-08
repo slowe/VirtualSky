@@ -211,6 +211,7 @@ function VirtualSky(input){
 		},
 		'equirectangular':{
 			azel2xy: function(az,el,w,h){
+				az = (az+360)%360;
 				return {x:(((az-180)/90)*h + w/2),y:(h-(el/90)*h)};
 			},
 			maxb: 90
