@@ -133,6 +133,7 @@ function VirtualSky(input){
 	this.constellation = { lines: false, boundaries: false, labels: false };	// Display constellations
 	this.meteorshowers = false;			// Display meteor shower radiants
 	this.negative = false;				// Invert colours to make it better for printing
+	this.showgalaxy = false;			// Display the Milky Way
 	this.showstars = true;				// Display current positions of the stars
 	this.showstarlabels = false;		// Display names for named stars
 	this.showplanets = true;			// Display current positions of the planets
@@ -310,7 +311,8 @@ function VirtualSky(input){
 		lines: this.dir+"lines_latin.json",	// Data for constellation lines - 12 kB
 		boundaries: this.dir+"boundaries.json",	// Data for constellation boundaries - 20 kB
 		planets: this.dir+"planets.json",	// Data for planets - 57kB
-		showers: this.dir+"showers.json"	// Data for meteor showers - 4 kB
+		showers: this.dir+"showers.json",	// Data for meteor showers - 4 kB
+		galaxy: this.dir+"galaxy.json"	// Data for milky way - 12 kB
 	}
 
 	this.hipparcos = {};
@@ -378,7 +380,8 @@ function VirtualSky(input){
 			'cardinal':'rgba(163,228,255, 1)',
 			'constellation':"rgba(180,180,255,0.8)",
 			'constellationboundary':"rgba(255,255,100,0.6)",
-			"showers":"rgba(100,255,100,0.8)",
+			'showers':"rgba(100,255,100,0.8)",
+			'galaxy':"rgba(100,200,255,0.5)",
 			'az':"rgba(100,100,255,0.4)",
 			'eq':"rgba(255,100,100,0.4)",
 			'ec':'rgba(255,0,0,0.4)',
@@ -396,6 +399,7 @@ function VirtualSky(input){
 			'constellation':"rgba(0,0,0,0.8)",
 			'constellationboundary':"rgba(0,0,0,0.6)",
 			"showers":"rgba(0,0,0,0.8)",
+			'galaxy':"rgba(0,0,0,0.5)",
 			'az':"rgba(0,0,255,0.6)",
 			'eq':"rgba(255,100,100,0.8)",
 			'ec':'rgba(255,0,0,0.6)',
@@ -599,6 +603,9 @@ VirtualSky.prototype.loadBoundaries = function(file,fn){
 VirtualSky.prototype.loadMeteorShowers = function(file,fn){
 	return this.loadJSON(file,function(data){ this.showers = data.showers; this.draw(); },fn);
 }
+VirtualSky.prototype.loadGalaxy = function(file,fn){
+	return this.loadJSON(file,function(data){ this.galaxy = data.galaxy; this.draw(); },fn);
+}
 VirtualSky.prototype.loadDeepStars = function(file,fn){
 	return this.loadJSON(file,function(data){ this.starsdeep = true; this.stars = this.stars.concat(data.stars); this.draw(); },fn);
 }
@@ -629,6 +636,9 @@ VirtualSky.prototype.createSky = function(){
 
 	// Get the meteor showers
 	if(!this.showers) this.loadMeteorShowers(this.file.showers);
+
+	// Get the meteor showers
+	if(!this.galaxy) this.loadGalaxy(this.file.galaxy);
 
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
@@ -726,6 +736,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
 	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
 	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
+	this.registerKey('M',function(){ this.toggleGalaxy(); });
 	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
 	this.registerKey('g',function(){ this.toggleGround(); });
 	this.registerKey('i',function(){ this.toggleNegative(); });
@@ -1128,7 +1139,7 @@ VirtualSky.prototype.draw = function(proj){
 		c.fill();
 	}
 	
-	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawPlanets().drawMeteorShowers().drawCardinalPoints();
+	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawGalaxy().drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawPlanets().drawMeteorShowers().drawCardinalPoints();
 
 	for(var i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
@@ -1486,7 +1497,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
-	this.ctx.lineWidth = 0.75
+	this.ctx.lineWidth = 0.75;
 	if(typeof this.boundaries!=="object") return this;
 	var posa, posb;
 	var ra,dc,dra,ddc,b3;
@@ -1538,6 +1549,41 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 		}
 	}
 	this.ctx.stroke();
+	return this;
+}
+VirtualSky.prototype.drawGalaxy = function(colour){
+	if(!this.galaxy || !this.showgalaxy) return this;
+	if(!colour) colour = this.col.galaxy;
+	this.ctx.beginPath();
+	this.ctx.strokeStyle = colour;
+	this.ctx.fillStyle = colour;
+	this.ctx.lineWidth = 1;
+	if(typeof this.boundaries!=="object") return this;
+	var posa, posb, points, col, i;
+
+	for(var c = 0; c < this.galaxy.length; c++){
+
+		// Get a copy of the current shape
+		points = this.galaxy[c].slice(0);
+		// Get the colour (first element)
+		col = points.shift();
+		posa = null;
+		// Now loop over joining the points
+		for(i = 0; i < points.length; i+=2){
+			posb = this.radec2xy(points[i], points[i+1]);
+			if(posa){
+				// Basic error checking: if the line is very long we need to normalize to other side of sky
+				if(Math.abs(posa.x-posb.x) < this.tall/5 && Math.abs(posa.y-posb.y) < this.tall/5){
+					this.ctx.moveTo(posa.x,posa.y);
+					this.ctx.lineTo(posb.x,posb.y);
+				}
+			}
+			posa = posb;
+		}
+
+	}
+	this.ctx.stroke();
+	//this.ctx.fill();
 	return this;
 }
 VirtualSky.prototype.drawMeteorShowers = function(colour){
@@ -1829,6 +1875,7 @@ VirtualSky.prototype.toggleGridlinesEquatorial = function(){ this.grid.eq = !thi
 VirtualSky.prototype.toggleGridlinesGalactic = function(){ this.grid.gal = !this.grid.gal; this.draw(); return this; }
 VirtualSky.prototype.toggleEcliptic = function(){ this.ecliptic = !this.ecliptic; this.draw(); return this; }
 VirtualSky.prototype.toggleGround = function(){ this.ground = !this.ground; this.draw(); return this; }
+VirtualSky.prototype.toggleGalaxy = function(){ this.showgalaxy = !this.showgalaxy; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetHints = function(){ this.showplanets = !this.showplanets; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetLabels = function(){ this.showplanetlabels = !this.showplanetlabels; this.draw(); return this; }
 VirtualSky.prototype.toggleOrbits = function(){ this.showorbits = !this.showorbits; this.draw(); return this; }
