@@ -163,6 +163,7 @@ function VirtualSky(input){
 	// Projections
 	this.projections = {
 		'polar': {
+			title: 'Polar projection',
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				var r = radius*(90-el)/90;
@@ -171,6 +172,7 @@ function VirtualSky(input){
 			polartype: true
 		},
 		'fisheye':{
+			title: 'Fisheye polar projection',
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				// R = 2 * f * sin(theta/2)
@@ -181,6 +183,7 @@ function VirtualSky(input){
 			polartype:true
 		},
 		'ortho':{
+			title: 'Orthographic polar projection',
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				var r = radius*Math.cos(el*vs.d2r);
@@ -189,6 +192,7 @@ function VirtualSky(input){
 			polartype:true
 		},
 		'stereo': {
+			title: 'Stereographic projection',
 			azel2xy: function(az,el,w,h,vs){
 				var sinel1 = Math.sin(0);
 				var cosel1 = Math.cos(0);
@@ -201,6 +205,7 @@ function VirtualSky(input){
 			}
 		},
 		'lambert':{
+			title: 'Lambert projection',
 			azel2xy: function(az,el,w,h,vs){
 				var cosaz = Math.cos((az-180)*vs.d2r);
 				var sinaz = Math.sin((az-180)*vs.d2r);
@@ -211,6 +216,7 @@ function VirtualSky(input){
 			}
 		},
 		'equirectangular':{
+			title: 'Equirectangular projection',
 			azel2xy: function(az,el,w,h){
 				az = (az+360)%360;
 				return {x:(((az-180)/90)*h + w/2),y:(h-(el/90)*h)};
@@ -218,6 +224,7 @@ function VirtualSky(input){
 			maxb: 90
 		},
 		'mollweide':{
+			title: 'Mollweide projection',
 			azel2xy: function(az,el,w,h){
 				return {x:0,y:0};
 			},
@@ -262,7 +269,7 @@ function VirtualSky(input){
 				c.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
 				c.closePath();
 				if(!this.transparent){
-					c.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
+					c.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					c.fill();
 				}
 			},
@@ -270,6 +277,7 @@ function VirtualSky(input){
 			fullsky:true
 		},
 		'planechart':{
+			title: 'Planechart projection',
 			azel2xy: function(az,el,w,h){
 				return {x:0,y:0};
 			},
@@ -845,6 +853,14 @@ VirtualSky.prototype.selectProjection = function(proj){
 		this.projection.id = proj;
 		this.fullsky = (typeof this.projection.fullsky=="boolean") ? this.projection.fullsky : false;
 		this.polartype = (typeof this.projection.polartype=="boolean") ? this.projection.polartype : false;
+		// Draw update label
+		if(this.container){
+			var w = this.container.width();
+			var h = this.container.height();
+			if($('.'+this.id+'_projection').length > 0) $('.'+this.id+'_projection').remove();
+			this.container.append('<div class="'+this.id+'_projection">'+this.projections[proj].title+'</div>');
+			$('.'+this.id+'_projection').on('mouseover',{me:this},function(e){ e.data.me.mouseover = true; }).css({position:'absolute',padding:0,width:w+'px',top:0,left:0,'text-align':'center','line-height':h+'px',zIndex:20,fontSize:'1.5em',display:'block',overflow:'hidden',backgroundColor:'transparent',color:this.col.txt}).delay(500).fadeOut(1000,function(){ $(this).remove(); });
+		}
 	}
 }
 VirtualSky.prototype.cycleProjection = function(){
