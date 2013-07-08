@@ -170,20 +170,20 @@ function VirtualSky(input){
 			},
 			polartype: true
 		},
-		'ortho':{
-			azel2xy: function(az,el,w,h,vs){
-				var radius = h/2;
-				var r = radius*Math.cos(el*vs.d2r);
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
-			},
-			polartype:true
-		},
 		'fisheye':{
 			azel2xy: function(az,el,w,h,vs){
 				var radius = h/2;
 				// R = 2 * f * sin(theta/2)
 				var r = radius*Math.sin((90-el)*vs.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
 				//var r = radius*(90-el)/95;	// the field of view is bigger than 180 degrees
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+			},
+			polartype:true
+		},
+		'ortho':{
+			azel2xy: function(az,el,w,h,vs){
+				var radius = h/2;
+				var r = radius*Math.cos(el*vs.d2r);
 				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
 			},
 			polartype:true
