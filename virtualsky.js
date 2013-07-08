@@ -42,6 +42,7 @@
 		showplanets (true) - show/hide the planets
 		showplanetlabels (true) - show/hide the planet labels
 		showorbits (false) - show/hide the orbits of the planets
+		showgalaxy (false) - show/hide an outline of the plane of the Milky Way
 		showdate (true) - show/hide the date and time
 		showposition (true) - show/hide the latitude/longitude
 		ground (false) - show/hide the local ground (for full sky projections)
@@ -488,6 +489,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.showplanets,b)) this.showplanets = d.showplanets;
 	if(is(d.showplanetlabels,b)) this.showplanetlabels = d.showplanetlabels;
 	if(is(d.showorbits,b)) this.showorbits = d.showorbits;
+	if(is(d.showgalaxy,b)) this.showgalaxy = d.showgalaxy;
 	if(is(d.showdate,b)) this.showdate = d.showdate;
 	if(is(d.showposition,b)) this.showposition = d.showposition;
 	if(is(d.keyboard,b)) this.keyboard = d.keyboard;
