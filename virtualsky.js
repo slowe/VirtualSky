@@ -366,6 +366,7 @@ function VirtualSky(input){
 		"togglesol": "toggle planets/Sun/Moon",
 		"togglesollabels": "toggle planet/Sun/Moon labels",
 		"toggleorbits": "toggle planet orbits",
+		"toggleprojection":"change map projection",
 		"power": "Powered by LCOGT"
 	},{
 		"code" : "es",
@@ -749,6 +750,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('g',function(){ this.toggleGround(); });
 	this.registerKey('i',function(){ this.toggleNegative(); });
 	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'cardinalchange');
+	this.registerKey('h',function(){ this.cycleProjection(); },'toggleprojection');
 	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
 	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
@@ -757,7 +759,6 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('=',function(){ this.setClock(86400); });
 	this.registerKey('[',function(){ this.setClock(-86400*7); });
 	this.registerKey(']',function(){ this.setClock(86400*7); });
-	this.registerKey('h',function(){ this.cycleProjection(); });
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
 	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
