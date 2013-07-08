@@ -169,6 +169,24 @@ function VirtualSky(input){
 			},
 			polartype: true
 		},
+		'ortho':{
+			azel2xy: function(az,el,w,h,vs){
+				var radius = h/2;
+				var r = radius*Math.cos(el*vs.d2r);
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+			},
+			polartype:true
+		},
+		'fisheye':{
+			azel2xy: function(az,el,w,h,vs){
+				var radius = h/2;
+				// R = 2 * f * sin(theta/2)
+				var r = radius*Math.sin((90-el)*vs.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
+				//var r = radius*(90-el)/95;	// the field of view is bigger than 180 degrees
+				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+			},
+			polartype:true
+		},
 		'stereo': {
 			azel2xy: function(az,el,w,h,vs){
 				var sinel1 = Math.sin(0);
@@ -190,24 +208,6 @@ function VirtualSky(input){
 				var k = Math.sqrt(2/(1+cosel*cosaz));
 				return {x:(w/2+0.6*h*k*cosel*sinaz),y:(h-0.6*h*k*(sinel))};
 			}
-		},
-		'ortho':{
-			azel2xy: function(az,el,w,h,vs){
-				var radius = h/2;
-				var r = radius*Math.cos(el*vs.d2r);
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
-			},
-			polartype:true
-		},
-		'fisheye':{
-			azel2xy: function(az,el,w,h,vs){
-				var radius = h/2;
-				// R = 2 * f * sin(theta/2)
-				var r = radius*Math.sin((90-el)*vs.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
-				//var r = radius*(90-el)/95;	// the field of view is bigger than 180 degrees
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
-			},
-			polartype:true
 		},
 		'equirectangular':{
 			azel2xy: function(az,el,w,h){
@@ -304,20 +304,13 @@ function VirtualSky(input){
 	if(idx >= 0) this.dir = this.dir.substring(0,idx+1);
 	else this.dir = "";
 
-	// Data for faint stars - 25 kB
-	this.starsdeep = this.dir+"stars.json";
-
-	// Data for constellation lines - 12 kB
-	this.lines = this.dir+"lines_latin.json";
-
-	// Data for constellation boundaries - kB
-	this.boundaries = this.dir+"boundaries.json";
-
-	// Load in the planet data from separate json file
-	this.planets = this.dir+"planets.json";
-
-	// Load in the planet data from separate json file
-	this.showers = this.dir+"showers.json";
+	this.file = {
+		stars: this.dir+"stars.json",	// Data for faint stars - 25 kB
+		lines: this.dir+"lines_latin.json",	// Data for constellation lines - 12 kB
+		boundaries: this.dir+"boundaries.json",	// Data for constellation boundaries - 20 kB
+		planets: this.dir+"planets.json",	// Data for planets - 57kB
+		showers: this.dir+"showers.json"	// Data for meteor showers - 4 kB
+	}
 
 	this.hipparcos = {};
 	this.az_step = 0;
@@ -414,7 +407,7 @@ function VirtualSky(input){
 
 	// Overwrite with input values
 	this.init(input);
-	
+
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
 
 	if((this.polartype || this.projection.altlabeltext) && !this.color) this.colours.normal.txt = "rgb(100,100,100)";
@@ -500,9 +493,12 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.base,s)) this.base = d.base;
-	if(is(d.planets,s) || is(d.planets,o)) this.planets = d.planets;
-	if(is(d.lines,s) || is(d.lines,o)) this.lines = d.lines;
-	if(is(d.boundaries,s) || is(d.boundaries,o)) this.boundaries = d.boundaries;
+	if(is(d.planets,s)) this.file.planets = d.planets;
+	if(is(d.planets,o)) this.planets = d.planets;
+	if(is(d.lines,s)) this.file.lines = d.lines;
+	if(is(d.lines,o)) this.lines = d.lines;
+	if(is(d.boundaries,s)) this.file.boundaries = d.boundaries;
+	if(is(d.boundaries,o)) this.boundaries = d.boundaries;
 	if(is(d.width,n)) this.wide = d.width;
 	if(is(d.height,n)) this.tall = d.height;
 	if(is(d.live,b)) this.islive = d.live;
@@ -584,25 +580,26 @@ VirtualSky.prototype.setWH = function(w,h){
 VirtualSky.prototype.hide = function(){ this.container.hide(); return this; }
 VirtualSky.prototype.show = function(){ this.container.show(); return this; }
 VirtualSky.prototype.toggle = function(){ this.container.toggle(); return this; }
-VirtualSky.prototype.loadJSON = function(file,callback){
+VirtualSky.prototype.loadJSON = function(file,callback,complete){
 	if(typeof file!=="string") return this;
-	$.ajax({ dataType: "json", jsonp: 'onJSONPLoad', url: this.base+file, context: this, success: callback });
+	if(typeof complete!=="function") complete = function(){};
+	$.ajax({ dataType: "json", jsonp: 'onJSONPLoad', url: this.base+file, context: this, success: callback, complete: complete });
 	return this;
 }
-VirtualSky.prototype.loadPlanets = function(file){
-	return this.loadJSON(file,function(data){ this.planets = data.planets; this.draw(); });
+VirtualSky.prototype.loadPlanets = function(file,fn){
+	return this.loadJSON(file,function(data){ this.planets = data.planets; this.draw(); },fn);
 }
-VirtualSky.prototype.loadLines = function(file){
-	return this.loadJSON(file,function(data){ this.lines = data.lines; this.draw(); });
+VirtualSky.prototype.loadLines = function(file,fn){
+	return this.loadJSON(file,function(data){ this.lines = data.lines; this.draw(); },fn);
 }
-VirtualSky.prototype.loadBoundaries = function(file){
-	return this.loadJSON(file,function(data){ this.boundaries = data.boundaries; this.draw(); });
+VirtualSky.prototype.loadBoundaries = function(file,fn){
+	return this.loadJSON(file,function(data){ this.boundaries = data.boundaries; this.draw(); },fn);
 }
-VirtualSky.prototype.loadMeteorShowers = function(file){
-	return this.loadJSON(file,function(data){ this.showers = data.showers; this.draw(); });
+VirtualSky.prototype.loadMeteorShowers = function(file,fn){
+	return this.loadJSON(file,function(data){ this.showers = data.showers; this.draw(); },fn);
 }
-VirtualSky.prototype.loadDeepStars = function(file){
-	return this.loadJSON(file,function(data){ this.stars = this.stars.concat(data.stars); this.draw(); });
+VirtualSky.prototype.loadDeepStars = function(file,fn){
+	return this.loadJSON(file,function(data){ this.starsdeep = true; this.stars = this.stars.concat(data.stars); this.draw(); },fn);
 }
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
@@ -618,19 +615,19 @@ VirtualSky.prototype.createSky = function(){
 	$(window).resize({me:this},function(e){ e.data.me.resize(); });
 
 	// Get the planet data
-	if(typeof this.planets==="string") this.loadPlanets(this.planets);
+	if(!this.planets) this.loadPlanets(this.file.planets);
 
 	// Get the constellation line data
-	if(typeof this.lines==="string") this.loadLines(this.lines);
+	if(!this.lines) this.loadLines(this.file.lines);
 	
 	// Get the constellation line data
-	if(typeof this.boundaries==="string") this.loadBoundaries(this.boundaries);
+	if(!this.boundaries) this.loadBoundaries(this.file.boundaries);
 	
 	// Get the faint star data
-	if(typeof this.starsdeep==="string") this.loadDeepStars(this.starsdeep);
+	if(!this.starsdeep) this.loadDeepStars(this.file.stars);
 
 	// Get the meteor showers
-	if(typeof this.showers==="string") this.loadMeteorShowers(this.showers);
+	if(!this.showers) this.loadMeteorShowers(this.file.showers);
 
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
@@ -740,6 +737,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('=',function(){ this.setClock(86400); });
 	this.registerKey('[',function(){ this.setClock(-86400*7); });
 	this.registerKey(']',function(){ this.setClock(86400*7); });
+	this.registerKey('h',function(){ this.cycleProjection(); });
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
 	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
@@ -836,6 +834,23 @@ VirtualSky.prototype.selectProjection = function(proj){
 		this.fullsky = (typeof this.projection.fullsky=="boolean") ? this.projection.fullsky : false;
 		this.polartype = (typeof this.projection.polartype=="boolean") ? this.projection.polartype : false;
 	}
+}
+VirtualSky.prototype.cycleProjection = function(){
+	var usenext = false;
+	var proj = this.projection.id;
+	var i = 0;
+	var firstkey;
+	for(var key in this.projections){
+		if(i==0) firstkey = key;
+		if(usenext){
+			proj = key;
+			break;
+		}
+		if(key == this.projection.id) usenext = true;
+		i++;
+	}
+	if(proj == this.projection.id) proj = firstkey;
+	this.draw(proj);
 }
 VirtualSky.prototype.isVisible = function(el){
 	if(!this.fullsky) return (el > 0);
@@ -1207,6 +1222,7 @@ VirtualSky.prototype.draw = function(proj){
 	}
 	return this;
 } 
+
 VirtualSky.prototype.lightbox = function(lb){
 	if(!lb.length) return this;
 	lb.css({'z-index': 100,'position': 'absolute'});
@@ -1407,7 +1423,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	this.ctx.lineWidth = 0.75
 	var fontsize = this.fontsize();
 	this.setFont();
-	if(typeof this.lines==="string") return this;
+	if(typeof this.lines!=="object") return this;
 	var pos, posa, posb;
 	var a,b,idx;
 	for(var c = 0; c < this.lines.length; c++){
@@ -1470,7 +1486,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75
-	if(typeof this.lines==="string") return this;
+	if(typeof this.boundaries!=="object") return this;
 	var posa, posb;
 	var ra,dc,dra,ddc,b3;
 	var n = 5;
