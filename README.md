@@ -5,8 +5,8 @@ A browser-based planetarium that can be [customized and embedded in web pages](h
 
 Usage
 -----
+    <html>
     <head>
-
     <!--[if lt IE 9]><script src="excanvas.js" type="text/javascript"></script><![endif]-->
     <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
     <script src="virtualsky.js" type="text/javascript"></script>
@@ -24,6 +24,7 @@ Usage
         <div id="starmap" style="width:944x;height:400px;"></div>
     
     </body>
+    </html>
 
 Options
 --------
