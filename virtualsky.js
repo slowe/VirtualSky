@@ -1369,6 +1369,7 @@ VirtualSky.prototype.drawPlanets = function(){
 
 		if((this.showplanets || this.showplanetlabels) && this.isVisible(pos.el) && mag < this.magnitude){
 			var d = 0;
+			var z;
 			if(typeof mag!="undefined"){
 				d = 0.8*Math.max(3-mag/2, 0.5);
 				if(this.gradient && !this.fullsky){
@@ -1518,7 +1519,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75;
 	if(typeof this.boundaries!=="object") return this;
-	var posa, posb;
+	var posa, posb, a, b;
 	var ra,dc,dra,ddc,b3;
 	var n = 5;
 	if(this.constellation.boundaries){
