@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Virtual Sky - unit tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+	<link rel="stylesheet" href="extra/qunit-1.12.0.css">
+	<script src="extra/qunit-1.12.0.js"></script>
+	<!--
+		Virtual Sky <canvas> application
+		(c) 2010-2012 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+	-->
+	<style>
+	body {
+		font-size: 14px;
+		font-family: Helvetica, sans-serif;
+		color: black;
+		margin: 0px;
+		padding: 0px;
+		font-size: 1em;
+	}
+	#starmapper { height: 400px; width:500px; position: relative; }
+	#virtualskyinfobox{
+		font-size: 12px;
+		display:none;
+		background-color:rgba(200,200,200,1);
+		color:black;
+		padding:5px;
+		max-width:150px;
+		border-radius:0.5em;
+		-moz-border-radius: 0.5em;
+		-webkit-border-radius: 0.5em;
+		box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+	}
+	.virtualskyinfocredit{
+		font-size:0.5em;
+		float:left;
+		position:absolute;
+		padding:5px;
+		color: white;
+	}
+	#virtualskyinfobox img { width: 128px; height: 128px; }
+	</style>
+	<!-- IE seems to get very confused if it loads Javascript from within a Javascript when in an iframe. We'll have to load it here -->
+	<!--[if IE]><script src="../excanvas.min.js"></script><![endif]-->
+	<script src="jquery-1.7.1.min.js"></script>
+	<script src="virtualsky.js" type="text/javascript"></script>
+	<script>
+		window.onload = function(){
+
+			function assert_equal(actual,expected,message){
+				equal(actual,expected,message);
+			}
+			function assert_almost_equal(actual,expected,precision,message){
+				if(typeof actual!=="number" || typeof expected!=="number"){
+					ok(false,"One or both of the inputs aren't numbers");
+					return;
+				}
+				if(typeof precision==="string"){
+					message = precision;
+					precision = 9;	// default
+				}
+				equal(parseFloat(actual.toFixed(precision)),parseFloat(expected.toFixed(precision)),message);
+			}
+
+			test("Initiation",function(){
+
+				$('#starmapper').remove();
+
+				// Try setting up a planetarium with no ID provided
+				var sky = $.virtualsky({});
+				assert_equal(sky.id,"","No ID should be set if none is provided");
+
+				var match = 0;
+				$('div').each(function(){
+					var id = $(this).attr('id');
+					if(id && id.indexOf("qunit") < 0){
+						match++;
+						console.log('Found '+id)
+					}
+				});
+				assert_equal(match,0,"No DOM element should be created as we don't have a name and don't want to clash");
+
+				// We will add a DOM element then assign it
+				// Remove the existing DOM element
+				$('#starmapper').remove();
+				$('body').append('<div id="starmapper"><\/div>');
+				
+				sky = $.virtualsky({id:'starmapper',projection:'stereo'});
+				assert_equal(sky.id,"starmapper","The ID should be set to the current ID");
+				assert_equal($('#starmapper').length,1,"We should have a DOM element");
+				assert_equal(sky.projection.id,"stereo","Projection should be stereo");
+
+				var w = 400;
+				var mag = 6;
+				sky = $.virtualsky({id:'starmapper',projection:'blah',width:w,magnitude:mag});
+				assert_equal(sky.id,"starmapper","The ID should be set to that created");
+				assert_equal($('#starmapper').length,1,"Was a DOM element created?");
+				assert_equal(sky.projection.id,"polar","Projection should default to polar if unrecognized");
+				assert_equal($('#starmapper').outerWidth(),w,"Width should be set from input variable");
+				assert_equal(sky.magnitude,mag,"The magnitude limit should be "+mag);
+
+			});
+			
+			test("Keyboard input",function(){
+
+				function keypress(key,sky){
+					var mouse = sky.mouseover;
+					sky.mouseover = true;
+					if(typeof key=="string") key = key.charCodeAt(0);
+					sky.keypress(key);
+					sky.mouseover = mouse;
+				}
+
+				var sky = $.virtualsky({id:'starmapper'});
+				var mag = sky.magnitude;
+
+				keypress(38,sky);
+				assert_equal(sky.magnitude,mag+0.2,"The magnitude limit should be "+(mag+0.2));
+				keypress(40,sky);
+				assert_equal(sky.magnitude,mag,"The magnitude limit should be "+(mag));
+				keypress(63,sky);
+				assert_equal($('.virtualskyhelp').length,1,"The help is visible");
+				ok($('.virtualskyhelp li').length > 1,"The help contains a list");
+				keypress(63,sky);
+
+				assert_equal(sky.spin,0,"Not moving initially");
+				keypress('l',sky);
+				assert_equal(sky.spin,0.1,"Slow");
+				keypress('k',sky);
+				assert_equal(sky.spin,0,"Stationary again");
+
+				var clock = new Date();
+				keypress('8',sky);
+				ok(sky.clock-clock < 2,"Time is now");
+				
+				
+			});
+
+			test("Times and Locations",function(){
+
+				var sky = $.virtualsky({id:'starmapper'});
+
+				var clock = new Date('October 25, 1985 01:21:00');
+				sky.setClock('October 25, 1985 01:21:00');
+				assert_equal(sky.clock-clock,0,"Check clock can be set with a string")
+
+				clock = new Date('July 5, 2013 18:00:00 UTC');
+				var JD = sky.getJD(clock);
+				assert_equal(JD,2456479.25,"Julian Date");
+
+				sky.setClock('now');
+
+				sky.setGeo("53.5,-2.3");
+				assert_equal(sky.latitude,53.5,"Latitude should be set")
+				assert_equal(sky.longitude,-2.3,"Longitude should be set")
+
+			});
+
+			test("Custom input",function(){
+
+				var sky = $.virtualsky({id:'starmapper',constellationboundaries: true,
+					boundaries: [
+						["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+						["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+					]
+				});
+				assert_equal(sky.boundaries.length,2,"Provided boundaries are used")
+
+
+			});
+
+			test("Languages",function(){
+				var sky = $.virtualsky({id:'starmapper',lang:'en'});
+				assert_equal(sky.getPhrase("sun"),"Sun","Check English Sun exists");
+				sky.changeLanguage('es');
+				assert_equal(sky.lang.code,"es","Change language to Spanish");
+				assert_equal(sky.getPhrase("sun"),"Sol","Check Spanish Sol exists");
+
+			});
+
+			test("JSON callbacks",function(){
+				
+				var sky = $.virtualsky({id:'starmapper'});
+
+				// We need to stop qunit until we get the ajax callback
+				stop();
+				sky.loadDeepStars(sky.file.stars,function(e){
+					ok((e.statusText=="success" ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.loadBoundaries(sky.file.boundaries,function(e){
+					ok((e.statusText=="success" ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.loadLines(sky.file.lines,function(e){
+					ok((e.statusText=="success" ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.loadPlanets(sky.file.planets,function(e){
+					ok((e.statusText=="success" ? true : false),"AJAX request for planets ("+this.file.planets+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.loadPlanets(sky.file.showers,function(e){
+					ok((e.statusText=="success" ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					start();	// Start qunit again
+				});
+
+			});
+
+/*
+		planets - either an object containing an array of planets or a JSON file
+		background ('rgba(0,0,0,0)') - the background colour
+		transparent (false) - make the sky background transparent
+		color ('rgb(255,255,255)') - the text colour
+		az (180) - an azimuthal offset with 0 = north and 90 = east
+		negative (false) - invert the default colours i.e. to black on white
+		ecliptic (false) - show the Ecliptic
+		gradient (true) - reduce the brightness of stars near the horizon
+		cardinalpoints (true) - show/hide the N/E/S/W labels
+		constellations (false) - show/hide the constellation lines
+		constellationlabels (false) - show/hide the constellation labels
+		constellationboundaries (false) - show/hide the constellation boundaries (IAU)
+		showstars (true) - show/hide the stars
+		showstarlabels (false) - show/hide the star labels for brightest stars
+		showplanets (true) - show/hide the planets
+		showplanetlabels (true) - show/hide the planet labels
+		showorbits (false) - show/hide the orbits of the planets
+		showdate (true) - show/hide the date and time
+		showposition (true) - show/hide the latitude/longitude
+		ground (false) - show/hide the local ground (for full sky projections)
+		keyboard (true) - allow keyboard controls
+		mouse (true) - allow mouse controls
+		gridlines_az (false) - show/hide the azimuth/elevation grid lines
+		gridlines_eq (false) - show/hide the RA/Dec grid lines
+		gridlines_gal (false) - show/hide the Galactic Coordinate grid lines
+		gridstep (30) - the size of the grid step when showing grid lines
+		live (false) - update the display in real time
+*/
+
+		};
+
+
+	</script>
+</head>
+
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+</body>
+</html>
