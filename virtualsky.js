@@ -1198,7 +1198,7 @@ VirtualSky.prototype.draw = function(proj){
 	if(this.container.find('.'+this.id+'_clock').length == 0){
 		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
 		var off = $('#'+this.idinner).position();
-		this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:txtcolour}).bind('click',{sky:this},function(e){
+		this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
 			var s = e.data.sky;
 			var id = s.id;
 			if($('#'+id+'_calendar').length == 0){
