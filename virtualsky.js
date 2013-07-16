@@ -417,7 +417,6 @@ function VirtualSky(input){
 		}
 	};
 
-
 	this.input = input;
 
 	// Overwrite with input values
@@ -425,8 +424,7 @@ function VirtualSky(input){
 
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
 
-	if((this.polartype || this.projection.altlabeltext) && !this.color) this.colours.normal.txt = "rgb(100,100,100)";
-	this.col = (this.negative) ? this.colours.negative : this.colours.normal;
+	this.updateColours();
 
 	this.changeLanguage(this.langcode);
 
@@ -856,16 +854,30 @@ VirtualSky.prototype.selectProjection = function(proj){
 		this.projection.id = proj;
 		this.fullsky = (typeof this.projection.fullsky=="boolean") ? this.projection.fullsky : false;
 		this.polartype = (typeof this.projection.polartype=="boolean") ? this.projection.polartype : false;
+
+		this.updateColours();
+
 		// Draw update label
 		if(this.container){
 			var w = this.container.width();
 			var h = this.container.height();
 			if($('.'+this.id+'_projection').length > 0) $('.'+this.id+'_projection').remove();
 			this.container.append('<div class="'+this.id+'_projection">'+this.projections[proj].title+'</div>');
-			$('.'+this.id+'_projection').on('mouseover',{me:this},function(e){ e.data.me.mouseover = true; }).css({position:'absolute',padding:0,width:w+'px',top:0,left:0,'text-align':'center','line-height':h+'px',zIndex:20,fontSize:'1.5em',display:'block',overflow:'hidden',backgroundColor:'transparent',color:this.col.txt}).delay(500).fadeOut(1000,function(){ $(this).remove(); });
+			$('.'+this.id+'_projection').on('mouseover',{me:this},function(e){ e.data.me.mouseover = true; }).css({position:'absolute',padding:0,width:w+'px',top:0,left:0,'text-align':'center','line-height':h+'px',zIndex:20,fontSize:'1.5em',display:'block',overflow:'hidden',backgroundColor:'transparent',color:(this.negative ? this.col.black : this.col.white)}).delay(500).fadeOut(1000,function(){ $(this).remove(); });
 		}
 	}
 }
+// Update the sky colours
+VirtualSky.prototype.updateColours = function(){
+	// We need to make a copy of the correct colour palette otherwise it'll overwrite it
+	this.col = jQuery.extend(true, {}, ((this.negative) ? this.colours.negative : this.colours.normal));
+	if(this.color==""){
+		if((this.polartype || this.projection.altlabeltext)) this.col.txt = this.col.grey;
+	}else{
+		this.col.txt = this.color;
+	}
+}
+// Cycle through the map projections
 VirtualSky.prototype.cycleProjection = function(){
 	var usenext = false;
 	var proj = this.projection.id;
