@@ -376,6 +376,14 @@ function VirtualSky(input){
 		"subtractday": "subtract 1 day",
 		"addweek": "add 1 week",
 		"subtractweek": "subtract 1 week",
+		"azleft": "rotate left",
+		"azright": "rotate right",
+		"magup": "increase magnitude limit",
+		"magdown": "decrease magnitude limit",
+		"left" : "left",
+		"right" : "right",
+		"up": "up",
+		"down": "down",
 		"power": "Powered by LCOGT"
 	},{
 		"code" : "es",
@@ -767,10 +775,10 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('=',function(){ this.setClock(86400); },'addday');
 	this.registerKey('[',function(){ this.setClock(-86400*7); },'subtractweek');
 	this.registerKey(']',function(){ this.setClock(86400*7); },'addweek');
-	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
-	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
-	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
-	this.registerKey(40,function(){ this.magnitude -= 0.2; this.draw(); }); // down
+	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); },'azleft'); // left
+	this.registerKey(39,function(){ this.az_off += 2; this.draw(); },'azright'); // right
+	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); },'magup'); // up
+	this.registerKey(40,function(){ this.magnitude -= 0.2; this.draw(); },'magdown'); // down
 	this.registerKey(63,function(){ this.toggleHelp(); });
 
 	this.draw();
@@ -780,7 +788,7 @@ VirtualSky.prototype.toggleHelp = function(){
 	else{
 		// Build the list of keyboard options
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="width:1em;display:inline-block;text-align:center;">'+String.fromCharCode(this.keys[i].charCode)+'</strong> - <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="min-width:1em;display:inline-block;text-align:center;">'+this.keys[i].str+'</strong> - <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
 		$('<div class="virtualsky_help"><div class="virtualskydismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
 
 		var hlp = $('.virtualsky_help');
@@ -804,12 +812,29 @@ VirtualSky.prototype.toggleHelp = function(){
 VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 	if(typeof fn!="function") return this;
 	if(typeof charCode!="object") charCode = [charCode];
-	var aok, ch, c, i;
+	var aok, ch, c, i, alt, str;
 	for(c = 0 ; c < charCode.length ; c++){
-		ch = (typeof charCode[c]=="string") ? charCode[c].charCodeAt(0) : charCode[c];
+		alt = false;
+		if(typeof charCode[c]=="string"){
+			if(charCode[c].indexOf('alt')==0){
+				str = charCode[c];
+				alt = true;
+				charCode[c] = charCode[c].substr(4);
+			}else{
+				str = charCode[c];
+			}
+			ch = charCode[c].charCodeAt(0);
+		}else{
+			ch = charCode[c];
+			if(ch==37) str = this.getPhrase("left");
+			else if(ch==38) str = this.getPhrase("up");
+			else if(ch==39) str = this.getPhrase("right");
+			else if(ch==40) str = this.getPhrase("down");
+			else str = String.fromCharCode(ch);
+		}
 		aok = true;
-		for(i = 0 ; i < this.keys.length ; i++){ if(this.keys.charCode == ch) aok = false; }
-		if(aok) this.keys.push({'charCode':ch,'char':String.fromCharCode(ch),'fn':fn,'txt':txt});
+		for(i = 0 ; i < this.keys.length ; i++){ if(this.keys.charCode == ch && this.keys.altKey == alt) aok = false; }
+		if(aok) this.keys.push({'str':str,'charCode':ch,'char':String.fromCharCode(ch),'fn':fn,'txt':txt,'altKey':alt});
 	}
 	return this;
 }
@@ -817,7 +842,7 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 VirtualSky.prototype.keypress = function(charCode,event){
 	if(this.mouseover && this.keyboard){
 		for(var i = 0 ; i < this.keys.length ; i++){
-			if(this.keys[i].charCode == charCode){
+			if(this.keys[i].charCode == charCode && event.altKey == this.keys[i].altKey){
 				this.keys[i].fn.call(this,{event:event});
 				break;
 			}
