@@ -357,6 +357,7 @@ function VirtualSky(input){
 		"reset": "reset time",
 		"togglecardinal": "toggle cardinal points",
 		"togglestars": "toggle stars",
+		"togglestarlabels": "toggle star labels",
 		"toggleneg": "invert colours",
 		"toggleatmos": "toggle atmosphere",
 		"toggleground": "toggle ground",
@@ -754,6 +755,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('g',function(){ this.toggleGround(); },'toggleground');
 	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'togglecardinal');
 	this.registerKey('s',function(){ this.toggleStars(); },'togglestars');
+	this.registerKey('S',function(){ this.toggleStarLabels(); },'togglestarlabels');
 	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
 	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
 	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
@@ -1950,6 +1952,7 @@ VirtualSky.prototype.setClock = function(seconds){
 }
 VirtualSky.prototype.toggleAtmosphere = function(){ this.gradient = !this.gradient; this.draw(); return this; }
 VirtualSky.prototype.toggleStars = function(){ this.showstars = !this.showstars; this.draw(); return this; }
+VirtualSky.prototype.toggleStarLabels = function(){ this.showstarlabels = !this.showstarlabels; this.draw(); return this; }
 VirtualSky.prototype.toggleNegative = function(){ this.negative = !this.negative; this.col = this.colours[(this.negative ? "negative" : "normal")]; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationLines = function(){ this.constellation.lines = !this.constellation.lines; this.draw(); return this; }
 VirtualSky.prototype.toggleConstellationBoundaries = function(){ this.constellation.boundaries = !this.constellation.boundaries; this.draw(); return this; }
