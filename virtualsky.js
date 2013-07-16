@@ -790,7 +790,7 @@ VirtualSky.prototype.toggleHelp = function(){
 	else{
 		// Build the list of keyboard options
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="min-width:1em;display:inline-block;text-align:center;">'+this.keys[i].str+'</strong> - <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="min-width:1em;display:inline-block;text-align:center;">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
 		$('<div class="virtualsky_help"><div class="virtualsky_dismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
 
 		var hlp = $('.virtualsky_help');
