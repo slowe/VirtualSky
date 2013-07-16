@@ -1038,20 +1038,25 @@ VirtualSky.prototype.ecliptic2radec = function(l,b,JD){
 	var ce = Math.cos(e);
 	ra = Math.atan2((sl*ce - tb*se),(cl));
 	dec = Math.asin(sb*ce+cb*se*sl);
+	// Make sure RA is positive
+	if(ra < 0) ra += Math.PI+Math.PI;
 	return { ra:ra/this.d2r, dec:dec/this.d2r };
 }
 // Returns [x, y (,elevation)]
 VirtualSky.prototype.ecliptic2xy = function(l,b,LST){
 	if(typeof LST=="undefined") LST = this.times.LST;
-	if(this.fullsky){
-		var pos = this.ecliptic2radec(l,b);
-		return this.radec2xy(pos.ra,pos.dec);
-	}else{
-		var pos = this.ecliptic2azel(l,b,LST);
-		var el = pos.el;
-		pos = this.azel2xy(pos.az-this.az_off,pos.el,this.wide,this.tall);
-		pos.el = el;
-		return pos;
+	if(typeof this.projection.ecliptic2xy==="function") return this.projection.ecliptic2xy.call(this,l,b,LST);
+	else{
+		if(this.fullsky){
+			var pos = this.ecliptic2radec(l,b);
+			return this.radec2xy(pos.ra,pos.dec);
+		}else{
+			var pos = this.ecliptic2azel(l,b,LST);
+			var el = pos.el;
+			pos = this.azel2xy(pos.az-this.az_off,pos.el,this.wide,this.tall);
+			pos.el = el;
+			return pos;
+		}
 	}
 	return 0;
 }
@@ -1720,7 +1725,8 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 						if(b == 0) c.moveTo(x,y);
 						else c.lineTo(x,y);
 					}else{
-						if(!moved || Math.abs(oldx-x) > this.wide/2){
+						// If the line is long we assume we've switched sides of the sky so don't join the dots
+						if(!moved || Math.abs(oldx-x) > this.tall/2){
 							c.moveTo(x,y);
 							moved = true;
 						}else c.lineTo(x,y);
