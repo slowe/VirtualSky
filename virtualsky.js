@@ -355,11 +355,15 @@ function VirtualSky(input){
 		"stop": "stop time",
 		"slow": "slow down",
 		"reset": "reset time",
-		"cardinalchange": "toggle cardinal points",
+		"togglecardinal": "toggle cardinal points",
+		"togglestars": "toggle stars",
+		"toggleneg": "invert colours",
 		"toggleatmos": "toggle atmosphere",
+		"toggleground": "toggle ground",
 		"toggleaz": "toggle Az/El gridlines",
 		"toggleeq": "toggle Ra/Dec gridlines",
 		"togglegal": "toggle Galactic gridlines",
+		"togglegalaxy": "toggle Galactic plane",
 		"toggleec": "toggle Ecliptic line",
 		"togglecon": "toggle constellation lines",
 		"toggleconbound": "toggle constellation boundaries",
@@ -368,6 +372,10 @@ function VirtualSky(input){
 		"togglesollabels": "toggle planet/Sun/Moon labels",
 		"toggleorbits": "toggle planet orbits",
 		"toggleprojection":"change map projection",
+		"addday": "add 1 day",
+		"subtractday": "subtract 1 day",
+		"addweek": "add 1 week",
+		"subtractweek": "subtract 1 week",
 		"power": "Powered by LCOGT"
 	},{
 		"code" : "es",
@@ -429,7 +437,7 @@ function VirtualSky(input){
 	this.changeLanguage(this.langcode);
 
 	// Define some VirtualSky styles
-	$('<style type="text/css">.virtualskyhelp { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskyhelp ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskydismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;}</style>').appendTo("head");
+	$('<style type="text/css">.virtualsky_help { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualsky_help ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualskydismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;}</style>').appendTo("head");
 
 	this.pointers = new Array();
 
@@ -735,7 +743,9 @@ VirtualSky.prototype.createSky = function(){
 	}
 
 	this.registerKey('a',function(){ this.toggleAtmosphere(); },'toggleatmos');
-	this.registerKey('s',function(){ this.toggleStars(); });
+	this.registerKey('g',function(){ this.toggleGround(); },'toggleground');
+	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'togglecardinal');
+	this.registerKey('s',function(){ this.toggleStars(); },'togglestars');
 	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
 	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
 	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
@@ -745,20 +755,18 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
 	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
 	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
-	this.registerKey('M',function(){ this.toggleGalaxy(); });
+	this.registerKey('M',function(){ this.toggleGalaxy(); },'togglegalaxy');
 	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
-	this.registerKey('g',function(){ this.toggleGround(); });
-	this.registerKey('i',function(){ this.toggleNegative(); });
-	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'cardinalchange');
+	this.registerKey('i',function(){ this.toggleNegative(); },'toggleneg');
 	this.registerKey('h',function(){ this.cycleProjection(); },'toggleprojection');
 	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
 	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
 	this.registerKey('8',function(){ this.setClock('now'); },'reset');
-	this.registerKey('-',function(){ this.setClock(-86400); });
-	this.registerKey('=',function(){ this.setClock(86400); });
-	this.registerKey('[',function(){ this.setClock(-86400*7); });
-	this.registerKey(']',function(){ this.setClock(86400*7); });
+	this.registerKey('-',function(){ this.setClock(-86400); },'subtractday');
+	this.registerKey('=',function(){ this.setClock(86400); },'addday');
+	this.registerKey('[',function(){ this.setClock(-86400*7); },'subtractweek');
+	this.registerKey(']',function(){ this.setClock(86400*7); },'addweek');
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); }); // left
 	this.registerKey(38,function(){ this.magnitude += 0.2; this.draw(); }); // up
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); }); // right
@@ -770,11 +778,26 @@ VirtualSky.prototype.createSky = function(){
 VirtualSky.prototype.toggleHelp = function(){
 	if($('.virtualskydismiss').length > 0) $('.virtualskydismiss').trigger('click');
 	else{
+		// Build the list of keyboard options
 		var o = '';
 		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="width:1em;display:inline-block;text-align:center;">'+String.fromCharCode(this.keys[i].charCode)+'</strong> - <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
-		this.lightbox($('<div class="virtualskyhelp"><div class="virtualskydismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul>'+o+'</ul></div>').appendTo(this.container));
+		$('<div class="virtualsky_help"><div class="virtualskydismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
+
+		var hlp = $('.virtualsky_help');
+		var h = hlp.outerHeight();
+
+		// Add the keyboard option list
+		hlp.find('ul').html(o);
+		// Set the maximum height for the list and add a scroll bar if necessary
+		$('.virtualsky_help ul').css({'overflow':'auto','max-height':(this.tall-h)+'px'});
+
+		// Add the events for each keyboard option
 		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) $('.virtualsky_'+this.keys[i].txt).on('click',{fn:this.keys[i].fn,me:this},function(e){ e.preventDefault(); e.data.fn.call(e.data.me); }); }
-		$('.virtualskyhelp, .virtualsky_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
+
+		// Create a lightbox
+		this.lightbox($('.virtualsky_help'));
+
+		$('.virtualsky_help, .virtualsky_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
 	}
 }
 // Register keyboard commands and associated functions
