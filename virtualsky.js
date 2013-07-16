@@ -1427,7 +1427,6 @@ VirtualSky.prototype.drawPlanets = function(){
 		}
 		var pos = this.radec2xy(ra,dec);
 
-
 		if(!this.negative) colour = this.planets[p][1];
 		if(typeof colour==="string") this.ctx.strokeStyle = colour;
 
@@ -1444,7 +1443,8 @@ VirtualSky.prototype.drawPlanets = function(){
 			if(d < 1.5) d = 1.5;
 			this.drawPlanet(pos.x,pos.y,d,colour,this.planets[p][0]);
 		}
-		if(this.showorbits && this.isVisible(pos.el) && mag < this.magnitude){
+
+		if(this.showorbits && mag < this.magnitude){
 			this.ctx.beginPath();
 			this.ctx.lineWidth = 0.5
 			this.setFont();
