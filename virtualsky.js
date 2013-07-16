@@ -840,6 +840,7 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 }
 // Work out if the keypress has a function that needs to be called.
 VirtualSky.prototype.keypress = function(charCode,event){
+	if(!event) event = { altKey: false };
 	if(this.mouseover && this.keyboard){
 		for(var i = 0 ; i < this.keys.length ; i++){
 			if(this.keys[i].charCode == charCode && event.altKey == this.keys[i].altKey){

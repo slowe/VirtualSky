@@ -121,8 +121,8 @@
 				keypress(40,sky);
 				assert_equal(sky.magnitude,mag,"The magnitude limit should be "+(mag));
 				keypress(63,sky);
-				assert_equal($('.virtualskyhelp').length,1,"The help is visible");
-				ok($('.virtualskyhelp li').length > 1,"The help contains a list");
+				assert_equal($('.virtualsky_help').length,1,"The help is visible");
+				ok($('.virtualsky_help li').length > 1,"The help contains a list");
 				keypress(63,sky);
 
 				assert_equal(sky.spin,0,"Not moving initially");
