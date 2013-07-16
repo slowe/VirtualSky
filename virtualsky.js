@@ -1724,7 +1724,7 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 		y = pos.y;
 		if(show){
 			if(isFinite(x) && isFinite(y)){
-				if(!moved || Math.abs(oldx-x) > this.wide/2){
+				if(!moved || Math.abs(oldx-x) > this.tall/2){
 					c.moveTo(x,y);
 					moved = true;
 				}else c.lineTo(x,y);
