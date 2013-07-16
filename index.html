@@ -20,7 +20,7 @@
 		list-style: none; /* Remove default numbering */
 		*list-style: decimal; /* Keep using default numbering for IE6/7 */
 	}
-	ol li:before{
+	ol li.example:before{
 		content: "Example " counter(li) ": ";
 		counter-increment: li;
 		font-size: 1.5em;
@@ -29,7 +29,7 @@
 		font-weight: bold;
 		display: block;
 	}
-	li { margin-bottom: 4em; }
+	li.example { margin-bottom: 4em; }
 	.virtualskyhelp li { margin-bottom: 0; }
 	.planetarium { max-width: 100%; height: 0;}
 	</style>
@@ -66,7 +66,7 @@
 		<p>Virtual Sky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
 
 		<ol>
-			<li>A default view with a <code>stereo</code> projection.
+			<li class="example">A default view with a <code>stereo</code> projection.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -82,7 +82,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap1" class="planetarium" style="width:100%;height:400px;"></div>
 			</li>
-			<li>A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
+			<li class="example">A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -100,7 +100,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap3" class="planetarium" style="width:500px;height:500px;"></div>
 			</li>
-			<li>A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
+			<li class="example">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
 		
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
@@ -122,7 +122,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap4" class="planetarium" style="width:500px;height:300px;"></div>
 			</li>
-			<li>A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid. The view is facing south from Hill Valley, California at 1:21 am on October 25, 1985.
+			<li class="example">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid. The view is facing south from Hill Valley, California at 1:21 am on October 25, 1985.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -143,7 +143,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap5" class="planetarium" style="width:650px;height:300px;"></div>
 			</li>
-			<li>A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
+			<li class="example">A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -160,7 +160,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap6" class="planetarium" style="width:920px;height:460px;"></div>
 			</li>
-			<li>A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
+			<li class="example">A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
