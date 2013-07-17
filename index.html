@@ -12,8 +12,30 @@
 	body {
 		font-family: 'Trebuchet MS',Tahoma,Helvetica,Verdana,sans-serif;
 		color: black;
+		margin: 0px;
+		padding: 0px;
+	}
+	.container {
+		max-width:940px;
+		margin:auto;
 		padding-top: 1.5em;
 		padding-bottom: 1.5em;
+		position: relative;
+	}
+	#forkme_banner {
+		background: url("../images/blacktocat.png") no-repeat scroll 95% 50% #0090FF;
+		border-bottom-left-radius: 2px;
+		border-bottom-right-radius: 2px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+		color: #FFFFFF;
+		display: block;
+		font-weight: 700;
+		padding: 10px 50px 10px 10px;
+		position: absolute;
+		right: 0px;
+		top: 0;
+		z-index: 10;
+		text-decoration: none;
 	}
 	ol {
 		margin: 0px;
@@ -79,7 +101,9 @@
 
 <body>
 
-	<div style="max-width:940px;margin:auto;">
+	<div class="container">
+
+		<a id="forkme_banner" href="https://github.com/slowe/graph">Fork Me on GitHub</a>
 
 		<h1>VirtualSky</h1>
 
