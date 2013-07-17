@@ -245,6 +245,49 @@ $(document).ready(function() {
 			</li>
 		</ol>
 
+		<h2>Options</h2>
+		<p>There are a range of options to try (default values in brackets):</p>
+		<ul>
+			<li><code>id</code> ('starmap') - The ID for the HTML element where you want the sky inserted</li>
+			<li><code>projection</code> ('polar') - The projection type as 'polar', 'stereo', 'lambert', 'ortho', 'equirectangular', 'mollweide', 'planechart' or 'fisheye'</li>
+			<li><code>width</code> (500) - Set the width of the sky unless you've set the width of the element</li>
+			<li><code>height</code> (250) - Set the height of the sky unless you've set the height of the element</li>
+			<li><code>planets</code> - either an object containing an array of planets or a JSON file</li>
+			<li><code>magnitude</code> (5) - the magnitude limit of displayed stars</li>
+			<li><code>longitude</code> (53.0) - the longitude of the observer</li>
+			<li><code>latitude</code> (-2.5) - the latitude of the observer</li>
+			<li><code>clock</code> (now) - a Javascript Date() object with the starting date/time</li>
+			<li><code>background</code> ('rgba(0,0,0,0)') - the background colour</li>
+			<li><code>transparent</code> (false) - make the background transparent</li>
+			<li><code>color</code> ('rgb(255,255,255)') - the text colour</li>
+			<li><code>az</code> (180) - an azimuthal offset with 0 = north and 90 = east</li>
+			<li><code>negative</code> (false) - invert the default colours i.e. to black on white</li>
+			<li><code>gradient</code> (true) - reduce the brightness of stars near the horizon</li>
+			<li><code>ground</code> (false) - show/hide the local ground (for full sky projections)</li>
+			<li><code>keyboard</code> (true) - allow keyboard controls</li>
+			<li><code>mouse</code> (true) - allow mouse controls</li>
+			<li><code>cardinalpoints</code> (true) - show/hide the N/E/S/W labels</li>
+			<li><code>constellations</code> (false) - show/hide the constellation lines</li>
+			<li><code>constellationlabels</code> (false) - show/hide the constellation labels</li>
+			<li><code>constellationboundaries</code> (false) - show/hide the constellation boundaries</li>
+			<li><code>meteorshowers</code> (false) - show/hide current meteor shower radiants</li>
+			<li><code>showplanets</code> (true) - show/hide the planets</li>
+			<li><code>showplanetlabels</code> (true) - show/hide the planet labels</li>
+			<li><code>showorbits</code> (false) - show/hide the orbits of the planets</li>
+			<li><code>showstars</code> (true) - show/hide the stars</li>
+			<li><code>showstarlabels</code> (false) - show/hide the star labels for the brightest stars</li>
+			<li><code>showdate</code> (true) - show/hide the date and time</li>
+			<li><code>showposition</code> (true) - show/hide the latitude and longitude</li>
+			<li><code>gridlines_az</code> (false) - show/hide the azimuth/elevation grid lines</li>
+			<li><code>gridlines_eq</code> (false) - show/hide the RA/Dec grid lines</li>
+			<li><code>gridlines_gal</code> (false) - show/hide the Galactic grid lines</li>
+			<li><code>gridstep</code> (30) - the size of the grid step when showing grid lines</li>
+			<li><code>ecliptic</code> (false) - show the line of the Ecliptic</li>
+			<li><code>meridian</code> (false) - show the line of the Meridian</li>
+			<li><code>showgalaxy</code> (false) - show an outline of the Milky Way</li>
+			<li><code>live</code> (false) - update the display in real time</li>
+		</ul>
+		
 		<h2>Technical details</h2>
 		<p>Virtual Sky uses the <a href="http://diveintohtml5.org/canvas.html#divingin">&lt;canvas&gt; element</a> - part of the <a href="http://whatwg.org/html5">HTML5 proposal</a> - so should work in most modern browsers such as Firefox (there are issues in Firefox 3.0 on Ubuntu), Opera, Chrome and Safari. It should also work in Internet Explorer 7.0 and 8.0 through the use of the <a href="http://code.google.com/p/explorercanvas/">excanvas.js</a> library. The <a href="https://github.com/slowe/VirtualSky">code can be found on Github</a>.</p>
 		

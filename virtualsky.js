@@ -31,7 +31,8 @@
 		color ('rgb(255,255,255)') - the text colour
 		az (180) - an azimuthal offset with 0 = north and 90 = east
 		negative (false) - invert the default colours i.e. to black on white
-		ecliptic (false) - show the Ecliptic
+		ecliptic (false) - show the Ecliptic line
+		meridian (false) - show the Meridian line
 		gradient (true) - reduce the brightness of stars near the horizon
 		cardinalpoints (true) - show/hide the N/E/S/W labels
 		constellations (false) - show/hide the constellation lines
