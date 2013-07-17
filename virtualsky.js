@@ -367,6 +367,7 @@ function VirtualSky(input){
 		"togglegal": "toggle Galactic gridlines",
 		"togglegalaxy": "toggle Galactic plane",
 		"toggleec": "toggle Ecliptic line",
+		"togglemeridian": "toggle Meridian line",
 		"togglecon": "toggle constellation lines",
 		"toggleconbound": "toggle constellation boundaries",
 		"togglenames": "toggle constellation names",
