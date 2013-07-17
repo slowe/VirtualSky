@@ -12,8 +12,9 @@
 	body {
 		font-family: 'Trebuchet MS',Tahoma,Helvetica,Verdana,sans-serif;
 		color: black;
+		padding-top: 1.5em;
+		padding-bottom: 1.5em;
 	}
-	h1 { margin-top: 2em; }
 	ol {
 		margin: 0px;
 		padding: 0px;
@@ -43,6 +44,8 @@
 
 		// Set up the prettification of code blocks
 		prettyPrint();
+
+		var vs = $.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
 
 		var planetarium = $.virtualsky({id:'starmap1'});
 		var planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
@@ -82,6 +85,11 @@
 
 		<p>VirtualSky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
 
+		<div id="starmap" class="planetarium" style="width:100%;height:300px;"></div>
+
+		<h2 id="keys">Keyboard shortcuts</h2>
+		<p>Press the "?" key (with your mouse over VirtualSky) to see the full list of keyboard controls.</p>
+		
 		<h2>Instructions for embedding</h2>
 		<p>The <a href="http://lcogt.net/virtualsky/embed/custom.html">easiest way to include VirtualSky</a> on your website is to use the custom form to create an embed link (uses an <code>&lt;iframe&gt;</code>).</p>
 		<p>Sometimes an <code>&lt;iframe&gt;</code> just doesn't give you the flexibility you need (or you might want to include it in an offline page during a public talk). In that case you could download a copy of <a href="https://github.com/slowe/VirtualSky">the source from GitHub</a> and include VirtualSky in your page using Javascript. You will need to include the following code block in the <code>&lt;head&gt;</code> of your page:</p>
@@ -110,15 +118,13 @@ $(document).ready(function() {
 
 		<p>That is a version of VirtualSky with all the default options. However, one of the great things about VirtualSky is that it can be customised. Here are some examples to give you some ideas:</p>
 		<ol>
-			<li class="example">A <code>stereo</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
+			<li class="example">A <code>stereo</code> projection set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
 	var planetarium = $.virtualsky({
 		id: 'starmap',
 		projection: 'stereo', 
-		mouse: true, 
-		keyboard: true, 
 		latitude: 34.4326, 
 		longitude: -119.86286
 	});
@@ -238,7 +244,14 @@ $(document).ready(function() {
 			<div id="starmap7" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
 		</ol>
-	</div>
+
+		<h2>Technical details</h2>
+		<p>Virtual Sky uses the <a href="http://diveintohtml5.org/canvas.html#divingin">&lt;canvas&gt; element</a> - part of the <a href="http://whatwg.org/html5">HTML5 proposal</a> - so should work in most modern browsers such as Firefox (there are issues in Firefox 3.0 on Ubuntu), Opera, Chrome and Safari. It should also work in Internet Explorer 7.0 and 8.0 through the use of the <a href="http://code.google.com/p/explorercanvas/">excanvas.js</a> library. The <a href="https://github.com/slowe/VirtualSky">code can be found on Github</a>.</p>
+		
+		<h2>Alternatives</h2>
+		<p>There are other browser-based planetaria available online e.g. <a href="http://ivan.ivanych.net/dev/starmap-canvas/">Ivan Boldyrev's Starchartjs</a>, <a href="http://canvas.staratlas.com/">Luther Huffman's StarAtlas</a> and <a href="http://tonightsky.free.fr/all-sky-map/">Thomas Boch's All Sky Map</a>. On the desktop, <a href="http://stellarium.org/">Stellarium</a> is a highly featured planetarium program that works on Windows, Mac and Linux platforms.</p>
+		
+	</div>	
 </body>
 </html>
 
