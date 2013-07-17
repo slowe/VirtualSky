@@ -1269,61 +1269,59 @@ VirtualSky.prototype.draw = function(proj){
 		if(d.find('.'+this.id+'_help').length == 0) d.append('<div class="'+this.id+'_help"><a href="#">'+helpstr+'</a></div>').find('.'+this.id+'_help').css({position:'absolute',padding:5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',right:0,top:0,'font-size':fontsize}).find('a').css({'text-decoration':'none',color:txtcolour}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
 		d.find('.'+this.id+'_help').css({'font-size':fontsize}).find('a').css({color:txtcolour});
 	}
-	if(this.container.find('.'+this.id+'_clock').length == 0){
-		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
-		var off = $('#'+this.idinner).position();
-		this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
-			var s = e.data.sky;
-			var id = s.id;
-			if($('#'+id+'_calendar').length == 0){
-				var off = $('#'+id).offset();
-				var w = 280;
-				var h = 50;
-				if(s.wide < w) w = s.wide;
-				s.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
-				$('#'+id+'_calendar').css({width:w});
-				$('#'+id+'_calendar input').bind('change',{sky:s},function(e){
-					e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
-					e.data.sky.advanceTime(0,0);
-				});
+	if(this.container.find('.'+this.id+'_clock').length == 0) this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
+	var off = $('#'+this.idinner).position();
+	this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
+		var s = e.data.sky;
+		var id = s.id;
+		if($('#'+id+'_calendar').length == 0){
+			var off = $('#'+id).offset();
+			var w = 280;
+			var h = 50;
+			if(s.wide < w) w = s.wide;
+			s.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
+			$('#'+id+'_calendar').css({width:w});
+			$('#'+id+'_calendar input').bind('change',{sky:s},function(e){
+				e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
+				e.data.sky.advanceTime(0,0);
+			});
+		}
+		s.lightbox($('#'+id+'_calendar'));
+		$('#'+id+'_year').val(s.clock.getFullYear());
+		$('#'+id+'_month').val(s.clock.getMonth()+1);
+		$('#'+id+'_day').val(s.clock.getDate());
+		$('#'+id+'_hours').val(s.clock.getHours());
+		$('#'+id+'_mins').val(s.clock.getMinutes());
+	});
+
+	if($('.'+this.id+'_position').length == 0) this.container.append('<div class="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
+	var off = $('#'+this.idinner).position();
+	$('.'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
+	$('.'+this.id+'_position').bind('click',{sky:this},function(e){
+		var s = e.data.sky;
+		var id = s.id;
+		if($('#'+id+'_geo').length == 0){
+			var w = 310;
+			var narrow = '';
+			if(s.wide < w){
+				narrow = '<br style="clear:both;margin-top:20px;" />';
+				w = w/2;
 			}
-			s.lightbox($('#'+id+'_calendar'));
-			$('#'+id+'_year').val(s.clock.getFullYear());
-			$('#'+id+'_month').val(s.clock.getMonth()+1);
-			$('#'+id+'_day').val(s.clock.getDate());
-			$('#'+id+'_hours').val(s.clock.getHours());
-			$('#'+id+'_mins').val(s.clock.getMinutes());
-		});
-	}
-	if($('.'+this.id+'_position').length == 0){
-		this.container.append('<div class="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
-		var off = $('#'+this.idinner).position();
-		$('.'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'});
-		$('.'+this.id+'_position').bind('click',{sky:this},function(e){
-			var s = e.data.sky;
-			var id = s.id;
-			if($('#'+id+'_geo').length == 0){
-				var w = 310;
-				var narrow = '';
-				if(s.wide < w){
-					narrow = '<br style="clear:both;margin-top:20px;" />';
-					w = w/2;
-				}
-				s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
-				$('#'+id+'_geo').css({width:w,'align':'center'})
-				$('#'+id+'_geo input').css({width:'6em'});
-				$('#'+id+'_geo_close').bind('click',{sky:s},function(e){
-					e.data.sky.latitude = parseFloat($('#'+id+'_lat').val())
-					e.data.sky.longitude = parseFloat($('#'+id+'_long').val())
-					e.data.sky.draw();
-				});
-			}
-			s.lightbox($('#'+id+'_geo'));
-			$('#'+id+'_lat').val(s.latitude)
-			$('#'+id+'_long').val(s.longitude)
-			if(typeof s.callback.geo=="function") s.callback.geo.call(s);
-		});
-	}
+			s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
+			$('#'+id+'_geo').css({width:w,'align':'center'})
+			$('#'+id+'_geo input').css({width:'6em'});
+			$('#'+id+'_geo_close').bind('click',{sky:s},function(e){
+				e.data.sky.latitude = parseFloat($('#'+id+'_lat').val())
+				e.data.sky.longitude = parseFloat($('#'+id+'_long').val())
+				e.data.sky.draw();
+			});
+		}
+		s.lightbox($('#'+id+'_geo'));
+		$('#'+id+'_lat').val(s.latitude)
+		$('#'+id+'_long').val(s.longitude)
+		if(typeof s.callback.geo=="function") s.callback.geo.call(s);
+	});
+
 	return this;
 } 
 
