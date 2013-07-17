@@ -2,9 +2,9 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Virtual Sky - Canvas Experiment</title>
+	<title>VirtualSky - Canvas Experiment</title>
 	<!--
-		Virtual Sky <canvas> application
+		VirtualSky <canvas> application
 		(c) 2010 Stuart Lowe (Las Cumbras Observatory Global Telescope)
 	-->
     <link rel="stylesheet" type="text/css" media="screen" href="extra/prettify.css">
@@ -13,6 +13,7 @@
 		font-family: 'Trebuchet MS',Tahoma,Helvetica,Verdana,sans-serif;
 		color: black;
 	}
+	h1 { margin-top: 2em; }
 	ol {
 		margin: 0px;
 		padding: 0px;
@@ -43,13 +44,13 @@
 		// Set up the prettification of code blocks
 		prettyPrint();
 
-		var planetarium = $.virtualsky({id:'starmap1',projection:'stereo'});
+		var planetarium = $.virtualsky({id:'starmap1'});
 		var planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
 			["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
 			["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
 				],clock:new Date("July 17, 2013 18:39:00 GMT")
 		});
-		var planetarium3 = $.virtualsky({id:'starmap3', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
+		var planetarium3 = $.virtualsky({id:'starmap3', projection:'stereo', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
 		var planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
 		var planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:135, latitude:38.25, longitude:-122.6, meridian: true, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
 		var planetarium6 = $.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
@@ -79,32 +80,43 @@
 
 		<h1>VirtualSky</h1>
 
-		<p>Virtual Sky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
+		<p>VirtualSky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
 
+		<h2>Instructions for embedding</h2>
+		<p>The <a href="http://lcogt.net/virtualsky/embed/custom.html">easiest way to include VirtualSky</a> on your website is to use the custom form to create an embed link (uses an <code>&lt;iframe&gt;</code>).</p>
+		<p>Sometimes an <code>&lt;iframe&gt;</code> just doesn't give you the flexibility you need (or you might want to include it in an offline page during a public talk). In that case you could download a copy of <a href="https://github.com/slowe/VirtualSky">the source from GitHub</a> and include VirtualSky in your page using Javascript. You will need to include the following code block in the <code>&lt;head&gt;</code> of your page:</p>
+		
+		<pre class="prettyprint lang-html lang-js">
+&lt;!--[if lt IE 9]&gt;&lt;script src="excanvas.min.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+&lt;script src="jquery-1.10.0.min.js"&gt;&lt;/script&gt;
+&lt;script src="virtualsky.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script&gt;
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		id: 'starmap1'
+	});
+
+});
+&lt;/script&gt;
+</pre>
+<p>Make sure the scripts point to the correct locations for the Javascript files. In the <code>&lt;body&gt;</code> you need to include the DOM element you've referenced by ID:</p>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap1" style="width:400px;height:400px;"&gt;&lt;/div&gt;
+</pre>
+
+		<p>The result is:</p>
+		<div id="starmap1" class="planetarium" style="width:400px;height:400px;"></div>
+
+		<p>That is a version of VirtualSky with all the default options. However, one of the great things about VirtualSky is that it can be customised. Here are some examples to give you some ideas:</p>
 		<ol>
-			<li class="example">A default view with a <code>stereo</code> projection.
+			<li class="example">A <code>stereo</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
 	var planetarium = $.virtualsky({
-		id: 'starmap1',
-		projection: 'stereo'
-	});
-
-});
-</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap1" style="width:100%;height:400px;"&gt;&lt;/div&gt;
-</pre>
-				<div id="starmap1" class="planetarium" style="width:100%;height:400px;"></div>
-			</li>
-			<li class="example">A <code>polar</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
-				<pre class="prettyprint lang-js">
-$(document).ready(function() {
-
-	var planetarium3 = $.virtualsky({
 		id: 'starmap',
-		projection: 'polar', 
+		projection: 'stereo', 
 		mouse: true, 
 		keyboard: true, 
 		latitude: 34.4326, 
@@ -112,9 +124,9 @@ $(document).ready(function() {
 	});
 });</pre>
 <pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:500px;height:500px;"&gt;&lt;/div&gt;
+&lt;div id="starmap" style="width:100%;height:500px;"&gt;&lt;/div&gt;
 </pre>
-				<div id="starmap3" class="planetarium" style="width:500px;height:500px;"></div>
+				<div id="starmap3" class="planetarium" style="width:100%;height:500px;"></div>
 			</li>
 			<li class="example">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
 		
