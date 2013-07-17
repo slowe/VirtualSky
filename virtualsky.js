@@ -827,7 +827,7 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 			if(charCode[c].indexOf('alt')==0){
 				str = charCode[c];
 				alt = true;
-				charCode[c] = charCode[c].substr(4);
+				charCode[c] = charCode[c].substring(4);
 			}else{
 				str = charCode[c];
 			}
