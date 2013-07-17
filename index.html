@@ -51,7 +51,7 @@
 		});
 		planetarium3 = $.virtualsky({id:'starmap3', projection:'polar', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
 		planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
-		planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:180, latitude:38.25, longitude:-122.6, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
+		planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:135, latitude:38.25, longitude:-122.6, meridian: true, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
 		planetarium6 = $.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
 	});
 	</script>
@@ -122,7 +122,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap4" class="planetarium" style="width:500px;height:300px;"></div>
 			</li>
-			<li class="example">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid. The view is facing south from Hill Valley, California at 1:21 am on October 25, 1985.
+			<li class="example">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid and the Meridian line displayed. The view is facing south east from Hill Valley, California at 1:21 am on October 25, 1985.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -131,7 +131,8 @@ $(document).ready(function() {
 		projection: 'stereo',
 		keyboard: false, 
 		mouse: false, 
-		az: 180, 
+		az: 135,
+		meridian: true,
 		latitude: 38.25, 
 		longitude: -122.6, 
 		clock: new Date("October 25, 1985 01:21:00"),
