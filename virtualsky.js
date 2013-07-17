@@ -146,6 +146,7 @@ function VirtualSky(input){
 	this.ground = false;
 	this.grid = { az: false, eq: false, gal: false, step: 30 };	// Display grids
 	this.ecliptic = false;				// Display the Ecliptic
+	this.meridian = false;				// Display the Meridian
 	this.keyboard = true;				// Allow keyboard controls
 	this.mouse = true;					// Allow mouse controls
 	this.islive = false;				// Update the sky in real time
@@ -351,10 +352,10 @@ function VirtualSky(input){
 		"S": "S",
 		"W": "W",
 		"keyboard": "Keyboard shortcuts:",
-		"fast": "speed up",
-		"stop": "stop time",
-		"slow": "slow down",
-		"reset": "reset time",
+		"fast": "increase time speed",
+		"stop": "set time rate to zero",
+		"slow": "decrease time speed",
+		"reset": "set time to now",
 		"togglecardinal": "toggle cardinal points",
 		"togglestars": "toggle stars",
 		"togglestarlabels": "toggle star labels",
@@ -412,7 +413,8 @@ function VirtualSky(input){
 			'az':"rgba(100,100,255,0.4)",
 			'eq':"rgba(255,100,100,0.4)",
 			'ec':'rgba(255,0,0,0.4)',
-			'gal':'rgba(100,200,255,0.4)'
+			'gal':'rgba(100,200,255,0.4)',
+			'meridian':'rgba(25,255,0,0.4)'
 		},
 		'negative':{
 			'txt' : "rgb(0,0,0)",
@@ -430,7 +432,8 @@ function VirtualSky(input){
 			'az':"rgba(0,0,255,0.6)",
 			'eq':"rgba(255,100,100,0.8)",
 			'ec':'rgba(255,0,0,0.6)',
-			'gal':'rgba(100,200,255,0.8)'
+			'gal':'rgba(100,200,255,0.8)',
+			'meridian':'rgba(0,255,0,0.6)'
 		}
 	};
 
@@ -515,6 +518,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.gridlines_gal,b)) this.grid.gal = d.gridlines_gal;
 	if(is(d.gridstep,n)) this.grid.step = d.gridstep;
 	if(is(d.ecliptic,b)) this.ecliptic = d.ecliptic;
+	if(is(d.meridian,b)) this.meridian = d.meridian;
 	if(is(d.magnitude,n)) this.magnitude = d.magnitude;
 	if(is(d.longitude,n)) this.longitude = d.longitude;
 	if(is(d.latitude,n)) this.latitude = d.latitude;
@@ -767,6 +771,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
 	this.registerKey('M',function(){ this.toggleGalaxy(); },'togglegalaxy');
 	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
+	this.registerKey(';',function(){ this.toggleMeridian(); },'togglemeridian');
 	this.registerKey('i',function(){ this.toggleNegative(); },'toggleneg');
 	this.registerKey('h',function(){ this.cycleProjection(); },'toggleprojection');
 	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
@@ -1225,7 +1230,7 @@ VirtualSky.prototype.draw = function(proj){
 		c.fill();
 	}
 	
-	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawGalaxy().drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawPlanets().drawMeteorShowers().drawCardinalPoints();
+	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawGalaxy().drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawMeridian().drawPlanets().drawMeteorShowers().drawCardinalPoints();
 
 	for(var i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
@@ -1740,6 +1745,37 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	return this;
 }
 
+VirtualSky.prototype.drawMeridian = function(colour){
+	if(!this.meridian) return this;
+	if(!colour || typeof colour!="string") colour = this.col.meridian;
+	var c = this.ctx;
+	var pos, a, b;
+	var minb = 0;
+	var maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb : 90;
+	var step = 2;
+	var oldx = 0;
+	var oldy = 0;
+	c.beginPath(); 
+	c.strokeStyle = colour;
+	c.lineWidth = 2;
+	for(b = minb, a = 0; b <= maxb ; b+= step){
+		pos = this.azel2xy(180-this.az_off,b);
+		if(isFinite(pos.x) && isFinite(pos.y)){
+			if(a == 0) c.moveTo(pos.x,pos.y);
+			a++;
+			c.lineTo(pos.x,pos.y);
+		}
+	}
+	for(b = maxb; b >= minb ; b-= step){
+		pos = this.azel2xy(0-this.az_off,b);
+		if(isFinite(pos.x) && isFinite(pos.y)){
+			c.lineTo(pos.x,pos.y);
+		}
+	}
+	c.stroke();
+	return this;
+}
+
 // type can be "az" or "eq"
 VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	if(!type || !this.grid[type]) return this;
@@ -1963,6 +1999,7 @@ VirtualSky.prototype.toggleGridlinesAzimuthal = function(){ this.grid.az = !this
 VirtualSky.prototype.toggleGridlinesEquatorial = function(){ this.grid.eq = !this.grid.eq; this.draw(); return this; }
 VirtualSky.prototype.toggleGridlinesGalactic = function(){ this.grid.gal = !this.grid.gal; this.draw(); return this; }
 VirtualSky.prototype.toggleEcliptic = function(){ this.ecliptic = !this.ecliptic; this.draw(); return this; }
+VirtualSky.prototype.toggleMeridian = function(){ this.meridian = !this.meridian; this.draw(); return this; }
 VirtualSky.prototype.toggleGround = function(){ this.ground = !this.ground; this.draw(); return this; }
 VirtualSky.prototype.toggleGalaxy = function(){ this.showgalaxy = !this.showgalaxy; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetHints = function(){ this.showplanets = !this.showplanets; this.draw(); return this; }
