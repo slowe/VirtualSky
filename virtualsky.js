@@ -1917,7 +1917,7 @@ VirtualSky.prototype.highlight = function(i,colour){
 			c.fillStyle = colour;
 			c.strokeStyle = colour;
 			c.beginPath(); 
-			c.fillRect(this.pointers[i].x-d/2,this.pointers[i].y-d/2,5,5);
+			c.fillRect(this.pointers[i].x-this.pointers[i].d/2,this.pointers[i].y-this.pointers[i].d/2,5,5);
 			c.font = "10px Helvetica";
 			c.lineWidth = 1.5;
 			c.fill();
