@@ -110,15 +110,13 @@ $(document).ready(function() {
 
 		<p>That is a version of VirtualSky with all the default options. However, one of the great things about VirtualSky is that it can be customised. Here are some examples to give you some ideas:</p>
 		<ol>
-			<li class="example">A <code>stereo</code> projection, with keyboard and mouse access set for Santa Barbara's lat/long:
+			<li class="example">A <code>stereo</code> projection set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
 	var planetarium = $.virtualsky({
 		id: 'starmap',
 		projection: 'stereo', 
-		mouse: true, 
-		keyboard: true, 
 		latitude: 34.4326, 
 		longitude: -119.86286
 	});
