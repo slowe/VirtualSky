@@ -1969,7 +1969,9 @@ VirtualSky.prototype.advanceTime = function(by,wait){
 	return this;
 }
 VirtualSky.prototype.setClock = function(seconds){
+
 	if(typeof seconds=="string"){
+		seconds = convertTZ(seconds);
 		if(!this.input.clock){
 			if(seconds=="now") this.clock = new Date();
 			else this.clock = new Date(seconds);
@@ -2086,6 +2088,25 @@ VirtualSky.prototype.getNegative = function(colour){
 	if(end == 0) return colour;
 	var rgb = colour.substring(colour.indexOf("(")+1,end).split(",");
 	return (rgb.length==3) ? ('rgb('+(255-rgb[0])+','+(255-rgb[1])+','+(255-rgb[2])+')') : ('rgba('+(255-rgb[0])+','+(255-rgb[1])+','+(255-rgb[2])+','+(rgb[3])+')');
+}
+
+// Some useful functions
+function convertTZ(s){
+	function formatHour(h){
+		var s = (h >= 0 ? "+" : "-");
+		h = Math.abs(h);
+		var m = (h - Math.floor(h))*60;
+		var h = Math.floor(h);
+		return s+(h < 10 ? "0"+h : h)+(m < 10 ? "0"+m : m);
+	}
+	var tzs = { A:1, ACDT:10.5, ACST:9.5, ADT:-3, AEDT:11, AEST:10, AKDT:-8, AKST:-9, AST:-4, AWST:8, B:2, BST:1, C:3, CDT:-5, CEDT:2, CEST:2, CET:1, CST:-6, CXT:7, D:4, E:5, EDT:-4, EEDT:3, EEST:3, EET:2, EST:-5, F:6, G:7, GMT:0, H:8, HAA:-3, HAC:-5, HADT:-9, HAE:-4, HAP:-7, HAR:-6, HAST:-10, HAT:-2.5, HAY:-8, HNA:-4, HNC:-6, HNE:-5, HNP:-8, HNR:-7, HNT:-3.5, HNY:-9, I:9, IST:9, IST:1, JST:9, K:10, L:11, M:12, MDT:-6, MESZ:2, MEZ:1, MST:-7, N:-1, NDT:-2.5, NFT:11.5, NST:-3.5, O:-2, P:-3, PDT:-7, PST:-8, Q:-4, R:-5, S:-6, T:-7, U:-8, UTC:0, UT:0, V:-9, W:-10, WEDT:1, WEST:1, WET:0, WST:8, X:-11, Y:-12, Z:0 }
+	// Get location of final space character
+	var i = s.lastIndexOf(' ');
+	// Replace the time zone with the +XXXX version
+	if(i > 0 && tzs[s.substr(i+1)]){
+		return s.substring(0,i)+" "+formatHour(tzs[s.substr(i+1)]);
+	}
+	return s;
 }
 
 $.virtualsky = function(placeholder,input) {
