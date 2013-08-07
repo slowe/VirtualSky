@@ -137,14 +137,40 @@
 				
 				
 			});
+ 
 
 			test("Times and Locations",function(){
 
 				var sky = $.virtualsky({id:'starmapper'});
 
-				var clock = new Date('October 25, 1985 01:21:00');
-				sky.setClock('October 25, 1985 01:21:00');
-				assert_equal(sky.clock-clock,0,"Check clock can be set with a string")
+				var str = 'October 25, 1985 01:21:00'
+				var clock = new Date(str);
+				sky.setClock(str);
+				assert_equal(sky.clock-clock,0,"Clock can be set with a string")
+
+				str = 'October 25, 1985 23:21:00 PST';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==26 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==7),true,"A date/time string with a PST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 CET'
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==22),true,"A date/time string with a CEST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 AEST';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==13),true,"A date/time string with an AEST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 -0800';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==26 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==7),true,"A date/time string with a -0800 time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 +0100';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==22),true,"A date/time string with a +0100 time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 +1030';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==12 && sky.clock.getUTCMinutes()==51),true,"A date/time string with a +1030 time zone ("+str+") is correctly set");
 
 				clock = new Date('July 5, 2013 18:00:00 UTC');
 				var JD = sky.getJD(clock);
