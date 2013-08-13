@@ -10,7 +10,6 @@
 	<style>
 	html,body { height: 100%; }
 	body {
-		font-size: 14px;
 		font-family: Helvetica, sans-serif;
 		color: black;
 		margin: 0px;
@@ -18,6 +17,16 @@
 		height: 100%;
 		width: 100%;
 		font-size: 1em;
+	}
+	@media (min-width: 600px), (min-device-width: 600px) {
+		.virtualsky_help ul li {
+			display: inline;
+			width: 280px;
+			float: left;
+		}
+		.virtualsky_help ul li:nth-child(2n+1) {
+			clear: both;
+		}
 	}
 	#starmapper { height: 100%; width:100%; position: relative; }
 	#virtualskyinfobox{

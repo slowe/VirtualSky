@@ -109,7 +109,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.23";
+	this.version = "0.3.24";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -384,10 +384,10 @@ function VirtualSky(input){
 		"azright": "rotate right",
 		"magup": "increase magnitude limit",
 		"magdown": "decrease magnitude limit",
-		"left" : "left",
-		"right" : "right",
-		"up": "up",
-		"down": "down",
+		"left" : "&larr;",
+		"right" : "&rarr;",
+		"up": "&uarr;",
+		"down": "&darr;",
 		"power": "Powered by LCOGT"
 	},{
 		"code" : "es",
@@ -451,7 +451,7 @@ function VirtualSky(input){
 	this.changeLanguage(this.langcode);
 
 	// Define some VirtualSky styles
-	$('<style type="text/css">.virtualsky_help { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualsky_help ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualsky_dismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;}</style>').appendTo("head");
+	$('<style type="text/css">.virtualsky_help { padding: 10px; background-color: white;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualsky_help ul { list-style:none;margin: 0px;padding:0px; } .virtualskyinfobox { background-color:rgb(200,200,200);color:black;padding:5px;border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em;box-shadow:0px 0px 20px rgba(255,255,255,0.5);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);} .virtualskyinfobox img {} .virtualskyinfocredit {color: white;float:left;font-size: 0.8em;padding: 5px;position: absolute;} .virtualskyform { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;box-shadow:0px 0px 20px rgba(255,255,255,0.6);-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.6);-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.6);border-radius:0.5em;-moz-border-radius:0.5em;-webkit-border-radius:0.5em; } .virtualsky_dismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } .virtualskyform input,.virtualskyform .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } .virtualskyform .divider { margin-top: 5px; padding: 2px;} .virtualsky_help_key:active{ background:#e9e9e9; } .virtualsky_help_key:hover{ border-color: #b0b0b0; } .virtualsky_help_key { cursor:pointer;display:inline-block;text-align:center;background:#f0f0f0;background:-moz-linear-gradient(top,#f0f0f0,#fcfcfc);background:-webkit-gradient(linear,center top,center bottom,from(#f0f0f0),to(#fcfcfc));-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-background-clip:padding-box;-moz-background-clip:padding;background-clip:padding-box;color:#303030;border:1px solid #e0e0e0;border-bottom-width:2px;white-space:nowrap;font-family:monospace;padding:1px 6px; font-size: 1.1em;}</style>').appendTo("head");
 
 	this.pointers = new Array();
 
@@ -797,7 +797,7 @@ VirtualSky.prototype.toggleHelp = function(){
 	else{
 		// Build the list of keyboard options
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong style="min-width:1em;display:inline-block;text-align:center;">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong class="virtualsky_help_key virtualsky_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
 		$('<div class="virtualsky_help"><div class="virtualsky_dismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
 
 		var hlp = $('.virtualsky_help');
