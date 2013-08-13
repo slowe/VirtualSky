@@ -109,7 +109,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.24";
+	this.version = "0.3.25";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -445,6 +445,8 @@ function VirtualSky(input){
 	// Overwrite with input values
 	this.init(input);
 
+	if(this.fontfamily) $('body').css({'font-family':this.fontfamily});
+
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
 
 	this.updateColours();
@@ -553,6 +555,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.credit,b)) this.credit = d.credit;
 	if(is(d.transparent,b)) this.transparent = d.transparent;
 	if(is(d.lang,s) && d.lang.length==2) this.langcode = d.lang;
+	if(is(d.fontfamily,s)) this.fontfamily = d.fontfamily.replace(/%20/g,' ');
 	if(is(d.callback,o)){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
