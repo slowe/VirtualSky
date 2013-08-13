@@ -197,6 +197,7 @@ function VirtualSky(input){
 		'stereo': {
 			title: 'Stereographic projection',
 			azel2xy: function(az,el,w,h,vs){
+				var f = 0.42;
 				var sinel1 = Math.sin(0);
 				var cosel1 = Math.cos(0);
 				var cosaz = Math.cos((az-180)*vs.d2r);
@@ -204,7 +205,7 @@ function VirtualSky(input){
 				var sinel = Math.sin(el*vs.d2r);
 				var cosel = Math.cos(el*vs.d2r);
 				var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
-				return {x:(w/2+0.42*k*h*cosel*sinaz),y:(h-0.42*k*h*(cosel1*sinel-sinel1*cosel*cosaz))};
+				return {x:(w/2+f*k*h*cosel*sinaz),y:(h-f*k*h*(cosel1*sinel-sinel1*cosel*cosaz))};
 			}
 		},
 		'lambert':{
@@ -376,6 +377,7 @@ function VirtualSky(input){
 		"togglesollabels": "toggle planet/Sun/Moon labels",
 		"toggleorbits": "toggle planet orbits",
 		"toggleprojection":"change map projection",
+		"togglemeteorshowers":"toggle meteor shower radiants",
 		"addday": "add 1 day",
 		"subtractday": "subtract 1 day",
 		"addweek": "add 1 week",
@@ -759,27 +761,29 @@ VirtualSky.prototype.createSky = function(){
 
 	this.registerKey('a',function(){ this.toggleAtmosphere(); },'toggleatmos');
 	this.registerKey('g',function(){ this.toggleGround(); },'toggleground');
+	this.registerKey('h',function(){ this.cycleProjection(); },'toggleprojection');
+	this.registerKey('i',function(){ this.toggleNegative(); },'toggleneg');
+	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
+	this.registerKey(';',function(){ this.toggleMeridian(); },'togglemeridian');
+	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
+	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
+	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
+	this.registerKey('M',function(){ this.toggleGalaxy(); },'togglegalaxy');
 	this.registerKey('q',function(){ this.toggleCardinalPoints(); },'togglecardinal');
 	this.registerKey('s',function(){ this.toggleStars(); },'togglestars');
 	this.registerKey('S',function(){ this.toggleStarLabels(); },'togglestarlabels');
-	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
-	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
-	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
 	this.registerKey('u',function(){ this.togglePlanetLabels(); },'togglesollabels');
 	this.registerKey('p',function(){ this.togglePlanetHints(); },'togglesol');
 	this.registerKey('o',function(){ this.toggleOrbits(); },'toggleorbits');
-	this.registerKey('z',function(){ this.toggleGridlinesAzimuthal(); },'toggleaz');
-	this.registerKey('e',function(){ this.toggleGridlinesEquatorial(); },'toggleeq');
-	this.registerKey('m',function(){ this.toggleGridlinesGalactic(); },'togglegal');
-	this.registerKey('M',function(){ this.toggleGalaxy(); },'togglegalaxy');
-	this.registerKey(',',function(){ this.toggleEcliptic(); },'toggleec');
-	this.registerKey(';',function(){ this.toggleMeridian(); },'togglemeridian');
-	this.registerKey('i',function(){ this.toggleNegative(); },'toggleneg');
-	this.registerKey('h',function(){ this.cycleProjection(); },'toggleprojection');
-	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
-	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
-	this.registerKey('k',function(){ this.spinIt(0) },'stop');
+	this.registerKey('c',function(){ this.toggleConstellationLines(); },'togglecon');
+	this.registerKey('v',function(){ this.toggleConstellationLabels(); },'togglenames');
+	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'toggleconbound');
+	this.registerKey('R',function(){ this.toggleMeteorShowers(); },'togglemeteorshowers');
+	this.registerKey('1',function(){ this.toggleHelp(); });
 	this.registerKey('8',function(){ this.setClock('now'); },'reset');
+	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
+	this.registerKey('k',function(){ this.spinIt(0) },'stop');
+	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
 	this.registerKey('-',function(){ this.setClock(-86400); },'subtractday');
 	this.registerKey('=',function(){ this.setClock(86400); },'addday');
 	this.registerKey('[',function(){ this.setClock(-86400*7); },'subtractweek');
@@ -2003,6 +2007,7 @@ VirtualSky.prototype.toggleEcliptic = function(){ this.ecliptic = !this.ecliptic
 VirtualSky.prototype.toggleMeridian = function(){ this.meridian = !this.meridian; this.draw(); return this; }
 VirtualSky.prototype.toggleGround = function(){ this.ground = !this.ground; this.draw(); return this; }
 VirtualSky.prototype.toggleGalaxy = function(){ this.showgalaxy = !this.showgalaxy; this.draw(); return this; }
+VirtualSky.prototype.toggleMeteorShowers = function(){ this.meteorshowers = !this.meteorshowers; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetHints = function(){ this.showplanets = !this.showplanets; this.draw(); return this; }
 VirtualSky.prototype.togglePlanetLabels = function(){ this.showplanetlabels = !this.showplanetlabels; this.draw(); return this; }
 VirtualSky.prototype.toggleOrbits = function(){ this.showorbits = !this.showorbits; this.draw(); return this; }
