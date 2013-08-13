@@ -669,7 +669,7 @@ VirtualSky.prototype.createSky = function(){
 	// Get the meteor showers
 	if(!this.showers) this.loadMeteorShowers(this.file.showers);
 
-	// Get the meteor showers
+	// Get the Milky Way
 	if(!this.galaxy) this.loadGalaxy(this.file.galaxy);
 
 	// If the Javascript function has been passed a width/height
@@ -1675,7 +1675,6 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 
 	}
 	this.ctx.stroke();
-	//this.ctx.fill();
 	return this;
 }
 VirtualSky.prototype.drawMeteorShowers = function(colour){
