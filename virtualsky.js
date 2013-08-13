@@ -445,7 +445,8 @@ function VirtualSky(input){
 	// Overwrite with input values
 	this.init(input);
 
-	if(this.fontfamily) $('body').css({'font-family':this.fontfamily});
+	if(this.fntfam) $('body').css({'font-family':this.fntfam});
+	if(this.fntsze) $('body').css({'font-size':this.fntsze});
 
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
 
@@ -555,7 +556,8 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.credit,b)) this.credit = d.credit;
 	if(is(d.transparent,b)) this.transparent = d.transparent;
 	if(is(d.lang,s) && d.lang.length==2) this.langcode = d.lang;
-	if(is(d.fontfamily,s)) this.fontfamily = d.fontfamily.replace(/%20/g,' ');
+	if(is(d.fontfamily,s)) this.fntfam = d.fontfamily.replace(/%20/g,' ');
+	if(is(d.fontsize,s)) this.fntsze = d.fontsize;
 	if(is(d.callback,o)){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
@@ -1178,6 +1180,7 @@ VirtualSky.prototype.vectorMultiply = function(A,B){
 }
 VirtualSky.prototype.setFont = function(){ this.ctx.font = this.fontsize()+"px "+this.canvas.css('font-family'); }
 VirtualSky.prototype.fontsize = function(){
+	if(this.fntsze) return parseInt(this.fntsze);
 	var m = Math.min(this.wide,this.tall);
 	return (m < 600) ? ((m < 500) ? ((m < 350) ? ((m < 300) ? ((m < 250) ? 9 : 10) : 11) : 12) : 14) : parseInt(this.container.css('font-size'));
 }
