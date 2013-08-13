@@ -88,56 +88,22 @@
 				$('body').append('<div id="starmapper"><\/div>');
 				
 				sky = $.virtualsky({id:'starmapper',projection:'stereo'});
-				assert_equal(sky.id,"starmapper","The ID should be set to the current ID");
-				assert_equal($('#starmapper').length,1,"We should have a DOM element");
+				assert_equal(sky.id,"starmapper","The ID should be set correctly");
+				assert_equal($('#starmapper').length,1,"The DOM element should still exist");
 				assert_equal(sky.projection.id,"stereo","Projection should be stereo");
 
 				var w = 400;
 				var mag = 6;
+				$('#starmapper').remove();
 				sky = $.virtualsky({id:'starmapper',projection:'blah',width:w,magnitude:mag});
-				assert_equal(sky.id,"starmapper","The ID should be set to that created");
-				assert_equal($('#starmapper').length,1,"Was a DOM element created?");
+				assert_equal($('#starmapper').length,1,"A DOM element was created");
+				assert_equal(sky.id,"starmapper","The ID should be set to that provided");
 				assert_equal(sky.projection.id,"polar","Projection should default to polar if unrecognized");
-				assert_equal($('#starmapper').outerWidth(),w,"Width should be set from input variable");
-				assert_equal(sky.magnitude,mag,"The magnitude limit should be "+mag);
+				assert_equal($('#starmapper').outerWidth(),w,"Width should be set from input as "+w);
+				assert_equal(sky.magnitude,mag,"The magnitude limit should be set from input as "+mag);
 
 			});
 			
-			test("Keyboard input",function(){
-
-				function keypress(key,sky){
-					var mouse = sky.mouseover;
-					sky.mouseover = true;
-					if(typeof key=="string") key = key.charCodeAt(0);
-					sky.keypress(key);
-					sky.mouseover = mouse;
-				}
-
-				var sky = $.virtualsky({id:'starmapper'});
-				var mag = sky.magnitude;
-
-				keypress(38,sky);
-				assert_equal(sky.magnitude,mag+0.2,"The magnitude limit should be "+(mag+0.2));
-				keypress(40,sky);
-				assert_equal(sky.magnitude,mag,"The magnitude limit should be "+(mag));
-				keypress(63,sky);
-				assert_equal($('.virtualsky_help').length,1,"The help is visible");
-				ok($('.virtualsky_help li').length > 1,"The help contains a list");
-				keypress(63,sky);
-
-				assert_equal(sky.spin,0,"Not moving initially");
-				keypress('l',sky);
-				assert_equal(sky.spin,0.1,"Slow");
-				keypress('k',sky);
-				assert_equal(sky.spin,0,"Stationary again");
-
-				var clock = new Date();
-				keypress('8',sky);
-				ok(sky.clock-clock < 2,"Time is now");
-				
-				
-			});
- 
 
 			test("Times and Locations",function(){
 
@@ -184,6 +150,42 @@
 
 			});
 
+			test("Keyboard input",function(){
+
+				function keypress(key,sky){
+					var mouse = sky.mouseover;
+					sky.mouseover = true;
+					if(typeof key=="string") key = key.charCodeAt(0);
+					sky.keypress(key);
+					sky.mouseover = mouse;
+				}
+
+				var sky = $.virtualsky({id:'starmapper'});
+				var mag = sky.magnitude;
+
+				keypress(38,sky);
+				assert_equal(sky.magnitude,mag+0.2,"Keypress (38): The magnitude limit should be "+(mag+0.2));
+				keypress(40,sky);
+				assert_equal(sky.magnitude,mag,"Keypress (40):The magnitude limit should be "+(mag));
+				keypress(63,sky);
+				assert_equal($('.virtualsky_help').length,1,"Keypress (63): The help is now visible");
+				ok($('.virtualsky_help li').length > 1,"The help contains a list");
+				keypress(63,sky); // Hide help
+				assert_equal($('.virtualsky_help').length,0,"Keypress (63): The help is hidden");
+				
+				assert_equal(sky.spin,0,"Not moving initially");
+
+				keypress('l',sky);
+				assert_equal(sky.spin,0.1,"Keypress (l): Slow");
+				keypress('k',sky);
+				assert_equal(sky.spin,0,"Keypress (k): Stationary again");
+
+				var clock = new Date();
+				keypress('8',sky);
+				ok(sky.clock-clock < 2,"Keypress (8): Time is set to now");
+				
+			});
+ 
 			test("Custom input",function(){
 
 				var sky = $.virtualsky({id:'starmapper',constellationboundaries: true,
