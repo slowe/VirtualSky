@@ -10,7 +10,6 @@
 	<style>
 	html,body { height: 100%; }
 	body {
-		font-size: 14px;
 		font-family: Helvetica, sans-serif;
 		color: black;
 		margin: 0px;
@@ -18,6 +17,16 @@
 		height: 100%;
 		width: 100%;
 		font-size: 1em;
+	}
+	@media (min-width: 600px), (min-device-width: 600px) {
+		.virtualsky_help ul li {
+			display: inline;
+			width: 280px;
+			float: left;
+		}
+		.virtualsky_help ul li:nth-child(2n+1) {
+			clear: both;
+		}
 	}
 	#starmapper { height: 100%; width:100%; position: relative; }
 	#virtualskyinfobox{
@@ -78,21 +87,19 @@
 						dataType: "json", 
 						url:'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.places%20where%20text%3D%22'+loc+'%22&format=json&diagnostics=true&callback=?',
 						context: _object,
-
 						success: function(data){
 							failed = false;
 							if(data.query.results && typeof data.query.results.place=="object"){
 								place = data.query.results.place;
-								sky = e.data.sky;
 								if(place.length > 1){
 									var str = '<form><select><option value="-1">Select...<\/option>';
-									$('#'+sky.id+'_geoip_message').html();
+									$('#'+_object.id+'_geoip_message').html();
 									for(i = 0; i < place.length ; i++){
 										str += '<option value="'+i+'">'+place[i].name+', '+place[i].admin1.content+', '+place[i].country.content+'<\/option>';
 									}
 									str += '<\/select><\/form>';
-									$('#'+sky.id+'_geoip_message').append(str);
-									$('#'+sky.id+'_geoip_message select').on('change',{sky:sky,place:place},function(e){
+									$('#'+_object.id+'_geoip_message').append(str);
+									$('#'+_object.id+'_geoip_message select').on('change',{sky:this,place:place},function(e){
 										var i = $(this).find(':selected').val();
 										if(i >= 0){
 											var sky = e.data.sky;
@@ -101,21 +108,23 @@
 											$('#'+sky.id+'_lat').val(sky.latitude);
 											$('#'+sky.id+'_long').val(sky.longitude);
 											sky.draw();
+											sky.setClock(0);
 										}
 									});
 
-									sky.lightbox($('#'+sky.id+'_geo'));
+									this.lightbox($('#'+this.id+'_geo'));
 								}else{
 									if(data.query.results.place.centroid){
 										lat = data.query.results.place.centroid.latitude;
 										lon = data.query.results.place.centroid.longitude;
 										place = data.query.results.place.placeTypeName.content+' in '+data.query.results.place.country.content
-										this.latitude = parseFloat(lat);
-										this.longitude = parseFloat(lon);
-										$('#'+this.id+'_lat').val(this.latitude);
-										$('#'+this.id+'_long').val(this.longitude);
-										$('#'+this.id+'_geoip_message').html(place);
-										this.draw();
+										_object.latitude = parseFloat(lat);
+										_object.longitude = parseFloat(lon);
+										$('#'+_object.id+'_lat').val(this.latitude);
+										$('#'+_object.id+'_long').val(this.longitude);
+										$('#'+_object.id+'_geoip_message').html(place);
+										_object.draw();
+										_object.setClock(0);
 									}else{
 										failed = true;
 									}
