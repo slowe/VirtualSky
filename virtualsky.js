@@ -1,8 +1,7 @@
 /*
 	Virtual Sky
 	(c) Stuart Lowe, Las Cumbres Observatory Global Telescope
-	A browser planetarium using HTML5's <canvas>. It works in
-	Internet Explorer using excanvas.js
+	A browser planetarium using HTML5's <canvas>.
 	
 	USAGE:
 		<!--[if lt IE 9]><script src="http://lcogt.net/virtualsky/embed/excanvas.js" type="text/javascript"></script><![endif]-->
@@ -54,6 +53,8 @@
 		gridlines_gal (false) - show/hide the Galactic Coordinate grid lines
 		gridstep (30) - the size of the grid step when showing grid lines
 		live (false) - update the display in real time
+		fontsize - set the font size in pixels if you want to over-ride the auto sizing
+		fontfamily - set the font family using a CSS style font-family string otherwise it inherits from the container element
 */
 (function ($) {
 
