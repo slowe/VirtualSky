@@ -215,31 +215,36 @@
 				// We need to stop qunit until we get the ajax callback
 				stop();
 				sky.load('stars',sky.file.stars,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('boundaries',sky.file.boundaries,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('lines',sky.file.lines,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('planets',sky.file.planets,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for planets ("+this.file.planets+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for planets ("+this.file.planets+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('showers',sky.file.showers,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					start();	// Start qunit again
+				});
+				stop();
+				sky.load('galaxy',sky.file.galaxy,function(e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for galaxy outline ("+this.file.galaxy+")");
 					start();	// Start qunit again
 				});
 
