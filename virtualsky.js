@@ -291,7 +291,8 @@ function VirtualSky(input){
 				var r = radius*(90-el)/90;
 				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
-			polartype: true
+			polartype: true,
+			gradient: false
 		},
 		'fisheye':{
 			title: 'Fisheye polar projection',
@@ -300,7 +301,8 @@ function VirtualSky(input){
 				var r = radius*Math.sin((90-el)*this.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
 				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
-			polartype:true
+			polartype:true,
+			gradient: false
 		},
 		'ortho':{
 			title: 'Orthographic polar projection',
@@ -309,7 +311,8 @@ function VirtualSky(input){
 				var r = radius*Math.cos(el*this.d2r);
 				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
-			polartype:true
+			polartype:true,
+			gradient: false
 		},
 		'stereo': {
 			title: 'Stereographic projection',
@@ -384,14 +387,15 @@ function VirtualSky(input){
 			},
 			draw: function(){
 				if(!this.transparent){
-					this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					this.ctx.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					this.ctx.fillRect(0,0,this.wide,this.tall);
 					this.ctx.fill();
 				}
 			},
 			isVisible: function(el){
 				return true;
-			}
+			},
+			gradient: false
 		},
 		'equirectangular':{
 			title: 'Equirectangular projection',
@@ -399,7 +403,8 @@ function VirtualSky(input){
 				az = (az+360)%360;
 				return {x:(((az-180)/90)*h + w/2),y:(h-(el/90)*h)};
 			},
-			maxb: 90
+			maxb: 90,
+			gradient: false
 		},
 		'mollweide':{
 			title: 'Mollweide projection',
@@ -444,12 +449,13 @@ function VirtualSky(input){
 				c.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
 				c.closePath();
 				if(!this.transparent){
-					c.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					c.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					c.fill();
 				}
 			},
 			altlabeltext:true,
-			fullsky:true
+			fullsky:true,
+			gradient: false
 		},
 		'planechart':{
 			title: 'Planechart projection',
@@ -464,12 +470,13 @@ function VirtualSky(input){
 			},
 			draw: function(){
 				if(!this.transparent){
-					this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					this.ctx.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					this.ctx.fillRect((this.wide/2) - (this.tall),0,this.tall*2,this.tall);
 					this.ctx.fill();
 				}
 			},
-			fullsky:true
+			fullsky:true,
+			gradient: false
 		}
 	};
 	
@@ -1456,7 +1463,7 @@ VirtualSky.prototype.draw = function(proj){
 		c.arc(this.wide/2,this.tall/2,-0.5+this.tall/2,0,Math.PI*2,true);
 		c.closePath();
 		if(!this.transparent){
-			c.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
+			c.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
 			c.fill();
 		}
 		c.lineWidth = 0.5;
@@ -1467,7 +1474,7 @@ VirtualSky.prototype.draw = function(proj){
 	this.now = this.clock;
 
 	c.beginPath();
-	if(this.gradient && !this.polartype && !this.fullsky && !this.negative){
+	if(this.hasAtmos() && !this.negative){
 		if(typeof this.sky_gradient == "undefined") this.updateSkyGradient();
 		c.fillStyle = this.sky_gradient;
 		// draw shapes
@@ -1594,7 +1601,7 @@ VirtualSky.prototype.drawStars = function(){
 				d = 0.8*Math.max(3-mag/2.1, 0.5);
 				// Modify the 'size' of the star by how close to the horizon it is
 				// i.e. smaller when closer to the horizon
-				if(this.gradient && !this.fullsky){
+				if(this.hasAtmos()){
 					z = (90-p.el)*this.d2r;
 					d *= Math.exp(-z*0.6)
 				}
@@ -1615,6 +1622,14 @@ VirtualSky.prototype.drawStars = function(){
 	}
 	this.ctx.fill();
 	return this;
+}
+VirtualSky.prototype.hasAtmos = function(){
+	if(typeof this.projection.gradient==="boolean"){
+		if(this.projection.gradient && this.gradient) return true;
+		else return false;
+	}
+	if(this.gradient && !this.fullsky) return true;
+	return this.gradient;
 }
 // When provided with an array of Julian dates, ra, dec, and magnitude this will interpolate to the nearest
 // data = [jd_1, ra_1, dec_1, mag_1, jd_2, ra_2, dec_2, mag_2....]
@@ -1685,7 +1700,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			var z;
 			if(typeof mag!="undefined"){
 				d = 0.8*Math.max(3-mag/2, 0.5);
-				if(this.gradient && !this.fullsky){
+				if(this.hasAtmos()){
 					z = (90-pos.el)*this.d2r;
 					d *= Math.exp(-z*0.6)
 				}
