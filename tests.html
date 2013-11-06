@@ -150,6 +150,22 @@
 
 			});
 
+			test("Angles",function(){
+
+				var sky = jQuery.virtualsky({id:'starmapper'});
+
+				assert_almost_equal(sky.greatCircle(180,0,180,0),0,8,"Great Circle distance for same point is zero");
+				assert_almost_equal(sky.greatCircle(180,0,90,0),90,8,"Great Circle distance for points separated around the equator");
+				assert_almost_equal(sky.greatCircle(180,0,180,45),45,8,"Great Circle distance for points separated in declination");
+				assert_almost_equal(sky.greatCircle(0,0,360,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different");
+				assert_almost_equal(sky.greatCircle(10,0,10,45),45,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(10,45,10,-45),90,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(-180,0,180,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
+				assert_almost_equal(sky.greatCircle(190,20,10,20),140,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
+
+			});
+
+
 			test("Keyboard input",function(){
 
 				function keypress(key,sky){
