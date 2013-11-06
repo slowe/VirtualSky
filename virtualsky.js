@@ -57,7 +57,7 @@
 		live (false) - update the display in real time
 		fontsize - set the font size in pixels if you want to over-ride the auto sizing
 		fontfamily - set the font family using a CSS style font-family string otherwise it inherits from the container element
-		objects - a semi-colon-separated string of recognized object names to display e.g. "M1;M42;Horsehead Nebula"
+		objects - a semi-colon-separated string of recognized object names to display e.g. "M1;M42;Horsehead Nebula" (requires internet connection)
 */
 (function ($) {
 
