@@ -1,4 +1,4 @@
-/*
+/*!
 	Virtual Sky
 	(c) Stuart Lowe, Las Cumbres Observatory Global Telescope
 	A browser planetarium using HTML5's <canvas>.
@@ -228,7 +228,7 @@ $.extend($.fn.addTouch = function(){
 
 function VirtualSky(input){
 
-	this.version = "0.3.25";
+	this.version = "0.3.26";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -715,7 +715,8 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.ra,n)) this.ra_off = -(d.ra%360);
-	if(is(d.dec,n)) this.dc_off = -(d.dec);
+	if(is(d.dec,n)) this.dc_off = -d.dec;
+	if(is(d.fov,n)) this.fov = d.fov;
 	if(is(d.objects,s)) this.objects = d.objects;
 	if(is(d.base,s)) this.base = d.base;
 	if(is(d.planets,s)) this.file.planets = d.planets;
@@ -805,11 +806,17 @@ VirtualSky.prototype.setWH = function(w,h){
 	this.canvas.css({'width':w,'height':h});
 }
 VirtualSky.prototype.changeFOV = function(delta){
-	if(delta > 0) this.fov /= 1.2;
-	else if(delta < 0) this.fov *= 1.2;
-	if(this.fov > 60 || typeof this.fov!=="number") this.fov = 60;
-	if(this.fov < 1) this.fov = 1;
+	var fov = this.fov;
+	if(delta > 0) fov /= 1.2;
+	else if(delta < 0) fov *= 1.2;
+	return this.setFOV(fov);
+}
+VirtualSky.prototype.setFOV = function(fov){
+	if(fov > 60 || typeof fov!=="number") this.fov = 60;
+	else if(fov < 1) this.fov = 1;
+	else this.fov = fov;
 	this.maxangle = this.fov*Math.max(this.wide,this.tall)/this.tall;
+	return this;
 }
 // Some pseudo-jQuery
 VirtualSky.prototype.hide = function(){ this.container.hide(); return this; }
