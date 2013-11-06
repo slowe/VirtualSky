@@ -29,6 +29,8 @@
 		transparent (false) - make the sky background transparent
 		color ('rgb(255,255,255)') - the text colour
 		az (180) - an azimuthal offset with 0 = north and 90 = east
+		ra (0 <= x < 360) - the RA for the centre of the view in gnomic projection
+		dec (-90 < x < 90) - the Declination for the centre of the view in gnomic projection
 		negative (false) - invert the default colours i.e. to black on white
 		ecliptic (false) - show the Ecliptic line
 		meridian (false) - show the Meridian line
@@ -55,6 +57,7 @@
 		live (false) - update the display in real time
 		fontsize - set the font size in pixels if you want to over-ride the auto sizing
 		fontfamily - set the font family using a CSS style font-family string otherwise it inherits from the container element
+		objects - a semi-colon-separated string of recognized object names to display e.g. "M1;M42;Horsehead Nebula"
 */
 (function ($) {
 
@@ -347,17 +350,18 @@ function VirtualSky(input){
 
 				var fov, alpha0, delta0, cd, cd0, sd, sd0, dA, A, F, scale, twopi;
 
-				if(!coords) coords = this.coord2horizon(ra, dec);
-				// Should we show things below the horizon?
-				if(this.ground && coords[0] < -1e-6) return {x:-1, y:-1, el:coords[0]};
-				
 				// Coordinates of the map centre
 				alpha0 = -this.ra_off;
 				delta0 = -this.dc_off;
 
 				// Only want to project the sky around the map centre
-				if(this.greatCircle(alpha0,delta0,ra,dec) >= this.maxangle) return {x:-1,y:-1,el:-1};
+				if(this.furtherThan(this.maxangle,alpha0,delta0,ra,dec)) return {x:-1,y:-1,el:-1};
 
+				if(!coords) coords = this.coord2horizon(ra, dec);
+
+				// Should we show things below the horizon?
+				if(this.ground && coords[0] < -1e-6) return {x:-1, y:-1, el:coords[0]};
+				
 				twopi = Math.PI*2;
 				
 				// number of pixels per degree in the map
@@ -584,7 +588,8 @@ function VirtualSky(input){
 			'eq':"rgba(255,100,100,0.4)",
 			'ec':'rgba(255,0,0,0.4)',
 			'gal':'rgba(100,200,255,0.4)',
-			'meridian':'rgba(25,255,0,0.4)'
+			'meridian':'rgba(25,255,0,0.4)',
+			'pointers':'rgb(200,200,200)'
 		},
 		'negative':{
 			'txt' : "rgb(0,0,0)",
@@ -709,6 +714,9 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.background,s)) this.background = d.background;
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
+	if(is(d.ra,n)) this.ra_off = -(d.ra%360);
+	if(is(d.dec,n)) this.dc_off = -(d.dec);
+	if(is(d.objects,s)) this.objects = d.objects;
 	if(is(d.base,s)) this.base = d.base;
 	if(is(d.planets,s)) this.file.planets = d.planets;
 	if(is(d.planets,o)) this.planets = d.planets;
@@ -850,6 +858,19 @@ VirtualSky.prototype.createSky = function(){
 
 	// Get the faint star data
 	if(!this.starsdeep) this.load('stars',this.file.stars);
+
+	// Add named objects to the display
+	if(this.objects){
+		var ob = this.objects.split(';');
+		for(var o = 0; o < ob.length ; o++){
+			$.ajax({ dataType: "jsonp", url: 'http://www.strudel.org.uk/lookUP/json/?name='+ob[o], context: this, success: function(data){
+				if(data && data.dec && data.ra){
+					this.addPointer({'ra':data.ra.decimal,'dec':data.dec.decimal,'label':data.target.name,colour:this.col.pointers});
+					this.draw();
+				}
+			}});
+		}
+	}
 
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
@@ -2218,6 +2239,7 @@ VirtualSky.prototype.toggleAzimuthMove = function(az){
 VirtualSky.prototype.addPointer = function(input){
 	// Check if we've already added this
 	var matched = -1;
+	var p;
 	for(var i = 0 ; i < this.pointers.length ; i++){
 		if(this.pointers[i].ra == input.ra && this.pointers[i].dec == input.dec && this.pointers[i].label == input.label) matched = i;
 	}
@@ -2226,15 +2248,16 @@ VirtualSky.prototype.addPointer = function(input){
 		input.ra *= 1;	// Correct for a bug
 		input.dec *= 1;
 		i = this.pointers.length;
-		this.pointers[i] = input;
-		if(!this.pointers[i].html){
-			style = (this.pointers[i].url) ? "" : "width:128px;height:128px;";
-			url = (this.pointers[i].url) ? this.pointers[i].url : "http://server1.wikisky.org/v2?ra="+(this.pointers[i].ra/15)+"&de="+(this.pointers[i].dec)+"&zoom=6&img_source=DSS2";
-			img = (this.pointers[i].img) ? this.pointers[i].img : 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(this.pointers[i].ra/15)+'&de='+this.pointers[i].dec+'&angle=0.25&output=PNG';
-			label = (this.pointers[i].credit) ? this.pointers[i].credit : "View in Wikisky";
-			credit = (this.pointers[i].credit) ? this.pointers[i].credit : "DSS2/Wikisky";
-			this.pointers[i].html =  (this.pointers[i].html) ? this.pointers[i].html : '<div class="virtualskyinfocredit"><a href="'+url+'" style="color: white;">'+credit+'<\/a><\/div><a href="'+url+'" style="display:block;'+style+'"><img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" \/><\/a>';
+		p = input;
+		if(!p.html){
+			style = (p.style) ? p.style : "width:128px;height:128px;";
+			url = (p.url) ? p.url : "http://server1.wikisky.org/v2?ra="+(p.ra/15)+"&de="+(p.dec)+"&zoom=6&img_source=DSS2";
+			img = (p.img) ? p.img : 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(p.ra/15)+'&de='+p.dec+'&angle=0.25&output=PNG';
+			label = (p.credit) ? p.credit : "View in Wikisky";
+			credit = (p.credit) ? p.credit : "DSS2/Wikisky";
+			p.html =  (p.html) ? p.html : '<div class="virtualskyinfocredit"><a href="'+url+'" style="color: white;">'+credit+'<\/a><\/div><a href="'+url+'" style="display:block;'+style+'"><img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" \/><\/a>';
 		}
+		this.pointers[i] = p;
 	}
 	return (this.pointers.length);
 }
@@ -2294,6 +2317,10 @@ VirtualSky.prototype.greatCircle = function(l1,d1,l2,d2){
 	l1 *= this.d2r;
 	l2 *= this.d2r;
 	return this.r2d*Math.acos(Math.cos(d1)*Math.cos(d2)*Math.cos(l1-l2)+Math.sin(d1)*Math.sin(d2));
+}
+VirtualSky.prototype.furtherThan = function(ang,l1,d1,l2,d2){
+	if(Math.abs(d1-d2) > ang) return true;
+	else return (this.greatCircle(l1,d1,l2,d2) > ang);
 }
 // Some useful functions
 function convertTZ(s){
