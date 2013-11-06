@@ -106,7 +106,122 @@ $.extend($.fn.addTouch = function(){
 		}
 	};
 });
+/*! Copyright (c) 2013 Brandon Aaron (http://brandonaaron.net)
+* Licensed under the MIT License (LICENSE.txt).
+*
+* Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
+* Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
+* Thanks to: Seamus Leahy for adding deltaX and deltaY
+*
+* Version: 3.1.3
+*
+* Requires: 1.2.2+
+*/
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
 
+    var toFix = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'];
+    var toBind = 'onwheel' in document || document.documentMode >= 9 ? ['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'];
+    var lowestDelta, lowestDeltaXY;
+
+    if ( $.event.fixHooks ) {
+        for ( var i = toFix.length; i; ) {
+            $.event.fixHooks[ toFix[--i] ] = $.event.mouseHooks;
+        }
+    }
+
+    $.event.special.mousewheel = {
+        setup: function() {
+            if ( this.addEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.addEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = handler;
+            }
+        },
+
+        teardown: function() {
+            if ( this.removeEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.removeEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = null;
+            }
+        }
+    };
+
+    $.fn.extend({
+        mousewheel: function(fn) {
+            return fn ? this.bind("mousewheel", fn) : this.trigger("mousewheel");
+        },
+
+        unmousewheel: function(fn) {
+            return this.unbind("mousewheel", fn);
+        }
+    });
+
+
+    function handler(event) {
+        var orgEvent = event || window.event,
+            args = [].slice.call(arguments, 1),
+            delta = 0,
+            deltaX = 0,
+            deltaY = 0,
+            absDelta = 0,
+            absDeltaXY = 0,
+            fn;
+        event = $.event.fix(orgEvent);
+        event.type = "mousewheel";
+
+        // Old school scrollwheel delta
+        if ( orgEvent.wheelDelta ) { delta = orgEvent.wheelDelta; }
+        if ( orgEvent.detail ) { delta = orgEvent.detail * -1; }
+
+        // New school wheel delta (wheel event)
+        if ( orgEvent.deltaY ) {
+            deltaY = orgEvent.deltaY * -1;
+            delta = deltaY;
+        }
+        if ( orgEvent.deltaX ) {
+            deltaX = orgEvent.deltaX;
+            delta = deltaX * -1;
+        }
+
+        // Webkit
+        if ( orgEvent.wheelDeltaY !== undefined ) { deltaY = orgEvent.wheelDeltaY; }
+        if ( orgEvent.wheelDeltaX !== undefined ) { deltaX = orgEvent.wheelDeltaX * -1; }
+
+        // Look for lowest delta to normalize the delta values
+        absDelta = Math.abs(delta);
+        if ( !lowestDelta || absDelta < lowestDelta ) { lowestDelta = absDelta; }
+        absDeltaXY = Math.max(Math.abs(deltaY), Math.abs(deltaX));
+        if ( !lowestDeltaXY || absDeltaXY < lowestDeltaXY ) { lowestDeltaXY = absDeltaXY; }
+
+        // Get a whole value for the deltas
+        fn = delta > 0 ? 'floor' : 'ceil';
+        delta = Math[fn](delta / lowestDelta);
+        deltaX = Math[fn](deltaX / lowestDeltaXY);
+        deltaY = Math[fn](deltaY / lowestDeltaXY);
+
+        // Add event and delta to the front of the arguments
+        args.unshift(event, delta, deltaX, deltaY);
+
+        return ($.event.dispatch || $.event.handle).apply(this, args);
+    }
+
+}));
 
 function VirtualSky(input){
 
@@ -168,56 +283,110 @@ function VirtualSky(input){
 	this.projections = {
 		'polar': {
 			title: 'Polar projection',
-			azel2xy: function(az,el,w,h,vs){
+			azel2xy: function(az,el,w,h){
 				var radius = h/2;
 				var r = radius*(90-el)/90;
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
 			polartype: true
 		},
 		'fisheye':{
 			title: 'Fisheye polar projection',
-			azel2xy: function(az,el,w,h,vs){
+			azel2xy: function(az,el,w,h){
 				var radius = h/2;
-				// R = 2 * f * sin(theta/2)
-				var r = radius*Math.sin((90-el)*vs.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
-				//var r = radius*(90-el)/95;	// the field of view is bigger than 180 degrees
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+				var r = radius*Math.sin((90-el)*this.d2r/2)/0.70710678;	// the field of view is bigger than 180 degrees
+				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
 			polartype:true
 		},
 		'ortho':{
 			title: 'Orthographic polar projection',
-			azel2xy: function(az,el,w,h,vs){
+			azel2xy: function(az,el,w,h){
 				var radius = h/2;
-				var r = radius*Math.cos(el*vs.d2r);
-				return {x:(w/2-r*Math.sin(az*vs.d2r)),y:(radius-r*Math.cos(az*vs.d2r))};
+				var r = radius*Math.cos(el*this.d2r);
+				return {x:(w/2-r*Math.sin(az*this.d2r)),y:(radius-r*Math.cos(az*this.d2r))};
 			},
 			polartype:true
 		},
 		'stereo': {
 			title: 'Stereographic projection',
-			azel2xy: function(az,el,w,h,vs){
+			azel2xy: function(az,el,w,h){
 				var f = 0.42;
 				var sinel1 = Math.sin(0);
 				var cosel1 = Math.cos(0);
-				var cosaz = Math.cos((az-180)*vs.d2r);
-				var sinaz = Math.sin((az-180)*vs.d2r);
-				var sinel = Math.sin(el*vs.d2r);
-				var cosel = Math.cos(el*vs.d2r);
+				var cosaz = Math.cos((az-180)*this.d2r);
+				var sinaz = Math.sin((az-180)*this.d2r);
+				var sinel = Math.sin(el*this.d2r);
+				var cosel = Math.cos(el*this.d2r);
 				var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
 				return {x:(w/2+f*k*h*cosel*sinaz),y:(h-f*k*h*(cosel1*sinel-sinel1*cosel*cosaz))};
 			}
 		},
 		'lambert':{
 			title: 'Lambert projection',
-			azel2xy: function(az,el,w,h,vs){
-				var cosaz = Math.cos((az-180)*vs.d2r);
-				var sinaz = Math.sin((az-180)*vs.d2r);
-				var sinel = Math.sin(el*vs.d2r);
-				var cosel = Math.cos(el*vs.d2r);
+			azel2xy: function(az,el,w,h){
+				var cosaz = Math.cos((az-180)*this.d2r);
+				var sinaz = Math.sin((az-180)*this.d2r);
+				var sinel = Math.sin(el*this.d2r);
+				var cosel = Math.cos(el*this.d2r);
 				var k = Math.sqrt(2/(1+cosel*cosaz));
 				return {x:(w/2+0.6*h*k*cosel*sinaz),y:(h-0.6*h*k*(sinel))};
+			}
+		},
+		'gnomic': {
+			title: 'Gnomic projection',
+			azel2xy: function(az,el){
+				if(el >= 0){
+					var pos = this.azel2radec(az,el);
+					return this.radec2xy(pos.ra,pos.dec,[el,az]);
+				}else{
+					return { x: -1, y: -1, el: el };
+				}
+			},
+			radec2xy: function(ra,dec,coords){
+
+				var fov, alpha0, delta0, cd, cd0, sd, sd0, dA, A, F, scale, twopi;
+
+				if(!coords) coords = this.coord2horizon(ra, dec);
+				// Should we show things below the horizon?
+				if(this.ground && coords[0] < -1e-6) return {x:-1, y:-1, el:coords[0]};
+				
+				// Coordinates of the map centre
+				alpha0 = -this.ra_off;
+				delta0 = -this.dc_off;
+
+				// Only want to project the sky around the map centre
+				if(this.greatCircle(alpha0,delta0,ra,dec) >= this.maxangle) return {x:-1,y:-1,el:-1};
+
+				twopi = Math.PI*2;
+				
+				// number of pixels per degree in the map
+				scale = this.tall/this.fov;
+
+
+				cd = Math.cos(dec*this.d2r);
+				cd0 = Math.cos(delta0*this.d2r);
+				sd = Math.sin(dec*this.d2r);
+				sd0 = Math.sin(delta0*this.d2r);
+
+				dA = this.d2r*(ra-alpha0);
+				while(dA > twopi) dA -= twopi;
+				while(dA < -twopi) dA += twopi;
+				
+				A = cd*Math.cos(dA);
+				F = scale*this.r2d/(sd0*sd + A*cd0);
+
+				return {x:(this.wide/2)-F*cd*Math.sin(dA),y:(this.tall/2) -F*(cd0*sd - A*sd0),el:coords[0]};
+			},
+			draw: function(){
+				if(!this.transparent){
+					this.ctx.fillStyle = (this.gradient && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					this.ctx.fillRect(0,0,this.wide,this.tall);
+					this.ctx.fill();
+				}
+			},
+			isVisible: function(el){
+				return true;
 			}
 		},
 		'equirectangular':{
@@ -230,9 +399,6 @@ function VirtualSky(input){
 		},
 		'mollweide':{
 			title: 'Mollweide projection',
-			azel2xy: function(az,el,w,h){
-				return {x:0,y:0};
-			},
 			radec2xy: function(ra,dec){
 				var dtheta, x, y, coords, sign, outside, normra;
 				var thetap = Math.abs(dec)*this.d2r;
@@ -283,9 +449,6 @@ function VirtualSky(input){
 		},
 		'planechart':{
 			title: 'Planechart projection',
-			azel2xy: function(az,el,w,h){
-				return {x:0,y:0};
-			},
 			radec2xy: function(ra,dec){
 				while(ra < 0) ra += 360;
 				while(ra > 360) ra -= 360;
@@ -330,6 +493,9 @@ function VirtualSky(input){
 	this.hipparcos = {};
 	this.az_step = 0;
 	this.az_off = 0;
+	this.ra_off = 0;
+	this.dc_off = 0;
+	this.fov = 30;
 	this.clock = new Date();
 	this.fullsky = false;
 
@@ -625,9 +791,17 @@ VirtualSky.prototype.setWH = function(w,h){
 	this.c.height = h;
 	this.wide = w;
 	this.tall = h;
+	this.changeFOV();
 	// Bug fix for IE 8 which sets a width of zero to a div within the <canvas>
 	if(this.ie && $.browser.version == 8) $('#'+this.idinner).find('div').css({'width':w,'height':h});
 	this.canvas.css({'width':w,'height':h});
+}
+VirtualSky.prototype.changeFOV = function(delta){
+	if(delta > 0) this.fov /= 1.2;
+	else if(delta < 0) this.fov *= 1.2;
+	if(this.fov > 60 || typeof this.fov!=="number") this.fov = 60;
+	if(this.fov < 1) this.fov = 1;
+	this.maxangle = this.fov*Math.max(this.wide,this.tall)/this.tall;
 }
 // Some pseudo-jQuery
 VirtualSky.prototype.hide = function(){ this.container.hide(); return this; }
@@ -712,48 +886,62 @@ VirtualSky.prototype.createSky = function(){
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) $(e.data.sky.canvas).css({cursor:'pointer'});
 		}).on('mousemove',{sky:this},function(e){
-			var sky = e.data.sky;
+			var s = e.data.sky;
 			// We don't need scrollX/scrollY as pageX/pageY seem to include this
 			var x = e.pageX - $(this).offset().left;
 			var y = e.pageY - $(this).offset().top;
-			if(sky.mouse) $(sky.canvas).css({cursor:'move'});
-			if(sky.dragging && sky.mouse){
-				if(sky.polartype){
-					dx = x - sky.wide/2;
-					dy = y - sky.tall/2;
-					theta = Math.atan2(dy,dx);
-					if(theta > sky.theta) sky.az_off += 2;
-					else if(theta < sky.theta) sky.az_off -= 2;
-					sky.az_off = sky.az_off%360;
-					sky.theta = theta;
+			var theta,f;
+			if(s.mouse) $(s.canvas).css({cursor:'move'});
+			if(s.dragging && s.mouse){
+				if(s.polartype){
+					theta = Math.atan2(y-s.tall/2,x-s.wide/2);
+					if(!s.theta) s.theta = theta;
+					s.az_off -= (s.theta-theta)*s.r2d;
+					s.theta = theta;
+				}else if(s.projection.id=="gnomic"){
+					f = 0.0015*s.fov;
+					if(typeof s.x=="number") s.ra_off += (s.x-x)*f/(Math.cos((s.dc_off)*s.d2r));
+					if(typeof s.y=="number") s.dc_off += (s.y-y)*f;
+					if(s.dc_off > 90) s.dc_off = 89.9999;
+					if(s.dc_off < -90) s.dc_off = -89.9999;
 				}else{
-					if(typeof sky.x=="number") sky.az_off += (sky.x-x)/2
-					sky.az_off = sky.az_off%360;
+					if(typeof s.x=="number") s.az_off += (s.x-x)/2
 				}
-				sky.x = x;
-				sky.y = y;
-				sky.draw();
-				$(sky.canvas).css({cursor:'-moz-grabbing'});
+				s.az_off = s.az_off%360;
+				s.x = x;
+				s.y = y;
+				s.draw();
+				$(s.canvas).css({cursor:'-moz-grabbing'});
 			}else{
-				matched = sky.whichPointer(x,y);
-				if(matched >= 0) $(sky.canvas).css({cursor:'pointer'});
-				sky.toggleInfoBox(matched);
+				matched = s.whichPointer(x,y);
+				if(matched >= 0) $(s.canvas).css({cursor:'pointer'});
+				s.toggleInfoBox(matched);
 			}	
 		}).on('mousedown',{sky:this},function(e){
 			e.data.sky.dragging = true;
 		}).on('mouseup',{sky:this},function(e){
-			e.data.sky.dragging = false;
-			e.data.sky.x = "";
+			var s = e.data.sky;
+			s.dragging = false;
+			s.x = "";
+			s.y = "";
+			s.theta = "";
 		}).on('mouseout',{sky:this},function(e){
 			var s = e.data.sky;
 			s.dragging = false;
 			s.mouseover = false;
 			s.x = "";
+			s.y = "";
 			if(typeof s.callback.mouseout=="function") s.callback.mouseout.call(s);
 		}).on('mouseenter',{sky:this},function(e){
 			var s = e.data.sky;
 			s.mouseover = true;
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
+		}).on('mousewheel',{sky:this},function(e, delta) {
+			if(e.data.sky.mouse){
+				e.data.sky.changeFOV(delta);
+				e.data.sky.draw();
+				return false;
+			}
 		});
 		$(document).bind('keypress',{sky:this},function(e){
 			if(!e) e = window.event;
@@ -890,28 +1078,29 @@ VirtualSky.prototype.toggleInfoBox = function(i){
 // utc is a Date object
 // results returned in hrz_altitude, hrz_azimuth
 VirtualSky.prototype.coord2horizon = function(ra, dec){
+	var utc, ha, lat, alt, az, hrz_al, hrz_az;
 	var utc = this.now;
 	// compute hour angle in degrees
 	//var times = this.astronomicalTimes(utc);
-	var ha = this.times.LST*15 - ra;
+	ha = this.times.LST*15 - ra;
 	if (ha < 0) ha += 360;
 	// convert degrees to radians
 	ha *= this.d2r;
 	dec *= this.d2r;
 	// Fudge to fix divide by zero error at poles
-	var lat = this.latitude;
+	lat = this.latitude;
 	lat = (Math.abs(lat) == 90.0) ? (lat-0.00001)*this.d2r : lat*this.d2r;
 	// compute altitude in radians
-	var alt = Math.asin(Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(ha));
+	alt = Math.asin(Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(ha));
 	// compute azimuth in radians
 	// divide by zero error at poles or if alt = 90 deg
-	var az  = Math.acos((Math.sin(dec) - Math.sin(alt)*Math.sin(lat))/(Math.cos(alt)*Math.cos(lat)));
+	az = Math.acos((Math.sin(dec) - Math.sin(alt)*Math.sin(lat))/(Math.cos(alt)*Math.cos(lat)));
 	// convert radians to degrees
-	var hrz_altitude = alt/this.d2r;
-	var hrz_azimuth  = az/this.d2r;
+	hrz_al = alt/this.d2r;
+	hrz_az = az/this.d2r;
 	// choose hemisphere
-	if (Math.sin(ha) > 0) hrz_azimuth = 360 - hrz_azimuth;
-	return [hrz_altitude,hrz_azimuth];
+	if (Math.sin(ha) > 0) hrz_az = 360 - hrz_az;
+	return [hrz_al,hrz_az];
 }
 VirtualSky.prototype.selectProjection = function(proj){
 	if(this.projections[proj]){
@@ -932,16 +1121,6 @@ VirtualSky.prototype.selectProjection = function(proj){
 		}
 	}
 }
-// Update the sky colours
-VirtualSky.prototype.updateColours = function(){
-	// We need to make a copy of the correct colour palette otherwise it'll overwrite it
-	this.col = $.extend(true, {}, ((this.negative) ? this.colours.negative : this.colours.normal));
-	if(this.color==""){
-		if((this.polartype || this.projection.altlabeltext)) this.col.txt = this.col.grey;
-	}else{
-		this.col.txt = this.color;
-	}
-}
 // Cycle through the map projections
 VirtualSky.prototype.cycleProjection = function(){
 	var usenext = false;
@@ -960,7 +1139,18 @@ VirtualSky.prototype.cycleProjection = function(){
 	if(proj == this.projection.id) proj = firstkey;
 	this.draw(proj);
 }
+// Update the sky colours
+VirtualSky.prototype.updateColours = function(){
+	// We need to make a copy of the correct colour palette otherwise it'll overwrite it
+	this.col = $.extend(true, {}, ((this.negative) ? this.colours.negative : this.colours.normal));
+	if(this.color==""){
+		if((this.polartype || this.projection.altlabeltext)) this.col.txt = this.col.grey;
+	}else{
+		this.col.txt = this.color;
+	}
+}
 VirtualSky.prototype.isVisible = function(el){
+	if(typeof this.projection.isVisible==="function") return this.projection.isVisible.call(el);
 	if(!this.fullsky) return (el > 0);
 	else return (this.ground) ? (el > 0) : true;
 }
@@ -1132,11 +1322,41 @@ VirtualSky.prototype.radec2xy = function(ra,dec){
 		var coords = this.coord2horizon(ra, dec);
 		// Only return coordinates above the horizon
 		if(coords[0] > 0){
-			var pos = (typeof this.projection.azel2xy==="function") ? this.projection.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall, this) : this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
+			var pos = this.azel2xy(coords[1]-this.az_off,coords[0],this.wide,this.tall);
 			return {x:pos.x,y:pos.y,az:coords[1],el:coords[0]};
 		}
 	}
 	return 0;
+}
+VirtualSky.prototype.azel2xy = function(az,el){
+	var w = this.wide;
+	var h = this.tall;
+	if(az < 0) az += 360;
+
+	if(typeof this.projection.azel2xy==="function") return this.projection.azel2xy.call(this,az,el,w,h);
+	else return {x:0,y:0};
+}
+VirtualSky.prototype.azel2radec = function(az,el){
+	var xt,yt,r;
+	xt  =  Math.asin( Math.sin(this.d2r*el) * Math.sin(this.d2r*this.latitude) + Math.cos(this.d2r*el) * Math.cos(this.d2r*this.latitude) * Math.cos(this.d2r*az) );
+	r = ( Math.sin(this.d2r*el) - Math.sin(this.d2r*this.latitude) * Math.sin(xt) ) / ( Math.cos(this.d2r*this.latitude) * Math.cos(xt) );
+	if(r > 1) r = 1;
+	yt  =  Math.acos(r);
+	if(Math.sin(this.d2r*az) > 0.0) yt  =  Math.PI*2 - yt;
+	xt *= this.r2d;
+	yt *= this.r2d;
+	yt = (this.times.LST*15 - yt + 360)%360.0;
+	return { ra: yt, dec: xt }
+}
+// Convert Galactic -> x,y
+VirtualSky.prototype.gal2xy = function(l,b){
+	var pos = this.gal2radec(l,b);
+	return this.radec2xy(pos[0],pos[1]);
+}
+// Convert Galactic -> J2000
+VirtualSky.prototype.gal2radec = function(l,b){
+	// Using SLALIB values
+	return this.Transform([l,b], [-0.054875539726, 0.494109453312, -0.867666135858, -0.873437108010, -0.444829589425, -0.198076386122, -0.483834985808, 0.746982251810, 0.455983795705]);
 }
 // Input is a two element position (degrees) and rotation matrix
 // Output is a two element position (degrees)
@@ -1153,24 +1373,11 @@ VirtualSky.prototype.Transform = function(p, rot){
 	if (a < 0) a += Math.PI*2;
 	return [a*this.r2d,b*this.r2d];
 }
-// Convert Galactic -> J2000
-VirtualSky.prototype.gal2xy = function(l,b){
-	// Using SLALIB values
-	var pos = this.Transform([l,b], [-0.054875539726, 0.494109453312, -0.867666135858, -0.873437108010, -0.444829589425, -0.198076386122, -0.483834985808, 0.746982251810, 0.455983795705]);
-	return this.radec2xy(pos[0],pos[1]);
-}
 // Convert from B1875 to J2000
 // Using B = 1900.0 + (JD − 2415020.31352) / 365.242198781 and p73 Practical Astronomy With A Calculator
 VirtualSky.prototype.fk1tofk5 = function(a,b){
 	// Convert from B1875 -> J2000
 	return this.Transform([a,b], [0.9995358730015703, -0.02793693620138929, -0.012147682028606801, 0.027936935758478665, 0.9996096732234282, -0.00016976035344812515, 0.012147683047201562, -0.00016968744936278707, 0.9999261997781408]);
-}
-VirtualSky.prototype.azel2xy = function(az,el){
-	var w = this.wide;
-	var h = this.tall;
-	if(az < 0) az += 360;
-
-	return this.projection.azel2xy(az,el,w,h,this);
 }
 VirtualSky.prototype.vectorMultiply = function(A,B){
 	if(B.length > 0){
@@ -1785,14 +1992,14 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	if(!type || !this.grid[type]) return this;
 	if(!colour || typeof colour!="string") colour = this.col[type];
 	if(!step || typeof step!="number") step = this.grid.step;
-	var maxb,minb,x,y,a,b,pos;
-	var c = this.ctx;
-	var oldx = 0;
-	var oldy = 0;
+	var maxb,minb,x,y,a,b,pos,c,oldx,oldy,bstep2,ra,dc;
+	c = this.ctx;
+	oldx = 0;
+	oldy = 0;
 	c.beginPath(); 
 	c.strokeStyle = colour;
 	c.lineWidth = 1.0;
-	var bstep = 2;
+	bstep = 2;
 	if(type=="az"){
 		maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb : 90-bstep;
 		minb = 0;
@@ -1800,33 +2007,43 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		maxb = 90-bstep;
 		minb = -maxb;
 	}
-	for(a = 0 ; a < 360 ; a += step){
-		moved = false;
-		for(b = minb; b <= maxb ; b+= bstep){
-			if(type=="az") pos = this.azel2xy(a-this.az_off,b);
-			else if(type=="eq") pos = this.radec2xy(a,b);
-			else if(type=="gal") pos = this.gal2xy(a,b);
-			x = pos.x;
-			y = pos.y;
-			if(type=="az") show = true;
-			else show = ((this.isVisible(pos.el)) ? true : false);
-			if(show){
-				if(isFinite(x) && isFinite(y)){
-					if(type=="az"){
-						if(b == 0) c.moveTo(x,y);
-						else c.lineTo(x,y);
-					}else{
-						// If the line is long we assume we've switched sides of the sky so don't join the dots
-						if(!moved || Math.abs(oldx-x) > this.tall/2){
-							c.moveTo(x,y);
-							moved = true;
-						}else c.lineTo(x,y);
-					}
+	// Function to join the dots
+	function joinpoint(s,type,a,b,old){
+		var x,y,show,c,pos;
+		c = s.ctx;
+		if(type=="az") pos = s.azel2xy(a-s.az_off,b);
+		else if(type=="eq") pos = s.radec2xy(a,b);
+		else if(type=="gal") pos = s.gal2xy(a,b);
+		x = pos.x;
+		y = pos.y;
+		if(type=="az") show = true;
+		else show = ((s.isVisible(pos.el)) ? true : false);
+		if(show){
+			if(isFinite(x) && isFinite(y)){
+				if(type=="az"){
+					if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2) c.moveTo(x,y);
+					c.lineTo(x,y);
+					old.moved = true;
+				}else{
+					// If the last point on s contour is more than a canvas width away
+					// it is probably supposed to be behind us so we won't draw a line 
+					if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2){
+						c.moveTo(x,y);
+						old.moved = true;
+					}else c.lineTo(x,y);
 				}
-				oldx = x;
-				oldy = y;
+				old.x = x;
+				old.y = y;
+				return old;
 			}
 		}
+		return old;
+	}
+	old = {x:0,y:0,moved:false};
+	// Draw grid lines in elevation/declination/latitude
+	for(a = 0 ; a < 360 ; a += step){
+		old.moved = false;
+		for(b = minb; b <= maxb ; b+= bstep) old = joinpoint(this,type,a,b,old);
 	}
 	c.stroke();
 	c.beginPath(); 
@@ -1837,34 +2054,11 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		minb = -90+step;
 		maxb = 90;
 	}
+	old = {x:0,y:0,moved:false};
+	// Draw grid lines in azimuth/RA/longitude
 	for(b = minb; b < maxb ; b+= step){
-		moved = false;
-		for(a = 0 ; a <= 360 ; a += bstep){
-			if(type=="az") pos = this.azel2xy(a-this.az_off,b);
-			else if(type=="eq") pos = this.radec2xy(a,b);
-			else if(type=="gal") pos = this.gal2xy(a,b);
-			x = pos.x;
-			y = pos.y;
-			if(type=="az") show = true;
-			else show = ((this.isVisible(pos.el)) ? true : false);
-			if(show){
-				if(isFinite(x) && isFinite(y)){
-					if(type=="az"){
-						if(a == 0) c.moveTo(x,y);
-						c.lineTo(x,y);
-					}else{
-						// If the last point on this contour is more than a canvas width away
-						// it is probably supposed to be behind us so we won't draw a line 
-						if(!moved || Math.abs(oldx-x) > this.tall/4 || Math.abs(oldy-y) > this.tall/4){
-							c.moveTo(x,y);
-							moved = true;
-						}else c.lineTo(x,y);
-						oldx = x;
-						oldy = y;
-					}
-				}
-			}
-		}
+		old.moved = false;
+		for(a = 0 ; a <= 360 ; a += bstep) old = joinpoint(this,type,a,b,old);
 	}
 	c.stroke();
 	return this;
@@ -1973,7 +2167,6 @@ VirtualSky.prototype.advanceTime = function(by,wait){
 	return this;
 }
 VirtualSky.prototype.setClock = function(seconds){
-
 	if(typeof seconds=="string"){
 		seconds = convertTZ(seconds);
 		if(!this.input.clock){
@@ -2018,7 +2211,7 @@ VirtualSky.prototype.toggleAzimuthMove = function(az){
 		this.moveIt();
 	}else{
 		this.az_step = 0;
-		if(typeof this.timer_az!="undefined") clearTimeout(this.timer_az)
+		if(typeof this.timer_az!="undefined") clearTimeout(this.timer_az);
 	}
 	return this;
 }
@@ -2094,7 +2287,14 @@ VirtualSky.prototype.getNegative = function(colour){
 	var rgb = colour.substring(colour.indexOf("(")+1,end).split(",");
 	return (rgb.length==3) ? ('rgb('+(255-rgb[0])+','+(255-rgb[1])+','+(255-rgb[2])+')') : ('rgba('+(255-rgb[0])+','+(255-rgb[1])+','+(255-rgb[2])+','+(rgb[3])+')');
 }
-
+// Calculate the Great Circle angular distance (in degrees) between two points defined by d1,l1 and d2,l2
+VirtualSky.prototype.greatCircle = function(l1,d1,l2,d2){
+	d1 *= this.d2r;
+	d2 *= this.d2r;
+	l1 *= this.d2r;
+	l2 *= this.d2r;
+	return this.r2d*Math.acos(Math.cos(d1)*Math.cos(d2)*Math.cos(l1-l2)+Math.sin(d1)*Math.sin(d2));
+}
 // Some useful functions
 function convertTZ(s){
 	function formatHour(h){
