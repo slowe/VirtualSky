@@ -266,6 +266,16 @@
 
 			});
 
+			test("Add Pointers",function(){
+
+				var sky = jQuery.virtualsky({id:'starmapper'});
+
+				assert_equal(1,sky.addPointer({'ra':83.6330833,'dec':22.0145,'label':'M1 - Crab Nebula','html':'Blah blah','url':'http://www.strudel.org.uk/lookUP/?name=M1',colour:'rgb(220,220,255)'}),"Add a first pointer");
+				assert_equal(2,sky.addPointer({'ra':148.9684583,'dec':69.6797028,'label':'M82','url':'http://www.strudel.org.uk/lookUP/?name=M82',colour:'rgb(220,220,255)'}),"Add a 2nd pointer");
+
+			});
+
+
 /*
 		planets - either an object containing an array of planets or a JSON file
 		background ('rgba(0,0,0,0)') - the background colour
