@@ -66,7 +66,13 @@ The following options can be specified (defaults in brackets):
   * `gridlines_az` (false) - show/hide the azimuth/elevation grid lines
   * `gridlines_eq` (false) - show/hide the RA/Dec grid lines
   * `gridlines_gal` (false) - show/hide the Galactic Coordinate grid lines
-  * `gridstep` (30) - the size of the grid step when showing grid lines</li>
+  * `gridstep` (30) - the size of the grid step when showing grid lines
+  * `ra` (0) - the RA (degrees) for the centre of the view in gnomic projection
+  * `dec` (0) - the Declination (degrees) for the centre of the view in gnomic projection
+  * `fov` (30) - the vertical field-of-view (degrees) in the gnomic projection
+  * `fontsize` - set the font size in pixels if you want to over-ride the auto sizing
+  * `fontfamily` - set the font family using a CSS style font-family string otherwise it inherits from the container element
+  * `objects` - a semi-colon-separated string of recognized object names to display e.g. "M1;M42;Horsehead Nebula" (requires internet connection)
 
 
 Author
