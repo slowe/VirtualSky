@@ -104,6 +104,7 @@
 
 			});
 			
+			var d2r = Math.PI/180;
 
 			test("Times and Locations",function(){
 
@@ -145,8 +146,8 @@
 				sky.setClock('now');
 
 				sky.setGeo("53.5,-2.3");
-				assert_equal(sky.latitude,53.5,"Latitude should be set")
-				assert_equal(sky.longitude,-2.3,"Longitude should be set")
+				assert_almost_equal(sky.latitude,53.5*d2r,6,"Latitude should be set")
+				assert_almost_equal(sky.longitude,-2.3*d2r,6,"Longitude should be set")
 
 			});
 
@@ -154,14 +155,14 @@
 
 				var sky = jQuery.virtualsky({id:'angletest','projection':'polar','width':500,'height':500});
 
-				assert_almost_equal(sky.greatCircle(180,0,180,0),0,8,"Great Circle distance for same point is zero");
-				assert_almost_equal(sky.greatCircle(180,0,90,0),90,8,"Great Circle distance for points separated around the equator");
-				assert_almost_equal(sky.greatCircle(180,0,180,45),45,8,"Great Circle distance for points separated in declination");
-				assert_almost_equal(sky.greatCircle(0,0,360,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different");
-				assert_almost_equal(sky.greatCircle(10,0,10,45),45,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
-				assert_almost_equal(sky.greatCircle(10,45,10,-45),90,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
-				assert_almost_equal(sky.greatCircle(-180,0,180,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
-				assert_almost_equal(sky.greatCircle(190,20,10,20),140,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,0),0*d2r,8,"Great Circle distance for same point is zero");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,90*d2r,0),90*d2r,8,"Great Circle distance for points separated around the equator");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination");
+				assert_almost_equal(sky.greatCircle(0,0,360*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different");
+				assert_almost_equal(sky.greatCircle(10*d2r,0,10*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(10*d2r,45*d2r,10*d2r,-45*d2r),90*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(-180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
+				assert_almost_equal(sky.greatCircle(190*d2r,20*d2r,10*d2r,20*d2r),140*d2r,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
 
 			});
 
@@ -275,36 +276,6 @@
 
 			});
 
-
-/*
-		planets - either an object containing an array of planets or a JSON file
-		background ('rgba(0,0,0,0)') - the background colour
-		transparent (false) - make the sky background transparent
-		color ('rgb(255,255,255)') - the text colour
-		az (180) - an azimuthal offset with 0 = north and 90 = east
-		negative (false) - invert the default colours i.e. to black on white
-		ecliptic (false) - show the Ecliptic
-		gradient (true) - reduce the brightness of stars near the horizon
-		cardinalpoints (true) - show/hide the N/E/S/W labels
-		constellations (false) - show/hide the constellation lines
-		constellationlabels (false) - show/hide the constellation labels
-		constellationboundaries (false) - show/hide the constellation boundaries (IAU)
-		showstars (true) - show/hide the stars
-		showstarlabels (false) - show/hide the star labels for brightest stars
-		showplanets (true) - show/hide the planets
-		showplanetlabels (true) - show/hide the planet labels
-		showorbits (false) - show/hide the orbits of the planets
-		showdate (true) - show/hide the date and time
-		showposition (true) - show/hide the latitude/longitude
-		ground (false) - show/hide the local ground (for full sky projections)
-		keyboard (true) - allow keyboard controls
-		mouse (true) - allow mouse controls
-		gridlines_az (false) - show/hide the azimuth/elevation grid lines
-		gridlines_eq (false) - show/hide the RA/Dec grid lines
-		gridlines_gal (false) - show/hide the Galactic Coordinate grid lines
-		gridstep (30) - the size of the grid step when showing grid lines
-		live (false) - update the display in real time
-*/
 
 		});
 
