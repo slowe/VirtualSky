@@ -282,6 +282,11 @@ function VirtualSky(input){
 	this.callback = { geo:'', mouseenter:'', mouseout:'' };
 	this.keys = new Array();
 	this.base = "";
+	this.az_step = 0;
+	this.az_off = 0;
+	this.ra_off = 0;
+	this.dc_off = 0;
+	this.fov = 30;
 
 	// Projections
 	this.projections = {
@@ -496,11 +501,6 @@ function VirtualSky(input){
 	}
 
 	this.hipparcos = {};
-	this.az_step = 0;
-	this.az_off = 0;
-	this.ra_off = 0;
-	this.dc_off = 0;
-	this.fov = 30;
 	this.clock = new Date();
 	this.fullsky = false;
 
@@ -1642,6 +1642,7 @@ VirtualSky.prototype.drawStars = function(){
 	this.az_off = (this.az_off+360)%360;
 	var mag,i,j,p,d,atmos;
 	atmos = this.hasAtmos();
+	fovf = Math.sqrt(30/this.fov);
 	var scale = (typeof this.scalestars==="number" && this.scalestars!=1) ? true : false;
 	for(i = 0; i < this.stars.length; i++){
 		if(this.stars[i][1] < this.magnitude){
@@ -1654,6 +1655,7 @@ VirtualSky.prototype.drawStars = function(){
 				if(atmos) d *= Math.exp(-((90-p.el)*this.d2r)*0.6);
 				if(this.negative) d *= 1.4;
 				if(scale) d *= this.scalestars;
+				if(this.projection.id == "gnomic") d *= fovf;
 				this.ctx.moveTo(p.x+d,p.y);
 				if(this.showstars) this.ctx.arc(p.x,p.y,d,0,Math.PI*2,true);
 				if(this.showstarlabels){
