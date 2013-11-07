@@ -298,7 +298,7 @@ function VirtualSky(input){
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
 			},
 			polartype: true,
-			gradient: false
+			atmos: true
 		},
 		'fisheye':{
 			title: 'Fisheye polar projection',
@@ -308,7 +308,7 @@ function VirtualSky(input){
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
 			},
 			polartype:true,
-			gradient: false
+			atmos: true
 		},
 		'ortho':{
 			title: 'Orthographic polar projection',
@@ -318,7 +318,7 @@ function VirtualSky(input){
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
 			},
 			polartype:true,
-			gradient: false
+			atmos: true
 		},
 		'stereo': {
 			title: 'Stereographic projection',
@@ -332,7 +332,8 @@ function VirtualSky(input){
 				var cosel = Math.cos(el);
 				var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
 				return {x:(w/2+f*k*h*cosel*sinaz),y:(h-f*k*h*(cosel1*sinel-sinel1*cosel*cosaz)),el:el};
-			}
+			},
+			atmos: true
 		},
 		'lambert':{
 			title: 'Lambert projection',
@@ -343,7 +344,8 @@ function VirtualSky(input){
 				var cosel = Math.cos(el);
 				var k = Math.sqrt(2/(1+cosel*cosaz));
 				return {x:(w/2+0.6*h*k*cosel*sinaz),y:(h-0.6*h*k*(sinel)),el:el};
-			}
+			},
+			atmos: true
 		},
 		'gnomic': {
 			title: 'Gnomic projection',
@@ -387,7 +389,7 @@ function VirtualSky(input){
 			},
 			draw: function(){
 				if(!this.transparent){
-					this.ctx.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					this.ctx.fillStyle = (this.hasGradient()) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					this.ctx.fillRect(0,0,this.wide,this.tall);
 					this.ctx.fill();
 				}
@@ -395,7 +397,7 @@ function VirtualSky(input){
 			isVisible: function(el){
 				return true;
 			},
-			gradient: false
+			atmos: false
 		},
 		'equirectangular':{
 			title: 'Equirectangular projection',
@@ -404,7 +406,7 @@ function VirtualSky(input){
 				return {x:(((az-Math.PI)/(Math.PI/2))*h + w/2),y:(h-(el/(Math.PI/2))*h),el:el};
 			},
 			maxb: 90,
-			gradient: false
+			atmos: false
 		},
 		'mollweide':{
 			title: 'Mollweide projection',
@@ -449,13 +451,13 @@ function VirtualSky(input){
 				c.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
 				c.closePath();
 				if(!this.transparent){
-					c.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					c.fillStyle = (this.hasGradient()) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					c.fill();
 				}
 			},
 			altlabeltext:true,
 			fullsky:true,
-			gradient: false
+			atmos: false
 		},
 		'planechart':{
 			title: 'Planechart projection',
@@ -469,13 +471,13 @@ function VirtualSky(input){
 			},
 			draw: function(){
 				if(!this.transparent){
-					this.ctx.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
+					this.ctx.fillStyle = (this.hasGradient()) ? "rgba(0,15,30, 1)" : ((this.negative) ? this.col.white : this.col.black);
 					this.ctx.fillRect((this.wide/2) - (this.tall),0,this.tall*2,this.tall);
 					this.ctx.fill();
 				}
 			},
 			fullsky:true,
-			gradient: false
+			atmos: false
 		}
 	};
 	
@@ -1512,7 +1514,7 @@ VirtualSky.prototype.draw = function(proj){
 		c.arc(this.wide/2,this.tall/2,-0.5+this.tall/2,0,Math.PI*2,true);
 		c.closePath();
 		if(!this.transparent){
-			c.fillStyle = (this.hasAtmos() && !this.negative) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
+			c.fillStyle = (this.hasGradient()) ? "rgba(0,15,30, 1)" : ((this.negative) ? white : black);
 			c.fill();
 		}
 		c.lineWidth = 0.5;
@@ -1523,7 +1525,7 @@ VirtualSky.prototype.draw = function(proj){
 	this.now = this.clock;
 
 	c.beginPath();
-	if(this.hasAtmos() && !this.negative){
+	if(this.hasGradient()){
 		if(typeof this.sky_gradient == "undefined") this.updateSkyGradient();
 		c.fillStyle = this.sky_gradient;
 		// draw shapes
@@ -1675,12 +1677,11 @@ VirtualSky.prototype.drawStars = function(){
 }
 
 VirtualSky.prototype.hasAtmos = function(){
-	if(typeof this.projection.gradient==="boolean"){
-		if(this.projection.gradient && this.gradient) return true;
-		else return false;
-	}
-	if(this.gradient && !this.fullsky) return true;
-	return this.gradient;
+	return (typeof this.projection.atmos==="boolean") ? (this.gradient ? this.projection.atmos : this.gradient) : this.gradient;
+}
+
+VirtualSky.prototype.hasGradient = function(){
+	return (this.hasAtmos() && !this.projection.polartype && !this.fullsky && !this.negative) ? true : false;
 }
 
 // When provided with an array of Julian dates, ra, dec, and magnitude this will interpolate to the nearest
@@ -1752,9 +1753,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			var z;
 			if(typeof mag!="undefined"){
 				d = 0.8*Math.max(3-mag/2, 0.5);
-				if(this.hasAtmos()){
-					d *= Math.exp(-((90-pos.el)*this.d2r)*0.6)
-				}
+				if(this.hasAtmos()) d *= Math.exp(-((90-pos.el)*this.d2r)*0.6);
 			}
 			if(d < 1.5) d = 1.5;
 			this.drawPlanet(pos.x,pos.y,d,colour,this.planets[p][0]);
