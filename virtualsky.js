@@ -1750,7 +1750,7 @@ VirtualSky.prototype.drawPlanets = function(){
 		if(!this.negative) colour = this.planets[p][1];
 		if(typeof colour==="string") this.ctx.strokeStyle = colour;
 
-		if((this.showplanets || this.showplanetlabels) && this.isVisible(pos.el) && mag < this.magnitude){
+		if((this.showplanets || this.showplanetlabels) && this.isVisible(pos.el) && mag < this.magnitude && !this.isPointBad(pos)){
 			var d = 0;
 			var z;
 			if(typeof mag!="undefined"){
@@ -1766,7 +1766,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			this.ctx.lineWidth = 0.5
 			this.setFont();
 			this.ctx.lineWidth = 1;
-			var previous = {x:0,y:0,el:0};
+			var previous = {x:-1,y:-1,el:-1};
 			for(i = 0 ; i < this.planets[p][2].length-4 ; i+=4){
 				var point = this.radec2xy(this.planets[p][2][i+1]*this.d2r, this.planets[p][2][i+2]*this.d2r);
 				if(previous.x > 0 && previous.y > 0 && this.isVisible(point.el)){
@@ -1793,10 +1793,10 @@ VirtualSky.prototype.drawPlanets = function(){
 		var pos;
 		// Draw the Sun
 		pos = this.ecliptic2xy(this.sun.lon*this.d2r,this.sun.lat*this.d2r,this.times.LST);
-		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"sun");
+		if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"sun");
 		// Draw Moon last as it is closest
 		pos = this.ecliptic2xy(this.moon.lon*this.d2r,this.moon.lat*this.d2r,this.times.LST);
-		if(this.isVisible(pos.el)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"moon");
+		if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"moon");
 
 	}
 	return this;
@@ -2141,7 +2141,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		}
 		return old;
 	}
-	old = {x:0,y:0,moved:false};
+	old = {x:-1,y:-1,moved:false};
 	step *= this.d2r;
 	bstep *= this.d2r;
 	minb *= this.d2r;
@@ -2162,7 +2162,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	}
 	minb *= this.d2r;
 	maxb *= this.d2r;
-	old = {x:0,y:0,moved:false};
+	old = {x:-1,y:-1,moved:false};
 	// Draw grid lines in azimuth/RA/longitude
 	for(b = minb; b < maxb ; b+= step){
 		old.moved = false;
