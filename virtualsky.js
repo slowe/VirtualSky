@@ -1640,7 +1640,7 @@ VirtualSky.prototype.drawStars = function(){
 	this.ctx.beginPath();
 	this.ctx.fillStyle = this.col.stars;
 	this.az_off = (this.az_off+360)%360;
-	var mag,i,j,p,d,atmos;
+	var mag,i,j,p,d,atmos,fovf;
 	atmos = this.hasAtmos();
 	fovf = Math.sqrt(30/this.fov);
 	var scale = (typeof this.scalestars==="number" && this.scalestars!=1) ? true : false;
