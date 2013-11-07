@@ -108,6 +108,14 @@
 			colour:'rgb(255,220,220)'
 		});
 
+		var planetarium8 = $.virtualsky({
+			id: 'starmap8',
+			projection: 'gnomic',
+			ra: 83.8220833,
+			dec:-5.3911111,
+			ground:false
+		});
+
 	});
 	</script>
 </head>
@@ -280,6 +288,28 @@ $(document).ready(function() {
 </pre>
 			<div id="starmap7" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
+
+			<li class="example">A default view using <code>gnomic-tan</code> projection centred on M42
+				<pre class="prettyprint lang-js">
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		id: 'starmap',
+		projection: 'gnomic',
+		ra: 83.8220833,
+		dec:-5.3911111,
+		ground:false
+	});
+
+});
+			</pre>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
+</pre>
+			<div id="starmap8" class="planetarium" style="width:944x;height:400px;"></div>
+			</li>
+
+
 		</ol>
 
 		<h2>Options</h2>
