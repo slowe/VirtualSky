@@ -152,7 +152,7 @@
 
 			test("Angles",function(){
 
-				var sky = jQuery.virtualsky({id:'starmapper'});
+				var sky = jQuery.virtualsky({id:'angletest','projection':'polar','width':500,'height':500});
 
 				assert_almost_equal(sky.greatCircle(180,0,180,0),0,8,"Great Circle distance for same point is zero");
 				assert_almost_equal(sky.greatCircle(180,0,90,0),90,8,"Great Circle distance for points separated around the equator");
