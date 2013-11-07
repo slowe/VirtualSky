@@ -2266,12 +2266,13 @@ VirtualSky.prototype.setDec = function(d){
 // Inputs: RA (deg), Dec (deg), duration (seconds)
 VirtualSky.prototype.panTo = function(ra,dec,s){
 	if(!s) s = 1000;
+	if(typeof ra!=="number" || typeof dec!=="number") return this;
 	this.panning = { s: { ra:this.ra_off*this.r2d, dec:this.dc_off*this.r2d }, e: { ra: ra, dec: dec}, duration: s, start: new Date() };
 	this.panning.dr = this.panning.e.ra-this.panning.s.ra;
 	this.panning.dd = this.panning.e.dec-this.panning.s.dec;
 	if(this.panning.dr > 180) this.panning.dr = -(360-this.panning.dr);
 	if(this.panning.dr < -180) this.panning.dr = (360+this.panning.dr);
-	this.panStep();
+	return this.panStep();
 }
 
 // shim layer with setTimeout fallback
