@@ -1332,6 +1332,8 @@ VirtualSky.prototype.ecliptic2radec = function(l,b,JD){
 	if(ra < 0) ra += Math.PI+Math.PI;
 	return { ra:ra/this.d2r, dec:dec/this.d2r };
 }
+// Convert Ecliptic coordinates to x,y position
+// Inputs: l (deg), b (deg), local sidereal time
 // Returns [x, y (,elevation)]
 VirtualSky.prototype.ecliptic2xy = function(l,b,LST){
 	if(typeof LST=="undefined") LST = this.times.LST;
@@ -1372,12 +1374,15 @@ VirtualSky.prototype.azel2xy = function(az,el){
 	else return {x:0,y:0};
 }
 VirtualSky.prototype.azel2radec = function(az,el){
-	var xt,yt,r;
-	xt  =  Math.asin( Math.sin(this.d2r*el) * Math.sin(this.d2r*this.latitude) + Math.cos(this.d2r*el) * Math.cos(this.d2r*this.latitude) * Math.cos(this.d2r*az) );
-	r = ( Math.sin(this.d2r*el) - Math.sin(this.d2r*this.latitude) * Math.sin(xt) ) / ( Math.cos(this.d2r*this.latitude) * Math.cos(xt) );
+	var xt,yt,r,l;
+	el *= this.d2r;
+	az *= this.d2r;
+	l = this.latitude*this.d2r;
+	xt  =  Math.asin( Math.sin(el) * Math.sin(l) + Math.cos(el) * Math.cos(l) * Math.cos(az) );
+	r = ( Math.sin(el) - Math.sin(l) * Math.sin(xt) ) / ( Math.cos(l) * Math.cos(xt) );
 	if(r > 1) r = 1;
 	yt  =  Math.acos(r);
-	if(Math.sin(this.d2r*az) > 0.0) yt  =  Math.PI*2 - yt;
+	if(Math.sin(az) > 0.0) yt  =  Math.PI*2 - yt;
 	xt *= this.r2d;
 	yt *= this.r2d;
 	yt = (this.times.LST*15 - yt + 360)%360.0;
@@ -1587,11 +1592,13 @@ VirtualSky.prototype.lightbox = function(lb){
 }
 
 VirtualSky.prototype.drawStars = function(){
+
 	if(!this.showstars && !this.showstarlabels) return this;
 	this.ctx.beginPath();
 	this.ctx.fillStyle = this.col.stars;
 	this.az_off = (this.az_off+360)%360;
-	var mag,i,j,p,d,z;
+	var mag,i,j,p,d,atmos;
+	atmos = this.hasAtmos();
 	var scale = (typeof this.scalestars==="number" && this.scalestars!=1) ? true : false;
 	for(i = 0; i < this.stars.length; i++){
 		if(this.stars[i][1] < this.magnitude){
@@ -1601,10 +1608,7 @@ VirtualSky.prototype.drawStars = function(){
 				d = 0.8*Math.max(3-mag/2.1, 0.5);
 				// Modify the 'size' of the star by how close to the horizon it is
 				// i.e. smaller when closer to the horizon
-				if(this.hasAtmos()){
-					z = (90-p.el)*this.d2r;
-					d *= Math.exp(-z*0.6)
-				}
+				if(atmos) d *= Math.exp(-((90-p.el)*this.d2r)*0.6);
 				if(this.negative) d *= 1.4;
 				if(scale) d *= this.scalestars;
 				this.ctx.moveTo(p.x+d,p.y);
@@ -1621,8 +1625,10 @@ VirtualSky.prototype.drawStars = function(){
 		}	
 	}
 	this.ctx.fill();
+
 	return this;
 }
+
 VirtualSky.prototype.hasAtmos = function(){
 	if(typeof this.projection.gradient==="boolean"){
 		if(this.projection.gradient && this.gradient) return true;
@@ -1631,6 +1637,7 @@ VirtualSky.prototype.hasAtmos = function(){
 	if(this.gradient && !this.fullsky) return true;
 	return this.gradient;
 }
+
 // When provided with an array of Julian dates, ra, dec, and magnitude this will interpolate to the nearest
 // data = [jd_1, ra_1, dec_1, mag_1, jd_2, ra_2, dec_2, mag_2....]
 VirtualSky.prototype.interpolate = function(jd,data){
@@ -1701,8 +1708,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			if(typeof mag!="undefined"){
 				d = 0.8*Math.max(3-mag/2, 0.5);
 				if(this.hasAtmos()){
-					z = (90-pos.el)*this.d2r;
-					d *= Math.exp(-z*0.6)
+					d *= Math.exp(-((90-pos.el)*this.d2r)*0.6)
 				}
 			}
 			if(d < 1.5) d = 1.5;
