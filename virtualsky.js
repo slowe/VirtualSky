@@ -2223,10 +2223,7 @@ VirtualSky.prototype.highlight = function(i,colour){
 			c.strokeStyle = colour;
 			c.beginPath(); 
 			c.fillRect(this.pointers[i].x-this.pointers[i].d/2,this.pointers[i].y-this.pointers[i].d/2,5,5);
-			c.font = "10px Helvetica";
-			c.lineWidth = 1.5;
-			c.fill();
-			c.fillText(this.pointers[i].label,this.pointers[i].x+this.pointers[i].d*1.4,this.pointers[i].y+this.pointers[i].d*0.7)
+			this.drawLabel(pos.x,pos.y,this.pointers[i].d,colour,this.pointers[i].label);
 		}
 	}
 	return this;
