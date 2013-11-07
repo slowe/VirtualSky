@@ -2251,7 +2251,7 @@ VirtualSky.prototype.setLongitude = function(l){
 	return this; 
 }
 VirtualSky.prototype.setRADec = function(r,d){
-	this.setRA(r).setDec(d);
+	return this.setRA(r).setDec(d);
 }
 VirtualSky.prototype.setRA = function(r){
 	this.ra_off = (r%360)*this.d2r;
@@ -2261,6 +2261,46 @@ VirtualSky.prototype.setDec = function(d){
 	this.dc_off = d*this.d2r
 	return this;
 }
+
+// Pan the view to the specified RA,Dec
+// Inputs: RA (deg), Dec (deg), duration (seconds)
+VirtualSky.prototype.panTo = function(ra,dec,s){
+	if(!s) s = 1000;
+	this.panning = { s: { ra:this.ra_off*this.r2d, dec:this.dc_off*this.r2d }, e: { ra: ra, dec: dec}, duration: s, start: new Date() };
+	this.panning.dr = this.panning.e.ra-this.panning.s.ra;
+	this.panning.dd = this.panning.e.dec-this.panning.s.dec;
+	if(this.panning.dr > 180) this.panning.dr = -(360-this.panning.dr);
+	if(this.panning.dr < -180) this.panning.dr = (360+this.panning.dr);
+	this.panStep();
+}
+
+// shim layer with setTimeout fallback
+window.requestAnimFrame = (function(){
+	return  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function( callback ){ window.setTimeout(callback, 1000 / 60); };
+})();
+
+// Animation step for the panning
+VirtualSky.prototype.panStep = function(){
+	var ra,dc;
+	var now = new Date();
+	var t = (now - this.panning.start)/this.panning.duration;
+	ra = this.panning.s.ra + (this.panning.dr)*(t);
+	dc = this.panning.s.dec + (this.panning.dd)*(t);
+
+	// Still animating
+	if(t < 1){
+		// update and draw
+		this.setRADec(ra,dc).draw();	
+		var _obj = this;
+		// request new frame
+		requestAnimFrame(function() { _obj.panStep(); });
+	}else{
+		// We've ended
+		this.setRADec(this.panning.e.ra,this.panning.e.dec).draw();
+	}
+	return this;
+}
+
 VirtualSky.prototype.liveSky = function(pos){
 	this.islive = !this.islive;
 	if(this.islive) interval = window.setInterval(function(sky){ sky.setClock('now'); },1000,this);
@@ -2269,6 +2309,7 @@ VirtualSky.prototype.liveSky = function(pos){
 	}
 	return this;
 }
+
 VirtualSky.prototype.start = function(){
 	this.islive = true;
 	// Clear existing interval
