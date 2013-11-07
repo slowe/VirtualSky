@@ -931,7 +931,7 @@ VirtualSky.prototype.createSky = function(){
 			// We don't need scrollX/scrollY as pageX/pageY seem to include this
 			var x = e.pageX - $(this).offset().left;
 			var y = e.pageY - $(this).offset().top;
-			var theta,f;
+			var theta,f,dr;
 			if(s.mouse) $(s.canvas).css({cursor:'move'});
 			if(s.dragging && s.mouse){
 				if(s.polartype){
@@ -941,8 +941,10 @@ VirtualSky.prototype.createSky = function(){
 					s.theta = theta;
 				}else if(s.projection.id=="gnomic"){
 					f = 0.0015*(s.fov*s.d2r);
-					if(typeof s.x=="number") s.ra_off -= (s.x-x)*f/(Math.cos(s.dc_off));
+					dr = 0;
+					if(typeof s.x=="number") dr = Math.min(Math.abs(s.x-x)*f/(Math.cos(s.dc_off)),Math.PI/36);
 					if(typeof s.y=="number") s.dc_off -= (s.y-y)*f;
+					s.ra_off -= (s.x-x > 0 ? 1 : -1)*dr;
 					s.dc_off = inrangeEl(s.dc_off);
 				}else{
 					if(typeof s.x=="number") s.az_off += (s.x-x)/2
