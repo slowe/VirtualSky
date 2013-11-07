@@ -150,6 +150,22 @@
 
 			});
 
+			test("Angles",function(){
+
+				var sky = jQuery.virtualsky({id:'angletest','projection':'polar','width':500,'height':500});
+
+				assert_almost_equal(sky.greatCircle(180,0,180,0),0,8,"Great Circle distance for same point is zero");
+				assert_almost_equal(sky.greatCircle(180,0,90,0),90,8,"Great Circle distance for points separated around the equator");
+				assert_almost_equal(sky.greatCircle(180,0,180,45),45,8,"Great Circle distance for points separated in declination");
+				assert_almost_equal(sky.greatCircle(0,0,360,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different");
+				assert_almost_equal(sky.greatCircle(10,0,10,45),45,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(10,45,10,-45),90,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(-180,0,180,45),45,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
+				assert_almost_equal(sky.greatCircle(190,20,10,20),140,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
+
+			});
+
+
 			test("Keyboard input",function(){
 
 				function keypress(key,sky){
@@ -215,35 +231,50 @@
 				// We need to stop qunit until we get the ajax callback
 				stop();
 				sky.load('stars',sky.file.stars,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('boundaries',sky.file.boundaries,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('lines',sky.file.lines,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('planets',sky.file.planets,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for planets ("+this.file.planets+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for planets ("+this.file.planets+")");
 					start();	// Start qunit again
 				});
 
 				stop();
 				sky.load('showers',sky.file.showers,function(e){
-					ok((e.statusText=="success" ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					start();	// Start qunit again
+				});
+				stop();
+				sky.load('galaxy',sky.file.galaxy,function(e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for galaxy outline ("+this.file.galaxy+")");
 					start();	// Start qunit again
 				});
 
 			});
+
+			test("Add Pointers",function(){
+
+				var sky = jQuery.virtualsky({id:'starmapper'});
+
+				assert_equal(1,sky.addPointer({'ra':83.6330833,'dec':22.0145,'label':'M1 - Crab Nebula','html':'Blah blah','url':'http://www.strudel.org.uk/lookUP/?name=M1',colour:'rgb(220,220,255)'}),"Add a first pointer");
+				assert_equal(2,sky.addPointer({'ra':148.9684583,'dec':69.6797028,'label':'M82','url':'http://www.strudel.org.uk/lookUP/?name=M82',colour:'rgb(220,220,255)'}),"Add a 2nd pointer");
+
+			});
+
 
 /*
 		planets - either an object containing an array of planets or a JSON file
