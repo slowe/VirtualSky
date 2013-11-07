@@ -352,16 +352,11 @@ function VirtualSky(input){
 			},
 			radec2xy: function(ra,dec,coords){
 
-				var fov, alpha0, delta0, cd, cd0, sd, sd0, dA, A, F, scale, twopi;
-
-				// Coordinates of the map centre
-				alpha0 = -this.ra_off;
-				delta0 = -this.dc_off;
-
+				var fov, cd, cd0, sd, sd0, dA, A, F, scale, twopi;
 
 				// Only want to project the sky around the map centre
-				if(Math.abs(dec-delta0) > this.maxangle) return {x:-1,y:-1,el:-1};
-				var ang = this.greatCircle(alpha0,delta0,ra,dec);
+				if(Math.abs(dec-this.dc_off) > this.maxangle) return {x:-1,y:-1,el:-1};
+				var ang = this.greatCircle(this.ra_off,this.dc_off,ra,dec);
 				if(ang > this.maxangle) return {x:-1,y:-1,el:-1};
 
 				if(!coords) coords = this.coord2horizon(ra, dec);
@@ -373,11 +368,11 @@ function VirtualSky(input){
 				scale = this.tall/this.fov;
 
 				cd = Math.cos(dec);
-				cd0 = Math.cos(delta0);
+				cd0 = Math.cos(this.dc_off);
 				sd = Math.sin(dec);
-				sd0 = Math.sin(delta0);
+				sd0 = Math.sin(this.dc_off);
 
-				dA = ra-alpha0;
+				dA = ra-this.ra_off;
 				dA = inrangeAz(dA);
 				
 				A = cd*Math.cos(dA);
@@ -720,8 +715,8 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.background,s)) this.background = d.background;
 	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
-	if(is(d.ra,n)) this.ra_off = -(d.ra%360)*this.d2r;
-	if(is(d.dec,n)) this.dc_off = -d.dec*this.d2r;
+	if(is(d.ra,n)) this.setRA(d.ra);
+	if(is(d.dec,n)) this.setDec(d.dec);
 	if(is(d.fov,n)) this.fov = d.fov;
 	if(is(d.objects,s)) this.objects = d.objects;
 	if(is(d.base,s)) this.base = d.base;
@@ -944,8 +939,8 @@ VirtualSky.prototype.createSky = function(){
 					s.theta = theta;
 				}else if(s.projection.id=="gnomic"){
 					f = 0.0015*(s.fov*s.d2r);
-					if(typeof s.x=="number") s.ra_off += (s.x-x)*f/(Math.cos(s.dc_off));
-					if(typeof s.y=="number") s.dc_off += (s.y-y)*f;
+					if(typeof s.x=="number") s.ra_off -= (s.x-x)*f/(Math.cos(s.dc_off));
+					if(typeof s.y=="number") s.dc_off -= (s.y-y)*f;
 					s.dc_off = inrangeEl(s.dc_off);
 				}else{
 					if(typeof s.x=="number") s.az_off += (s.x-x)/2
@@ -2254,6 +2249,17 @@ VirtualSky.prototype.setLongitude = function(l){
 	while(this.longitude <= -Math.PI) this.longitude += 2*Math.PI;
 	while(this.longitude > Math.PI) this.longitude -= 2*Math.PI;
 	return this; 
+}
+VirtualSky.prototype.setRADec = function(r,d){
+	this.setRA(r).setDec(d);
+}
+VirtualSky.prototype.setRA = function(r){
+	this.ra_off = (r%360)*this.d2r;
+	return this;
+}
+VirtualSky.prototype.setDec = function(d){
+	this.dc_off = d*this.d2r
+	return this;
 }
 VirtualSky.prototype.liveSky = function(pos){
 	this.islive = !this.islive;
