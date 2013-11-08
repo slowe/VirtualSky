@@ -397,7 +397,8 @@ function VirtualSky(input){
 			isVisible: function(el){
 				return true;
 			},
-			atmos: false
+			atmos: false,
+			fullsky: true
 		},
 		'equirectangular':{
 			title: 'Equirectangular projection',
@@ -1465,7 +1466,7 @@ VirtualSky.prototype.Transform = function(p, rot, indeg){
 // Using B = 1900.0 + (JD − 2415020.31352) / 365.242198781 and p73 Practical Astronomy With A Calculator
 VirtualSky.prototype.fk1tofk5 = function(a,b){
 	// Convert from B1875 -> J2000
-	return this.Transform([a,b], [0.9995358730015703, -0.02793693620138929, -0.012147682028606801, 0.027936935758478665, 0.9996096732234282, -0.00016976035344812515, 0.012147683047201562, -0.00016968744936278707, 0.9999261997781408],true);
+	return this.Transform([a,b], [0.9995358730015703, -0.02793693620138929, -0.012147682028606801, 0.027936935758478665, 0.9996096732234282, -0.00016976035344812515, 0.012147683047201562, -0.00016968744936278707, 0.9999261997781408]);
 }
 VirtualSky.prototype.vectorMultiply = function(A,B){
 	if(B.length > 0){
@@ -1725,6 +1726,7 @@ VirtualSky.prototype.drawPlanets = function(){
 	this.jd = this.times.JD;
 
 	var colour = this.col.grey;
+	var maxl = this.maxLine();
 	for(var p = 0 ; p < this.planets.length ; p++){
 		// We'll allow 2 formats here:
 		// [Planet name,colour,ra,dec,mag] or [Planet name,colour,[jd_1, ra_1, dec_1, mag_1, jd_2, ra_2, dec_2, mag_2....]]
@@ -1772,7 +1774,7 @@ VirtualSky.prototype.drawPlanets = function(){
 				if(previous.x > 0 && previous.y > 0 && this.isVisible(point.el)){
 					this.ctx.moveTo(previous.x,previous.y);
 					// Basic error checking: points behind us often have very long lines so we'll zap them
-					if(Math.abs(point.x-previous.x) < this.wide/3){
+					if(Math.abs(point.x-previous.x) < maxl){
 						this.ctx.lineTo(point.x,point.y);
 					}
 				}
@@ -1838,7 +1840,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	this.setFont();
 	if(typeof this.lines!=="object") return this;
 	var pos,posa,posb,a,b,idx;
-	var maxl = (this.projection.id == "gnomic" ? this.tall : this.tall/3);
+	var maxl = this.maxLine();
 	for(var c = 0; c < this.lines.length; c++){
 		if(this.constellation.lines){
 			for(l = 3; l < this.lines[c].length; l+=2){
@@ -1902,46 +1904,56 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75;
 	if(typeof this.boundaries!=="object") return this;
-	var posa, posb, a, b, ra,dc,dra,ddc,b3;
+	var posa, posb, a, b, l, c, i, ra,dc,dra,ddc,b3;
 	var n = 5;
+	var maxl = this.maxLine(5);
+	// Create a holder for the constellation boundary points
+	if(!this.constellation.boundarypoints) this.constellation.boundarypoints = new Array(this.boundaries.length);
 	if(this.constellation.boundaries){
-		for(var c = 0; c < this.boundaries.length; c++){
+		for(c = 0; c < this.boundaries.length; c++){
 			if(typeof this.boundaries!=="string" && c < this.boundaries.length){
 
-				var points = [];
-				for(var l = 1; l < this.boundaries[c].length; l+=2){
-					b = [this.boundaries[c][l],this.boundaries[c][l+1]];
-					if(l > 1){
-						ra = (b[0]-a[0])%360;
-						if(ra > 180) ra = ra-360;
-						if(ra < -180) ra = ra+360;
-						dc = (b[1]-a[1]);
-
-						n = 5;
-						if(ra/2 > n) n = parseInt(ra);
-						if(dc/2 > n) n = parseInt(dc);
-						
-						dra = ra/n;
-						ddc = dc/n;
-						
-						for(var i = 1; i <= n; i++){
-							ra = a[0]+(i*dra);
-							if(ra < 0) ra += 360;
-							dc = a[1]+(i*ddc);
-							points.push([ra,dc]);
+				if(this.constellation.boundarypoints[c]){
+					// Use the old array
+					var points = this.constellation.boundarypoints[c];
+				}else{
+					// Create a new array of points
+					var points = [];
+					for(l = 1; l < this.boundaries[c].length; l+=2){
+						b = [this.boundaries[c][l],this.boundaries[c][l+1]];
+						if(l > 1){
+							ra = (b[0]-a[0])%360;
+							if(ra > 180) ra = ra-360;
+							if(ra < -180) ra = ra+360;
+							dc = (b[1]-a[1]);
+	
+							n = 5;
+							if(ra/2 > n) n = parseInt(ra);
+							if(dc/2 > n) n = parseInt(dc);
+							
+							dra = ra/n;
+							ddc = dc/n;
+							
+							for(var i = 1; i <= n; i++){
+								ra = a[0]+(i*dra);
+								if(ra < 0) ra += 360;
+								dc = a[1]+(i*ddc);
+								// Convert to J2000
+								points.push(this.fk1tofk5(ra*this.d2r,dc*this.d2r));
+							}
 						}
+						a = b;
 					}
-					a = b;
+					this.constellation.boundarypoints[c] = points;
 				}
 				posa = null;
 				// Now loop over joining the points
-				for(var i = 0; i < points.length; i++){
-					b = this.fk1tofk5(points[i][0],points[i][1]);
-					posb = this.radec2xy(b[0]*this.d2r, b[1]*this.d2r);
+				for(i = 0; i < points.length; i++){
+					posb = this.radec2xy(points[i][0],points[i][1]);
 					if(posa && this.isVisible(posa.el) && this.isVisible(posb.el)){
 						if(!this.isPointBad(posa) && !this.isPointBad(posb)){
 							// Basic error checking: constellations behind us often have very long lines so we'll zap them
-							if(Math.abs(posa.x-posb.x) < this.tall/3 && Math.abs(posa.y-posb.y) < this.tall/3){
+							if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
 								this.ctx.moveTo(posa.x,posa.y);
 								this.ctx.lineTo(posb.x,posb.y);
 							}
@@ -1964,6 +1976,8 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 	this.ctx.lineWidth = 1;
 	if(typeof this.boundaries!=="object") return this;
 	var posa, posb, points, col, i;
+	var maxl = this.maxLine(5);
+	var old;
 
 	for(var c = 0; c < this.galaxy.length; c++){
 
@@ -1972,19 +1986,19 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 		// Get the colour (first element)
 		col = points.shift();
 		posa = null;
+
 		// Now loop over joining the points
 		for(i = 0; i < points.length; i+=2){
 			posb = this.radec2xy(points[i]*this.d2r, points[i+1]*this.d2r);
 			if(posa){
 				// Basic error checking: if the line is very long we need to normalize to other side of sky
-				if(Math.abs(posa.x-posb.x) < this.tall/5 && Math.abs(posa.y-posb.y) < this.tall/5){
+				if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
 					this.ctx.moveTo(posa.x,posa.y);
 					this.ctx.lineTo(posb.x,posb.y);
 				}
 			}
 			posa = posb;
 		}
-
 	}
 	this.ctx.stroke();
 	return this;
@@ -2029,29 +2043,15 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	if(!this.ecliptic) return this;
 	if(!colour || typeof colour!="string") colour = this.col.ec;
 	var c = this.ctx;
-	var moved = false;
-	var show, x, y, pos, a;
-	var oldx = 0;
-	var oldy = 0;
+	var step = 2*this.d2r;
 	c.beginPath(); 
 	c.strokeStyle = colour;
 	c.lineWidth = 3;
-	for(a = 0 ; a <= 360 ; a += 2){
-		pos = this.ecliptic2xy(a*this.d2r,0,this.times.LST);
-		show = (this.isVisible(pos.el)) ? true : false;
-		x = pos.x;
-		y = pos.y;
-		if(show){
-			if(isFinite(x) && isFinite(y)){
-				if(!moved || Math.abs(oldx-x) > this.tall/2){
-					c.moveTo(x,y);
-					moved = true;
-				}else c.lineTo(x,y);
-			}
-			oldx = x;
-			oldy = y;
-		}
-	}
+	var maxl = this.maxLine();
+
+	var old = {x:-1,y:-1,moved:false};
+	for(var a = 0 ; a < Math.PI*2 ; a += step) old = joinpoint(this,"ec",a,0,old,maxl);
+	
 	c.stroke();
 	return this;
 }
@@ -2060,29 +2060,19 @@ VirtualSky.prototype.drawMeridian = function(colour){
 	if(!this.meridian) return this;
 	if(!colour || typeof colour!="string") colour = this.col.meridian;
 	var c = this.ctx;
-	var pos, a, b;
+	var a, b;
 	var minb = 0;
-	var maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb : 90;
-	var step = 2;
-	var oldx = 0;
-	var oldy = 0;
+	var maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb*this.d2r : Math.PI/2;
+	var step = 2*this.d2r;
+	var maxl = this.maxLine();
 	c.beginPath(); 
 	c.strokeStyle = colour;
 	c.lineWidth = 2;
-	for(b = minb, a = 0; b <= maxb ; b+= step){
-		pos = this.azel2xy((180-this.az_off)*this.d2r,b*this.d2r,this.wide,this.tall);
-		if(isFinite(pos.x) && isFinite(pos.y)){
-			if(a == 0) c.moveTo(pos.x,pos.y);
-			a++;
-			c.lineTo(pos.x,pos.y);
-		}
-	}
-	for(b = maxb; b >= minb ; b-= step){
-		pos = this.azel2xy((0-this.az_off)*this.d2r,b*this.d2r,this.wide,this.tall);
-		if(isFinite(pos.x) && isFinite(pos.y)){
-			c.lineTo(pos.x,pos.y);
-		}
-	}
+
+	var old = {x:-1,y:-1,moved:false};
+	for(b = minb, a = 0; b <= maxb ; b+= step) old = joinpoint(this,"az",Math.PI,b,old,maxl);
+	for(b = maxb, a = 0; b >= minb ; b-= step) old = joinpoint(this,"az",0,b,old,maxl);
+
 	c.stroke();
 	return this;
 }
@@ -2108,39 +2098,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		maxb = 90-bstep;
 		minb = -maxb;
 	}
-
-	// Function to join the dots
-	function joinpoint(s,type,a,b,old){
-		var x,y,show,c,pos;
-		c = s.ctx;
-		if(type=="az") pos = s.azel2xy((a-s.az_off*s.d2r),b,s.wide,s.tall);
-		else if(type=="eq") pos = s.radec2xy(a,b);
-		else if(type=="gal") pos = s.gal2xy(a,b);
-		x = pos.x;
-		y = pos.y;
-		if(type=="az") show = true;
-		else show = ((s.isVisible(pos.el)) ? true : false);
-		if(show){
-			if(isFinite(x) && isFinite(y)){
-				if(type=="az"){
-					if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2) c.moveTo(x,y);
-					c.lineTo(x,y);
-					old.moved = true;
-				}else{
-					// If the last point on s contour is more than a canvas width away
-					// it is probably supposed to be behind us so we won't draw a line 
-					if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2){
-						c.moveTo(x,y);
-						old.moved = true;
-					}else c.lineTo(x,y);
-				}
-				old.x = x;
-				old.y = y;
-				return old;
-			}
-		}
-		return old;
-	}
+	var maxl = this.maxLine(5);
 	old = {x:-1,y:-1,moved:false};
 	step *= this.d2r;
 	bstep *= this.d2r;
@@ -2149,7 +2107,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	// Draw grid lines in elevation/declination/latitude
 	for(a = 0 ; a < Math.PI*2 ; a += step){
 		old.moved = false;
-		for(b = minb; b <= maxb ; b+= bstep) old = joinpoint(this,type,a,b,old);
+		for(b = minb; b <= maxb ; b+= bstep) old = joinpoint(this,type,a,b,old,maxl);
 	}
 	c.stroke();
 	c.beginPath(); 
@@ -2166,11 +2124,12 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	// Draw grid lines in azimuth/RA/longitude
 	for(b = minb; b < maxb ; b+= step){
 		old.moved = false;
-		for(a = 0 ; a <= 2*Math.PI ; a += bstep) old = joinpoint(this,type,a,b,old);
+		for(a = 0 ; a <= 2*Math.PI ; a += bstep) old = joinpoint(this,type,a,b,old,maxl);
 	}
 	c.stroke();
 	return this;
 }
+
 VirtualSky.prototype.drawCardinalPoints = function(){
 	if(!this.cardinalpoints) return this;
 	var i, pos, r, x, y, pos, ang, theta;
@@ -2208,6 +2167,7 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 	c.fill();
 	return this;
 }
+
 // Assume decimal Ra/Dec
 VirtualSky.prototype.highlight = function(i,colour){
 	if(this.pointers[i].ra && this.pointers[i].dec){
@@ -2230,6 +2190,47 @@ VirtualSky.prototype.highlight = function(i,colour){
 	}
 	return this;
 }
+
+// Function to join the dots
+function joinpoint(s,type,a,b,old,maxl){
+	var x,y,show,c,pos;
+	c = s.ctx;
+	if(type=="az") pos = s.azel2xy((a-s.az_off*s.d2r),b,s.wide,s.tall);
+	else if(type=="eq") pos = s.radec2xy(a,b);
+	else if(type=="ec") pos = s.ecliptic2xy(a,b,s.times.LST);
+	else if(type=="gal") pos = s.gal2xy(a,b);
+	x = pos.x;
+	y = pos.y;
+	if(type=="az") show = true;
+	else show = ((s.isVisible(pos.el)) ? true : false);
+	if(show){
+		if(isFinite(x) && isFinite(y)){
+			if(type=="az"){
+				if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2) c.moveTo(x,y);
+				c.lineTo(x,y);
+				old.moved = true;
+			}else{
+				// If the last point on s contour is more than a canvas width away
+				// it is probably supposed to be behind us so we won't draw a line 
+				if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > maxl){
+					c.moveTo(x,y);
+					old.moved = true;
+				}else c.lineTo(x,y);
+			}
+			old.x = x;
+			old.y = y;
+			return old;
+		}
+	}
+	return old;
+}
+
+VirtualSky.prototype.maxLine = function(f){
+	if(this.projection.id == "gnomic") return this.tall;
+	if(typeof f!=="number") f = 3;
+	return this.tall/f;
+}
+
 // Expects a latitude,longitude string (comma separated)
 VirtualSky.prototype.setGeo = function(pos){
 	if(typeof pos!=="string") return this;
@@ -2238,11 +2239,13 @@ VirtualSky.prototype.setGeo = function(pos){
 	this.setLongitude(pos[1]);
 	return this;
 }
+
 // Input: latitude (deg)
 VirtualSky.prototype.setLatitude = function(l){
 	this.latitude = inrangeEl(parseFloat(l)*this.d2r);
 	return this; 
 }
+
 // Input: longitude (deg)
 VirtualSky.prototype.setLongitude = function(l){
 	this.longitude = parseFloat(l)*this.d2r;
@@ -2250,13 +2253,16 @@ VirtualSky.prototype.setLongitude = function(l){
 	while(this.longitude > Math.PI) this.longitude -= 2*Math.PI;
 	return this; 
 }
+
 VirtualSky.prototype.setRADec = function(r,d){
 	return this.setRA(r).setDec(d);
 }
+
 VirtualSky.prototype.setRA = function(r){
 	this.ra_off = (r%360)*this.d2r;
 	return this;
 }
+
 VirtualSky.prototype.setDec = function(d){
 	this.dc_off = d*this.d2r
 	return this;
