@@ -225,7 +225,7 @@ $.extend($.fn.addTouch = function(){
     }
 
 }));
-
+/*! VirtualSky */
 function VirtualSky(input){
 
 	this.version = "0.4.0";
@@ -1896,6 +1896,16 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	this.ctx.stroke();
 	return this;
 }
+
+// Draw the boundaries of constellations
+// Input: colour (e.g. "rgb(255,255,0)")
+// We should have all the boundary points stored in this.boundaries. As many of the constellations
+// will share boundaries we don't want to bother drawing lines that we've already done so we will 
+// keep a record of the lines we've drawn as we go. As some segments may be large on the sky we will
+// interpolate a few points between so that boundaries follow the curvature of the projection better.
+// As the boundaries are in FK1 we will calculate the J2000 positions once and keep them cached as
+// this speeds up the re-drawing as the user moves the sky. We assume that the user's session << time
+// between epochs.
 VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	if(!this.constellation.boundaries) return this;
 	if(!colour) colour = this.col.constellationboundary;
@@ -1904,11 +1914,16 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 0.75;
 	if(typeof this.boundaries!=="object") return this;
-	var posa, posb, a, b, l, c, i, ra,dc,dra,ddc,b3;
+	var posa, posb, a, b, l, c, d, atob,btoa, move, i, j, ra,dc,dra,ddc,b3;
+	// Keys defining a line in both directions
+	atob = "";
+	btoa = "";
 	var n = 5;
 	var maxl = this.maxLine(5);
-	// Create a holder for the constellation boundary points
+	// Create a holder for the constellation boundary points i.e. a cache of position calculations
 	if(!this.constellation.boundarypoints) this.constellation.boundarypoints = new Array(this.boundaries.length);
+	// We'll record which boundary lines we've already processed
+	var cbdone = [];
 	if(this.constellation.boundaries){
 		for(c = 0; c < this.boundaries.length; c++){
 			if(typeof this.boundaries!=="string" && c < this.boundaries.length){
@@ -1921,13 +1936,20 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 					var points = [];
 					for(l = 1; l < this.boundaries[c].length; l+=2){
 						b = [this.boundaries[c][l],this.boundaries[c][l+1]];
+						if(a){
+							atob = a[0]+','+a[1]+'-'+b[0]+','+b[1];
+							btoa = b[0]+','+b[1]+'-'+a[0]+','+a[1];
+						}
 						if(l > 1){
+							move = (cbdone[atob] || cbdone[btoa]);
 							ra = (b[0]-a[0])%360;
 							if(ra > 180) ra = ra-360;
 							if(ra < -180) ra = ra+360;
 							dc = (b[1]-a[1]);
-	
-							n = 5;
+
+							// If we've already done this line we'll only calculate 
+							// two points on the line otherwise we'll do 5
+							n = (move) ? 5 : 2;
 							if(ra/2 > n) n = parseInt(ra);
 							if(dc/2 > n) n = parseInt(dc);
 							
@@ -1939,18 +1961,23 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 								if(ra < 0) ra += 360;
 								dc = a[1]+(i*ddc);
 								// Convert to J2000
-								points.push(this.fk1tofk5(ra*this.d2r,dc*this.d2r));
+								d = this.fk1tofk5(ra*this.d2r,dc*this.d2r);
+								points.push([d[0],d[1],move]);
 							}
 						}
+						// Mark this line as drawn
+						cbdone[atob] = true;
+						cbdone[btoa] = true;
 						a = b;
 					}
 					this.constellation.boundarypoints[c] = points;
 				}
 				posa = null;
 				// Now loop over joining the points
-				for(i = 0; i < points.length; i++){
-					posb = this.radec2xy(points[i][0],points[i][1]);
-					if(posa && this.isVisible(posa.el) && this.isVisible(posb.el)){
+				for(i = 0; i <= points.length; i++){
+					j = (i == points.length) ? 0 : i;
+					posb = this.radec2xy(points[j][0],points[j][1]);
+					if(posa && this.isVisible(posa.el) && this.isVisible(posb.el) && points[j][2]){
 						if(!this.isPointBad(posa) && !this.isPointBad(posb)){
 							// Basic error checking: constellations behind us often have very long lines so we'll zap them
 							if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
@@ -1963,6 +1990,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 				}
 			}
 		}
+		cbdone = [];
 	}
 	this.ctx.stroke();
 	return this;
@@ -1975,31 +2003,37 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = 1;
 	if(typeof this.boundaries!=="object") return this;
-	var posa, posb, points, col, i;
-	var maxl = this.maxLine(5);
-	var old;
+	var p, pa, pb, i, c, old, maxl;
+	maxl = this.maxLine(5);
 
-	for(var c = 0; c < this.galaxy.length; c++){
+	for(c = 0; c < this.galaxy.length; c++){
+
+		// We will convert all the galaxy outline coordinates to radians
+		if(!this.galaxyprocessed) for(i = 1; i < this.galaxy[c].length; i++) this.galaxy[c][i] *= this.d2r;
 
 		// Get a copy of the current shape
-		points = this.galaxy[c].slice(0);
+		p = this.galaxy[c].slice(0);
+
 		// Get the colour (first element)
-		col = points.shift();
-		posa = null;
+		p.shift();
+		// Set the initial point to null
+		pa = null;
 
 		// Now loop over joining the points
-		for(i = 0; i < points.length; i+=2){
-			posb = this.radec2xy(points[i]*this.d2r, points[i+1]*this.d2r);
-			if(posa){
+		for(i = 0; i < p.length; i+=2){
+			pb = this.radec2xy(p[i], p[i+1]);
+			if(pa){
 				// Basic error checking: if the line is very long we need to normalize to other side of sky
-				if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
-					this.ctx.moveTo(posa.x,posa.y);
-					this.ctx.lineTo(posb.x,posb.y);
+				if(Math.abs(pa.x-pb.x) < maxl && Math.abs(pa.y-pb.y) < maxl){
+					this.ctx.moveTo(pa.x,pa.y);
+					this.ctx.lineTo(pb.x,pb.y);
 				}
 			}
-			posa = posb;
+			pa = pb;
 		}
 	}
+	// We've converted the galaxy to radians
+	this.galaxyprocessed = true;
 	this.ctx.stroke();
 	return this;
 }
