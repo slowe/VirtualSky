@@ -2,7 +2,8 @@
 	Virtual Sky
 	(c) Stuart Lowe, Las Cumbres Observatory Global Telescope
 	A browser planetarium using HTML5's <canvas>.
-	
+*/
+/*
 	USAGE:
 		<!--[if lt IE 9]><script src="http://lcogt.net/virtualsky/embed/excanvas.js" type="text/javascript"></script><![endif]-->
 		<script src="http://lcogt.net/virtualsky/embed/jquery-1.7.1.min.js" type="text/javascript"></script>
@@ -228,7 +229,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.4.0";
+	this.version = "0.4.1";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -621,9 +622,6 @@ function VirtualSky(input){
 	// Overwrite with input values
 	this.init(input);
 
-	if(this.fntfam) $('body').css({'font-family':this.fntfam});
-	if(this.fntsze) $('body').css({'font-size':this.fntsze});
-
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
 
 	this.updateColours();
@@ -849,10 +847,14 @@ VirtualSky.prototype.load = function(t,file,fn){
 		this.draw();
 	},fn);
 }
+
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
 	this.container.addTouch();
 	this.times = this.astronomicalTimes();
+
+	if(this.fntfam) this.container.css({'font-family':this.fntfam});
+	if(this.fntsze) this.container.css({'font-size':this.fntsze});
 
 	if(this.container.length == 0){
 		// No appropriate container exists. So we'll make one.
@@ -1038,28 +1040,29 @@ VirtualSky.prototype.changeMagnitude = function(m){
 	return this;
 }
 VirtualSky.prototype.toggleHelp = function(){
-	if($('.virtualsky_dismiss').length > 0) $('.virtualsky_dismiss').trigger('click');
+	var v = "virtualsky";
+	if($('.'+v+'_dismiss').length > 0) $('.'+v+'_dismiss').trigger('click');
 	else{
 		// Build the list of keyboard options
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong class="virtualsky_help_key virtualsky_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="virtualsky_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
-		$('<div class="virtualsky_help"><div class="virtualsky_dismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong class="'+v+'_help_key '+v+'_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="'+v+'_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
+		$('<div class="'+v+'_help"><div class="'+v+'_dismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><ul></ul></div>').appendTo(this.container);
 
-		var hlp = $('.virtualsky_help');
+		var hlp = $('.'+v+'_help');
 		var h = hlp.outerHeight();
 
 		// Add the keyboard option list
 		hlp.find('ul').html(o);
 		// Set the maximum height for the list and add a scroll bar if necessary
-		$('.virtualsky_help ul').css({'overflow':'auto','max-height':(this.tall-h)+'px'});
+		$('.'+v+'_help ul').css({'overflow':'auto','max-height':(this.tall-h)+'px'});
 
 		// Add the events for each keyboard option
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) $('.virtualsky_'+this.keys[i].txt).on('click',{fn:this.keys[i].fn,me:this},function(e){ e.preventDefault(); e.data.fn.call(e.data.me); }); }
+		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) $('.'+v+'_'+this.keys[i].txt).on('click',{fn:this.keys[i].fn,me:this},function(e){ e.preventDefault(); e.data.fn.call(e.data.me); }); }
 
 		// Create a lightbox
-		this.lightbox($('.virtualsky_help'));
+		this.lightbox($('.'+v+'_help'));
 
-		$('.virtualsky_help, .virtualsky_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
+		$('.'+v+'_help, .'+v+'_bg').on('mouseout',{sky:this},function(e){ e.data.sky.mouseover = false; }).on('mouseenter',{sky:this},function(e){ e.data.sky.mouseover = true; });
 	}
 }
 // Register keyboard commands and associated functions
@@ -1586,12 +1589,13 @@ VirtualSky.prototype.draw = function(proj){
 	this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
 		var s = e.data.sky;
 		var id = s.id;
+		var v = "virtualsky";
 		if($('#'+id+'_calendar').length == 0){
 			var off = $('#'+id).offset();
 			var w = 280;
 			var h = 50;
 			if(s.wide < w) w = s.wide;
-			s.container.append('<div id="'+id+'_calendar" class="virtualskyform"><div style="" id="'+id+'_calendar_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
+			s.container.append('<div id="'+id+'_calendar" class="'+v+'form"><div style="" id="'+id+'_calendar_close" class="'+v+'_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_year" style="width:3.2em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_month" style="width:1.6em;" value="" /><div class="divider">/</div><input type="text" id="'+id+'_day" style="width:1.6em;" value="" /><div class="divider">&nbsp;</div><input type="text" id="'+id+'_hours" style="width:1.6em;" value="" /><div class="divider">:</div><input type="text" id="'+id+'_mins" style="width:1.6em;" value="" /></div></div>');
 			$('#'+id+'_calendar').css({width:w});
 			$('#'+id+'_calendar input').bind('change',{sky:s},function(e){
 				e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
@@ -1611,6 +1615,7 @@ VirtualSky.prototype.draw = function(proj){
 	$('.'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
 		var s = e.data.sky;
 		var id = s.id;
+		var v = "virtualsky";
 		if($('#'+id+'_geo').length == 0){
 			var w = 310;
 			var narrow = '';
@@ -1618,7 +1623,7 @@ VirtualSky.prototype.draw = function(proj){
 				narrow = '<br style="clear:both;margin-top:20px;" />';
 				w = w/2;
 			}
-			s.container.append('<div id="'+id+'_geo" class="virtualskyform"><div id="'+id+'_geo_close" class="virtualsky_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
+			s.container.append('<div id="'+id+'_geo" class="'+v+'form"><div id="'+id+'_geo_close" class="'+v+'_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
 			$('#'+id+'_geo').css({width:w,'align':'center'})
 			$('#'+id+'_geo input').css({width:'6em'});
 			$('#'+id+'_geo_close').bind('click',{sky:s},function(e){
@@ -1638,8 +1643,9 @@ VirtualSky.prototype.draw = function(proj){
 VirtualSky.prototype.lightbox = function(lb){
 	if(!lb.length) return this;
 	lb.css({'z-index': 100,'position': 'absolute'});
-	if(this.container.find('.virtualsky_bg').length == 0) this.container.append('<div class="virtualsky_bg" style="position:absolute;z-index: 99;left:0px;top: 0px;right: 0px;bottom: 0px;background-color: rgba(0,0,0,0.7);"></div>')
-	var bg = this.container.find('.virtualsky_bg').show();
+	var n = "virtualsky_bg";
+	if(this.container.find('.'+n).length == 0) this.container.append('<div class="'+n+'" style="position:absolute;z-index: 99;left:0px;top: 0px;right: 0px;bottom: 0px;background-color: rgba(0,0,0,0.7);"></div>')
+	var bg = this.container.find('.'+n).show();
 	lb.css({left:((this.wide-lb.outerWidth())/2)+'px',top:((this.tall-lb.outerHeight())/2)+'px'}).show();
 	this.container.find('.virtualsky_dismiss').click({lb:lb,bg:bg},function(e){ lb.remove(); bg.remove(); });
 	bg.click({lb:lb,bg:bg},function(e){ lb.hide(); bg.hide(); }).css({'height':this.container.height()+'px'});
