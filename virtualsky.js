@@ -980,11 +980,11 @@ VirtualSky.prototype.createSky = function(){
 			s.mouseover = true;
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		}).on('mousewheel',{sky:this},function(e, delta) {
-			if(e.data.sky.mouse){
-				e.data.sky.changeFOV(delta);
-				e.data.sky.draw();
+			var s = e.data.sky;
+			if(s.mouse && s.projection.id=="gnomic"){
+				s.changeFOV(delta).draw();
 				return false;
-			}
+			}else return true;
 		});
 		$(document).bind('keypress',{sky:this},function(e){
 			if(!e) e = window.event;
