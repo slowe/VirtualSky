@@ -181,7 +181,7 @@
 				var mag = sky.magnitude;
 
 				keypress(38,sky);
-				assert_equal(sky.magnitude,mag+0.2,"Keypress (38): The magnitude limit should be "+(mag+0.2));
+				assert_equal(sky.magnitude,(mag+0.25),"Keypress (38): The magnitude limit should be "+(mag+0.25));
 				keypress(40,sky);
 				assert_equal(sky.magnitude,mag,"Keypress (40):The magnitude limit should be "+(mag));
 				keypress(63,sky);
