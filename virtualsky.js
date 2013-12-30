@@ -871,6 +871,7 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete){
 	}
 	var config = { dataType: dt, url: this.base+file, context: this, success: callback, complete: complete };
 	if(dt=="json") config.jsonp = 'onJSONPLoad';
+	if(dt=="script") config.cache = true;	// Use a cached version
 	$.ajax(config);
 	return this;
 }
