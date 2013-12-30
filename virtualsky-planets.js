@@ -3,12 +3,13 @@
  * needing a file regularly updated from JPL Horizons
  * Written by Stuart Lowe (http://www.strudel.org.uk/)
  */
+
 (function ($) {
 
 	// An init function for the plugin
-	function init(vs){
+	function init(){
 		// Attach a callback to the loadedPlanets event to calculate and draw the planets
-		vs.bind("loadedPlanets",function(d){
+		this.bind("loadedPlanets",function(d){
 			this.jd = this.times.JD;
 			var p = new Planets();
 			var days = 365.25;
@@ -403,6 +404,7 @@
 	function log10(x) {
 		return Math.LOG10E * Math.log(x);
 	}
+
 	$.virtualsky.plugins.push({
 		init: init,
 		name: 'planets',
