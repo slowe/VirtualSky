@@ -497,18 +497,19 @@ function VirtualSky(input){
 	if(idx >= 0) this.dir = this.dir.substring(0,idx+1);
 	else this.dir = "";
 
+	// Define extra files (JSON/JS)
 	this.file = {
-		stars: this.dir+"stars.json",	// Data for faint stars - 54 kB
-		lines: this.dir+"lines_latin.json",	// Data for constellation lines - 12 kB
-		boundaries: this.dir+"boundaries.json",	// Data for constellation boundaries - 20 kB
-		showers: this.dir+"showers.json",	// Data for meteor showers - 4 kB
-		galaxy: this.dir+"galaxy.json",	// Data for milky way - 12 kB
-		planets: this.dir+"virtualsky-planets.min.js"	// Plugin for planet ephemeris - 12kB
+		stars: this.dir+"stars.json",                 // Data for faint stars - 54 kB
+		lines: this.dir+"lines_latin.json",           // Data for constellation lines - 12 kB
+		boundaries: this.dir+"boundaries.json",       // Data for constellation boundaries - 20 kB
+		showers: this.dir+"showers.json",             // Data for meteor showers - 4 kB
+		galaxy: this.dir+"galaxy.json",               // Data for milky way - 12 kB
+		planets: this.dir+"virtualsky-planets.min.js" // Plugin for planet ephemeris - 12kB
 	}
 
-	this.hipparcos = {};
-	this.clock = new Date();
-	this.fullsky = false;
+	this.hipparcos = {};     // Define our star catalogue
+	this.clock = new Date(); // Define the 'current' time
+	this.fullsky = false;    // Are we showing the entire sky?
 
 	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	this.language = (navigator.language) ? navigator.language : navigator.userLanguage;			// Set the user language
@@ -578,7 +579,10 @@ function VirtualSky(input){
 		"moon":"Luna",
 		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so','Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero','Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor','El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro','Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma','La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo','La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n','El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules','Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n','Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira','La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco','Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor','Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha','Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante','Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n','Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
 	}];
-	this.colours = { 'normal' : {
+
+	// Define the colours that we will use
+	this.colours = {
+		'normal' : {
 			'txt' : "rgb(255,255,255)",
 			'black':"rgb(0,0,0)",
 			'white':"rgb(255,255,255)",
@@ -619,13 +623,15 @@ function VirtualSky(input){
 		}
 	};
 
+	// Keep a copy of the inputs
 	this.input = input;
 
-	// Overwrite with input values
+	// Overwrite our defaults with input values
 	this.init(input);
 
-	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default
+	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default projection
 
+	// Update the colours
 	this.updateColours();
 
 	this.changeLanguage(this.langcode);
@@ -641,8 +647,7 @@ function VirtualSky(input){
 	s = br('3px');
 	$('<style type="text/css">'+v+'_help { padding:10px;background-color:white;'+r+'} '+v+'_help ul { list-style:none;margin:0px;padding:0px; } '+v+'infobox { background-color:rgb(200,200,200);color:black;padding:5px;'+r+bs()+'} '+v+'infobox img {} '+v+'infocredit {color:white;float:left;font-size:0.8em;padding:5px;position:absolute;} '+v+'form { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;'+bs()+r+' } '+v+'_dismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } '+v+'form input,'+v+'form .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } '+v+'form .divider { margin-top: 5px; padding: 2px;} '+v+'_help_key:active{ background:#e9e9e9; } '+v+'_help_key:hover{ border-color: #b0b0b0; } '+v+'_help_key { cursor:pointer;display:inline-block;text-align:center;background:'+a+';background:-moz-linear-gradient(top,'+a+','+b+');background:-webkit-gradient(linear,center top,center bottom,from('+a+'),to('+b+'));'+s+'-webkit-background-clip:padding-box;-moz-background-clip:padding;background-clip:padding-box;color:#303030;border:1px solid #e0e0e0;border-bottom-width:2px;white-space:nowrap;font-family:monospace;padding:1px 6px;font-size:1.1em;}</style>').appendTo("head");
 
-	this.pointers = new Array();
-
+	this.pointers = new Array(); // Define an empty list of pointers/markers
 
 	// Internal variables
 	this.dragging = false;
@@ -655,6 +660,8 @@ function VirtualSky(input){
 	this.now = this.clock;
 	this.times = this.astronomicalTimes();
 	if(this.id) this.createSky();
+
+	// Find out where the Sun and Moon are
 	p = this.moonPos(this.times.JD);
 	this.moon = p.moon;
 	this.sun = p.sun;
