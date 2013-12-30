@@ -405,10 +405,17 @@
 		return Math.LOG10E * Math.log(x);
 	}
 
-	$.virtualsky.plugins.push({
-		init: init,
-		name: 'planets',
-		version: '1.0'
-	});
-	
+	var match = false;
+	for(var i = 0; i < $.virtualsky.plugins.length; i++){
+		if($.virtualsky.plugins[i].name=="planets") match = true;
+	}
+
+	if(!match){
+		$.virtualsky.plugins.push({
+			init: init,
+			name: 'planets',
+			version: '1.0'
+		});
+	}
+
 })(jQuery);
