@@ -503,7 +503,7 @@ function VirtualSky(input){
 		boundaries: this.dir+"boundaries.json",	// Data for constellation boundaries - 20 kB
 		showers: this.dir+"showers.json",	// Data for meteor showers - 4 kB
 		galaxy: this.dir+"galaxy.json",	// Data for milky way - 12 kB
-		planets: this.dir+"virtualsky-planets.js"	// Plugin for planet ephemeris - 20kB
+		planets: this.dir+"virtualsky-planets.min.js"	// Plugin for planet ephemeris - 12kB
 	}
 
 	this.hipparcos = {};
