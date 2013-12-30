@@ -864,10 +864,7 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete){
 		callback = function(data){
 			// Initialize any plugins
 			for (var i = 0; i < this.plugins.length; ++i){
-				if(typeof this.plugins[i].init=="function" && !this.plugins[i].inited){
-					this.plugins[i].inited = true;
-					this.plugins[i].init.call(this);
-				}
+				if(typeof this.plugins[i].init=="function") this.plugins[i].init.call(this);
 			}
 			tmp.call(this,data);
 		};
