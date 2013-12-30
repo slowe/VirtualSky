@@ -667,6 +667,7 @@ function VirtualSky(input){
 	this.sun = p.sun;
 
 	if(this.islive) interval = window.setInterval(function(sky){ sky.setClock('now'); },1000,this);
+
 }
 VirtualSky.prototype.init = function(d){
 	if(!d) return this;
@@ -751,9 +752,6 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
 	}
-	// Initialize the plugins
-	for (var i = 0; i < this.plugins.length; ++i)
-		if(typeof this.plugins[i].init=="function") this.plugins[i].init(this);
 
 	return this;
 }
@@ -839,14 +837,6 @@ VirtualSky.prototype.setFOV = function(fov){
 VirtualSky.prototype.hide = function(){ this.container.hide(); return this; }
 VirtualSky.prototype.show = function(){ this.container.show(); return this; }
 VirtualSky.prototype.toggle = function(){ this.container.toggle(); return this; }
-VirtualSky.prototype.loadJSON = function(file,callback,complete){
-	if(typeof file!=="string") return this;
-	if(typeof complete!=="function") complete = function(){ };
-	var config = { dataType: (file.indexOf('.json') >= 0) ? "json" : "script", url: this.base+file, context: this, success: callback, complete: complete };
-	if(config.dataType=="json") config.jsonp = 'onJSONPLoad';
-	$.ajax(config);
-	return this;
-}
 // Our stars are stored in decimal degrees so we will convert them here
 VirtualSky.prototype.convertStarsToRadians = function(stars){
 	for(var i = 0; i < stars.length; i++){
@@ -860,10 +850,33 @@ VirtualSky.prototype.load = function(t,file,fn){
 		if(t=="stars"){ this.starsdeep = true; this.stars = this.stars.concat(this.convertStarsToRadians(data.stars));}
 		else{ this[t] = data[t]; }
 		this.draw();
-		this.trigger("loaded"+(t.charAt(0).toUpperCase() + t.slice(1)),{data:data}); 
+		this.trigger("loaded"+(t.charAt(0).toUpperCase() + t.slice(1)),{data:data});
 	},fn);
 }
-
+VirtualSky.prototype.loadJSON = function(file,callback,complete){
+	if(typeof file!=="string") return this;
+	var dt = (file.indexOf('.json') >= 0) ? "json" : "script";
+	if(typeof complete!=="function") complete = function(){ };
+	if(dt=="script"){
+		// If we are loading an external script we need to make sure we initiate 
+		// it first. To do that we will re-write the callback that was provided.
+		var tmp = callback;
+		callback = function(data){
+			// Initialize any plugins
+			for (var i = 0; i < this.plugins.length; ++i){
+				if(typeof this.plugins[i].init=="function" && !this.plugins[i].inited){
+					this.plugins[i].inited = true;
+					this.plugins[i].init.call(this);
+				}
+			}
+			tmp.call(this,data);
+		};
+	}
+	var config = { dataType: dt, url: this.base+file, context: this, success: callback, complete: complete };
+	if(dt=="json") config.jsonp = 'onJSONPLoad';
+	$.ajax(config);
+	return this;
+}
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
 	this.container.addTouch();
