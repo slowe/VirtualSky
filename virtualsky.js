@@ -2336,24 +2336,21 @@ function joinpoint(s,type,a,b,old,maxl){
 	y = pos.y;
 	if(type=="az") show = true;
 	else show = ((s.isVisible(pos.el)) ? true : false);
-	if(show){
-		if(isFinite(x) && isFinite(y)){
-			if(type=="az"){
-				if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2) c.moveTo(x,y);
-				c.lineTo(x,y);
+	if(show && isFinite(x) && isFinite(y)){
+		if(type=="az"){
+			if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > s.tall/2) c.moveTo(x,y);
+			c.lineTo(x,y);
+			old.moved = true;
+		}else{
+			// If the last point on s contour is more than a canvas width away
+			// it is probably supposed to be behind us so we won't draw a line 
+			if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > maxl){
+				c.moveTo(x,y);
 				old.moved = true;
-			}else{
-				// If the last point on s contour is more than a canvas width away
-				// it is probably supposed to be behind us so we won't draw a line 
-				if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > maxl){
-					c.moveTo(x,y);
-					old.moved = true;
-				}else c.lineTo(x,y);
-			}
-			old.x = x;
-			old.y = y;
-			return old;
+			}else c.lineTo(x,y);
 		}
+		old.x = x;
+		old.y = y;
 	}
 	return old;
 }
@@ -2518,7 +2515,6 @@ VirtualSky.prototype.toggleAzimuthMove = function(az){
 	if(this.az_step == 0){
 		this.az_step = (typeof az=="number") ? az : -1;
 		this.moveIt();
-	}else{
 		this.az_step = 0;
 		if(typeof this.timer_az!="undefined") clearTimeout(this.timer_az);
 	}
