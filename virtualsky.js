@@ -659,7 +659,7 @@ function VirtualSky(input){
 	s = br('3px');
 	$('<style type="text/css">'+v+'_help { padding:10px;background-color:white;'+r+'} '+v+'_help ul { list-style:none;margin:0px;padding:0px; } '+v+'infobox { background-color:rgb(200,200,200);color:black;padding:5px;'+r+bs()+'} '+v+'infobox img {} '+v+'infocredit {color:white;float:left;font-size:0.8em;padding:5px;position:absolute;} '+v+'form { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;'+bs()+r+' } '+v+'_dismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } '+v+'form input,'+v+'form .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } '+v+'form .divider { margin-top: 5px; padding: 2px;} '+v+'_help_key:active{ background:#e9e9e9; } '+v+'_help_key:hover{ border-color: #b0b0b0; } '+v+'_help_key { cursor:pointer;display:inline-block;text-align:center;background:'+a+';background:-moz-linear-gradient(top,'+a+','+b+');background:-webkit-gradient(linear,center top,center bottom,from('+a+'),to('+b+'));'+s+'-webkit-background-clip:padding-box;-moz-background-clip:padding;background-clip:padding-box;color:#303030;border:1px solid #e0e0e0;border-bottom-width:2px;white-space:nowrap;font-family:monospace;padding:1px 6px;font-size:1.1em;}</style>').appendTo("head");
 
-	this.pointers = new Array(); // Define an empty list of pointers/markers
+	this.pointers = []; // Define an empty list of pointers/markers
 
 	// Internal variables
 	this.dragging = false;
@@ -985,7 +985,8 @@ VirtualSky.prototype.createSky = function(){
 			var x = e.pageX - $(this).offset().left;
 			var y = e.pageY - $(this).offset().top;
 			var theta,f,dr;
-			if(s.mouse) $(s.canvas).css({cursor:'move'});
+			if(s.mouse)
+				$(s.canvas).css({cursor:'move'});
 			if(s.dragging && s.mouse){
 				if(s.polartype){
 					theta = Math.atan2(y-s.tall/2,x-s.wide/2);
@@ -1009,7 +1010,6 @@ VirtualSky.prototype.createSky = function(){
 				$(s.canvas).css({cursor:'-moz-grabbing'});
 			}else{
 				matched = s.whichPointer(x,y);
-				if(matched >= 0) $(s.canvas).css({cursor:'pointer'});
 				s.toggleInfoBox(matched);
 			}	
 		}).on('mousedown',{sky:this},function(e){
@@ -1165,10 +1165,11 @@ VirtualSky.prototype.whichPointer = function(x,y){
 	return -1;
 }
 VirtualSky.prototype.toggleInfoBox = function(i){
-	if(this.pointers.length == 0 || i > this.pointers.length) return this;
+	if(this.pointers.length == 0 || i >= this.pointers.length || (i>=0 && !this.pointers[i].html)) return this;
 
-	if($('#'+this.id+'_'+this.infobox).length <= 0) this.container.append('<div id="'+this.id+'_'+this.infobox+'" class="virtualskyinfobox" style="display:none;"></div>');
-	el = $('#'+this.id+'_'+this.infobox);
+	if($('#'+this.id+'_'+this.infobox).length <= 0)
+		this.container.append('<div id="'+this.id+'_'+this.infobox+'" class="virtualskyinfobox" style="display:none;"></div>');
+	var el = $('#'+this.id+'_'+this.infobox);
 	if(i >= 0 && this.isVisible(this.pointers[i].el) && this.pointers[i].x > 0 && this.pointers[i].y > 0 && this.pointers[i].x < this.wide && this.pointers[i].y < this.tall){
 		var offset = this.container.position();
 		el.html(this.pointers[i].html);
@@ -1534,7 +1535,9 @@ VirtualSky.prototype.fk1tofk5 = function(a,b){
 VirtualSky.prototype.vectorMultiply = function(A,B){
 	if(B.length > 0){
 		// 2D or 1D
-		if(B[0].length > 0) return [[(A[0][0]*B[0][0]+A[0][1]*B[1][0]+A[0][2]*B[2][0]),(A[0][0]*B[0][1]+A[0][1]*B[1][1]+A[0][2]*B[2][1]),(A[0][0]*B[0][2]+A[0][1]*B[1][2]+A[0][2]*B[2][2])],[(A[1][0]*B[0][0]+A[1][1]*B[1][0]+A[1][2]*B[2][0]),(A[1][0]*B[0][1]+A[1][1]*B[1][1]+A[1][2]*B[2][1]),(A[1][0]*B[0][2]+A[1][1]*B[1][2]+A[1][2]*B[2][2])],[(A[2][0]*B[0][0]+A[2][1]*B[1][0]+A[2][2]*B[2][0]),(A[2][0]*B[0][1]+A[2][1]*B[1][1]+A[2][2]*B[2][1]),(A[2][0]*B[0][2]+A[2][1]*B[1][2]+A[2][2]*B[2][2])]];
+		if(B[0].length > 0) return [[(A[0][0]*B[0][0]+A[0][1]*B[1][0]+A[0][2]*B[2][0]),(A[0][0]*B[0][1]+A[0][1]*B[1][1]+A[0][2]*B[2][1]),(A[0][0]*B[0][2]+A[0][1]*B[1][2]+A[0][2]*B[2][2])],
+									[(A[1][0]*B[0][0]+A[1][1]*B[1][0]+A[1][2]*B[2][0]),(A[1][0]*B[0][1]+A[1][1]*B[1][1]+A[1][2]*B[2][1]),(A[1][0]*B[0][2]+A[1][1]*B[1][2]+A[1][2]*B[2][2])],
+									[(A[2][0]*B[0][0]+A[2][1]*B[1][0]+A[2][2]*B[2][0]),(A[2][0]*B[0][1]+A[2][1]*B[1][1]+A[2][2]*B[2][1]),(A[2][0]*B[0][2]+A[2][1]*B[1][2]+A[2][2]*B[2][2])]];
 		else return [(A[0][0]*B[0] + A[0][1]*B[1] + A[0][2]*B[2]),(A[1][0]*B[0] + A[1][1]*B[1] + A[1][2]*B[2]),(A[2][0]*B[0] + A[2][1]*B[1] + A[2][2]*B[2])];
 	}
 }
@@ -1617,7 +1620,18 @@ VirtualSky.prototype.draw = function(proj){
 		}
 	}
 	
-	this.drawGridlines("az").drawGridlines("eq").drawGridlines("gal").drawGalaxy().drawConstellationLines().drawConstellationBoundaries().drawStars().drawEcliptic().drawMeridian().drawPlanets().drawMeteorShowers().drawCardinalPoints();
+	this.drawGridlines("az")
+		.drawGridlines("eq")
+		.drawGridlines("gal")
+		.drawGalaxy()
+		.drawConstellationLines()
+		.drawConstellationBoundaries()
+		.drawStars()
+		.drawEcliptic()
+		.drawMeridian()
+		.drawPlanets()
+		.drawMeteorShowers()
+		.drawCardinalPoints();
 
 	for(var i = 0; i < this.pointers.length ; i++) this.highlight(i);
 
@@ -1645,19 +1659,50 @@ VirtualSky.prototype.draw = function(proj){
 		var credit = this.getPhrase('power');
 		var metric_credit = this.drawText(credit,5,this.tall-5);
 		// Float a transparent link on top of the credit text
-		if(d.find('.'+this.id+'_credit').length == 0) d.append('<div class="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" title="Created by the Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
+		if(d.find('.'+this.id+'_credit').length == 0)
+			d.append('<div class="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" title="Created by the Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
 		d.find('.'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
 		d.find('.'+this.id+'_credit a').css({display:'block',width:Math.ceil(metric_credit)+'px',height:fontsize+'px','font-size':fontsize+'px'});
 		this.positionCredit();
 	}
 	if(this.showhelp){
 		var helpstr = '?';
-		if(d.find('.'+this.id+'_help').length == 0) d.append('<div class="'+this.id+'_help"><a href="#">'+helpstr+'</a></div>').find('.'+this.id+'_help').css({position:'absolute',padding:5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',right:0,top:0,'font-size':fontsize}).find('a').css({'text-decoration':'none',color:txtcolour}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
+		if(d.find('.'+this.id+'_help').length == 0)
+			d.append('<div class="'+this.id+'_help"><a href="#">'+helpstr+'</a></div>')
+			 .find('.'+this.id+'_help')
+			 .css({
+				position:'absolute',
+				padding:5,
+				zIndex:20,
+				display:'block',
+				overflow:'hidden',
+				backgroundColor:'transparent',
+				right:0,
+				top:0,
+				'font-size':fontsize
+			}).find('a').css({
+				'text-decoration':'none',
+				color:txtcolour
+			}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
 		d.find('.'+this.id+'_help').css({'font-size':fontsize}).find('a').css({color:txtcolour});
 	}
-	if(this.container.find('.'+this.id+'_clock').length == 0) this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
+	if(this.container.find('.'+this.id+'_clock').length == 0)
+		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
 	var off = $('#'+this.idinner).position();
-	this.container.find('.'+this.id+'_clock').css({position:'absolute',padding:0,width:metric_clock,cursor:'pointer',top:off.top+5,left:off.left+5,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
+	this.container.find('.'+this.id+'_clock').css({
+		position:'absolute',
+		padding:0,
+		width:metric_clock,
+		cursor:'pointer',
+		top:off.top+5,
+		left:off.left+5,
+		zIndex:20,
+		display:'block',
+		overflow:'hidden',
+		backgroundColor:'transparent',
+		fontSize:fontsize+'px',
+		color:'transparent'
+	}).bind('click',{sky:this},function(e){
 		var s = e.data.sky;
 		var id = s.id;
 		var hid = '#'+id;
@@ -1935,6 +1980,7 @@ VirtualSky.prototype.drawText = function(txt,x,y){
 }
 // Helper function. You'll need to wrap it with a this.ctx.beginPath() and a this.ctx.fill();
 VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
+	if(label===undefined) return this;
 	var c = this.ctx;
 	if(colour.length > 0) c.fillStyle = colour;
 	c.lineWidth = 1.5;
@@ -2321,15 +2367,16 @@ VirtualSky.prototype.highlight = function(i,colour){
 		var pos = this.radec2xy(this.pointers[i].ra*this.d2r, this.pointers[i].dec*this.d2r);
 		var c = this.ctx;
 		if(this.isVisible(pos.el)){
+			var p = this.pointers[i];
 			this.pointers[i].az = pos.az;
 			this.pointers[i].el = pos.el;
 			this.pointers[i].x = pos.x;
 			this.pointers[i].y = pos.y;
-			this.pointers[i].d = 5;
 			c.fillStyle = colour;
 			c.strokeStyle = colour;
-			c.beginPath(); 
-			c.fillRect(this.pointers[i].x-this.pointers[i].d/2,this.pointers[i].y-this.pointers[i].d/2,5,5);
+			c.beginPath();
+			c.arc(p.x,p.y,p.d/2,0,2*Math.PI);
+			c.fill();
 			this.drawLabel(pos.x,pos.y,this.pointers[i].d,colour,this.pointers[i].label);
 		}
 	}
@@ -2546,13 +2593,14 @@ VirtualSky.prototype.addPointer = function(input){
 		input.dec *= 1;
 		i = this.pointers.length;
 		p = input;
-		if(!p.html){
-			style = (p.style) ? p.style : "width:128px;height:128px;";
-			url = (p.url) ? p.url : "http://server1.wikisky.org/v2?ra="+(p.ra/15)+"&de="+(p.dec)+"&zoom=6&img_source=DSS2";
-			img = (p.img) ? p.img : 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(p.ra/15)+'&de='+p.dec+'&angle=0.25&output=PNG';
-			label = (p.credit) ? p.credit : "View in Wikisky";
-			credit = (p.credit) ? p.credit : "DSS2/Wikisky";
-			p.html =  (p.html) ? p.html : '<div class="virtualskyinfocredit"><a href="'+url+'" style="color: white;">'+credit+'<\/a><\/div><a href="'+url+'" style="display:block;'+style+'"><img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" \/><\/a>';
+		p.d = is(p.d, "number")?p.d:5;
+		if(typeof p.html !== "string"){
+			style = p.style || "width:128px;height:128px;";
+			url = p.url || "http://server1.wikisky.org/v2?ra="+(p.ra/15)+"&de="+(p.dec)+"&zoom=6&img_source=DSS2";
+			img = p.img || 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(p.ra/15)+'&de='+p.dec+'&angle=0.25&output=PNG';
+			label = p.credit || "View in Wikisky";
+			credit = p.credit || "DSS2/Wikisky";
+			p.html =  p.html || '<div class="virtualskyinfocredit"><a href="'+url+'" style="color: white;">'+credit+'<\/a><\/div><a href="'+url+'" style="display:block;'+style+'"><img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" \/><\/a>';
 		}
 		this.pointers[i] = p;
 	}
