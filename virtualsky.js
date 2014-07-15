@@ -1594,8 +1594,9 @@ VirtualSky.prototype.draw = function(proj){
 	this.now = this.clock;
 
 	if(this.hasGradient()){
-		if(typeof this.skygrad == "undefined") this.updateSkyGradient();
-		if(typeof this.skygrad!=="undefined"){
+		if(this.skygrad === undefined){
+			this.updateSkyGradient();
+		}else{
 			c.beginPath();
 			c.fillStyle = this.skygrad;
 			// draw shapes
