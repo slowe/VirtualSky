@@ -690,10 +690,10 @@ VirtualSky.prototype.init = function(d){
 		for(var i = 0; i < bits.length ; i++){
 			key = bits[i].split('=')[0], val = bits[i].split('=')[1];
 			// convert floats
-			if(/^[0-9.\-]+$/.test(val)) val = parseFloat(val);
+			if(/^-?[0-9.]+$/.test(val)) val = parseFloat(val);
 			if(val == "true") val = true;
 			if(val == "false") val = false;
-			if(typeof d[key]=="undefined") d[key] = val;
+			if(d[key]===undefined) d[key] = val;
 		}
 	}
 	var n = "number";
@@ -701,48 +701,62 @@ VirtualSky.prototype.init = function(d){
 	var b = "boolean";
 	var o = "object";
 	var f = "function";
+	
+	
 	// Overwrite defaults with variables passed to the function
-	if(is(d.id,s)) this.id = d.id;
+	//directly mapped variables
+	var pairs = {
+		id: s,
+		gradient: b,
+		cardinalpoints: b,
+		negative: b,
+		meteorshowers: b,
+		showstars: b,
+		scalestars: n,
+		showstarlabels: b,
+		starnames: o,
+		showplanets: o,
+		showplanetlabels: b,
+		showorbits: b,
+		showgalaxy: b,
+		showdate: b,
+		showposition: b,
+		keyboard: b,
+		mouse: b,
+		ground: b,
+		ecliptic: b,
+		meridian: b,
+		magnitude: n,
+		clock: o,
+		background: s,
+		color: s,
+		fov: n,
+		objects: s,
+		base: s,
+		fullscreen: b,
+		credit: b,
+		transparent: b,
+		plugins: o
+	}
+	for(key in pairs)
+		if(is(d[key], pairs[key]))
+			this[key] = d[key];
+	
+	//undirecly paired values
 	if(is(d.projection,s)) this.selectProjection(d.projection);
-	if(is(d.gradient,b)) this.gradient = d.gradient;
-	if(is(d.cardinalpoints,b)) this.cardinalpoints = d.cardinalpoints;
-	if(is(d.negative,b)) this.negative = d.negative;
 	if(is(d.constellations,b)) this.constellation.lines = d.constellations;
 	if(is(d.constellationboundaries,b)) this.constellation.boundaries = d.constellationboundaries;
 	if(is(d.constellationlabels,b)) this.constellation.labels = d.constellationlabels;
-	if(is(d.meteorshowers,b)) this.meteorshowers = d.meteorshowers;
-	if(is(d.showstars,b)) this.showstars = d.showstars;
-	if(is(d.scalestars,n)) this.scalestars = d.scalestars;
-	if(is(d.showstarlabels,b)) this.showstarlabels = d.showstarlabels;
-	if(is(d.starnames,o)) this.starnames = d.starnames;
-	if(is(d.showplanets,b)) this.showplanets = d.showplanets;
-	if(is(d.showplanetlabels,b)) this.showplanetlabels = d.showplanetlabels;
-	if(is(d.showorbits,b)) this.showorbits = d.showorbits;
-	if(is(d.showgalaxy,b)) this.showgalaxy = d.showgalaxy;
-	if(is(d.showdate,b)) this.showdate = d.showdate;
-	if(is(d.showposition,b)) this.showposition = d.showposition;
-	if(is(d.keyboard,b)) this.keyboard = d.keyboard;
-	if(is(d.mouse,b)) this.mouse = d.mouse;
-	if(is(d.ground,b)) this.ground = d.ground;
 	if(is(d.gridlines_az,b)) this.grid.az = d.gridlines_az;
 	if(is(d.gridlines_eq,b)) this.grid.eq = d.gridlines_eq;
 	if(is(d.gridlines_gal,b)) this.grid.gal = d.gridlines_gal;
 	if(is(d.gridstep,n)) this.grid.step = d.gridstep;
-	if(is(d.ecliptic,b)) this.ecliptic = d.ecliptic;
-	if(is(d.meridian,b)) this.meridian = d.meridian;
-	if(is(d.magnitude,n)) this.magnitude = d.magnitude;
 	if(is(d.longitude,n)) this.setLongitude(d.longitude);
 	if(is(d.latitude,n)) this.setLatitude(d.latitude);
 	if(is(d.clock,s)) this.clock = new Date(d.clock.replace(/%20/g,' '));
-	if(is(d.clock,o)) this.clock = d.clock;
-	if(is(d.background,s)) this.background = d.background;
-	if(is(d.color,s)) this.color = d.color;
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.ra,n)) this.setRA(d.ra);
 	if(is(d.dec,n)) this.setDec(d.dec);
-	if(is(d.fov,n)) this.fov = d.fov;
-	if(is(d.objects,s)) this.objects = d.objects;
-	if(is(d.base,s)) this.base = d.base;
 	if(is(d.planets,s)) this.file.planets = d.planets;
 	if(is(d.planets,o)) this.planets = d.planets;
 	if(is(d.lines,s)) this.file.lines = d.lines;
@@ -752,13 +766,9 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.width,n)) this.wide = d.width;
 	if(is(d.height,n)) this.tall = d.height;
 	if(is(d.live,b)) this.islive = d.live;
-	if(is(d.fullscreen,b)) this.fullscreen = d.fullscreen;
-	if(is(d.credit,b)) this.credit = d.credit;
-	if(is(d.transparent,b)) this.transparent = d.transparent;
 	if(is(d.lang,s) && d.lang.length==2) this.langcode = d.lang;
 	if(is(d.fontfamily,s)) this.fntfam = d.fontfamily.replace(/%20/g,' ');
 	if(is(d.fontsize,s)) this.fntsze = d.fontsize;
-	if(is(d.plugins,o)) this.plugins = d.plugins;
 	if(is(d.callback,o)){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
