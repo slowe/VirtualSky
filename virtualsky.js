@@ -578,6 +578,18 @@ function VirtualSky(input){
 		"sun":"Sol",
 		"moon":"Luna",
 		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so','Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero','Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor','El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro','Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma','La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo','La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n','El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules','Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n','Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira','La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco','Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor','Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha','Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante','Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n','Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
+	},{
+		"code":"cs",
+		"name":"Čeština",
+		"position":"zeměpisná šířka a délka",
+		"N":"S",
+		"W":"Z",
+		"E":"V",
+		"S":"J",
+		"sun":"Slunce",
+		"moon":"Měsíc",
+		"planets": ["Merkur","Venuše","Mars","Jupiter","Saturn","Uran","Neptun"],
+		"constellations": ['Andromeda','Vývěva','Rajka','Vodnář','Orel','Oltář','Beran','Vozka','Pastýř','Rydlo','Žirafa','Rak','Honící psi','Velký pes','Malý pes','Kozoroh','Lodní kýl','Kasiopeja','Kentaur','Kefeus','Velryba','Chamaeleon','Kružítko','Holubice','Vlas Bereničin','Jižní koruna','Severní koruna','Havran','Pohár','Jižní kříž','Labuť','Delfín','Mečoun','Drak','Koníček','Řeka Eridanus','Pec','Blíženci','Jeřáb','Herkules','Hodiny','Hydra','Malý vodní hrad','Indián','Ještěrka','Lev','Malý lev','Zajíc','Váhy','Vlk','Rys','Lyra','Tabulová hora','Mikroskop','Jednorožec','Moucha','Pravítko','Oktant','Hladonoš','Orion','Páv','Pegas','Perseus','Fénix','Malíř','Ryby','Jižní ryba','Lodní záď','Kompas','Mřížka','Šíp','Střelec','Štír','Sochař','Štít','Had','Sextant','Býk','Dalekohled','Trojúhelník','Jižní trojúhelník','Tukan','Velká medvědice','Malý medvěd','Plachty','Panna','Letající ryba','Liška']
 	}];
 
 	// Define the colours that we will use
