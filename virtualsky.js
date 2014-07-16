@@ -1348,8 +1348,16 @@ VirtualSky.prototype.toggleHelp = function(){
 	else{
 		// Build the list of keyboard options
 		var o = '';
-		for(var i = 0; i < this.keys.length ; i++){ if(this.keys[i].txt) o += '<li><strong class="'+v+'_help_key '+v+'_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="'+v+'_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a></li>'; }
-		$('<div class="'+v+'_help"><div class="'+v+'_dismiss" title="close">&times;</div><span>'+this.getPhrase('keyboard')+'</span><div class="'+v+'_helpinner"><ul></ul></div></div>').appendTo(this.container);
+		for(var i = 0; i < this.keys.length ; i++){
+			if(this.keys[i].txt)
+				o += '<li>'+
+						'<strong class="'+v+'_help_key '+v+'_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="'+v+'_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a>'+
+					'</li>'; }
+		$('<div class="'+v+'_help">'+
+			'<div class="'+v+'_dismiss" title="close">&times;</div>'+
+			'<span>'+this.getPhrase('keyboard')+'</span>'+
+			'<div class="'+v+'_helpinner"><ul></ul></div>'+	
+		'</div>').appendTo(this.container);
 
 		var hlp = $('.'+v+'_help');
 		var h = hlp.outerHeight();
@@ -1519,7 +1527,22 @@ VirtualSky.prototype.selectProjection = function(proj){
 			var h = this.container.height();
 			if($('.'+this.id+'_projection').length > 0) $('.'+this.id+'_projection').remove();
 			this.container.append('<div class="'+this.id+'_projection">'+this.projections[proj].title+'</div>');
-			$('.'+this.id+'_projection').on('mouseover',{me:this},function(e){ e.data.me.mouseover = true; }).css({position:'absolute',padding:0,width:w+'px',top:0,left:0,'text-align':'center','line-height':h+'px',zIndex:20,fontSize:'1.5em',display:'block',overflow:'hidden',backgroundColor:'transparent',color:(this.negative ? this.col.black : this.col.white)}).delay(500).fadeOut(1000,function(){ $(this).remove(); });
+			$('.'+this.id+'_projection')
+				.on('mouseover',{me:this},function(e){e.data.me.mouseover = true;})
+				.css({
+					position:'absolute',
+					padding:0,
+					width:w+'px',
+					top:0,left:0,
+					'text-align':'center',
+					'line-height':h+'px',
+					zIndex:20,
+					fontSize:'1.5em',
+					display:'block',
+					overflow:'hidden',
+					backgroundColor:'transparent',
+					color:(this.negative ? this.col.black : this.col.white)})
+				.delay(500).fadeOut(1000,function(){ $(this).remove(); });
 		}
 	}
 }
@@ -2001,7 +2024,21 @@ VirtualSky.prototype.draw = function(proj){
 
 	if($('.'+this.id+'_position').length == 0) this.container.append('<div class="'+this.id+'_position" title="'+this.getPhrase('positionchange')+'">'+positionstring+'</div>');
 	var off = $('#'+this.idinner).position();
-	$('.'+this.id+'_position').css({position:'absolute',padding:0,width:metric_pos,cursor:'pointer',top:off.top+5+fontsize,left:off.left+5,zIndex:20,fontSize:fontsize+'px',display:'block',overflow:'hidden',backgroundColor:'transparent',fontSize:fontsize+'px',color:'transparent'}).bind('click',{sky:this},function(e){
+	$('.'+this.id+'_position').css({
+		position:'absolute',
+		padding:0,
+		width:metric_pos,
+		cursor:'pointer',
+		top:off.top+5+fontsize,
+		left:off.left+5,
+		zIndex:20,
+		fontSize:fontsize+'px',
+		display:'block',
+		overflow:'hidden',
+		backgroundColor:'transparent',
+		fontSize:fontsize+'px',
+		color:'transparent'
+	}).bind('click',{sky:this},function(e){
 		var s = e.data.sky;
 		var id = s.id;
 		var hid = '#'+id;
@@ -2013,7 +2050,17 @@ VirtualSky.prototype.draw = function(proj){
 				narrow = '<br style="clear:both;margin-top:20px;" />';
 				w = w/2;
 			}
-			s.container.append('<div id="'+id+'_geo" class="'+v+'form"><div id="'+id+'_geo_close" class="'+v+'_dismiss" title="close">&times;</div><div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div><div style="text-align:center;"><input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;"><div class="divider">'+s.getPhrase('N')+'</div>'+narrow+'<input type="text" id="'+id+'_long" value="" /><div class="divider">'+s.getPhrase('E')+'</div></div></div>');
+			s.container.append(
+				'<div id="'+id+'_geo" class="'+v+'form">'+
+					'<div id="'+id+'_geo_close" class="'+v+'_dismiss" title="close">&times;</div>'+
+					'<div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div>'+
+					'<div style="text-align:center;">'+
+						'<input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;">'+
+						'<div class="divider">'+s.getPhrase('N')+'</div>'+
+						narrow+'<input type="text" id="'+id+'_long" value="" />'+
+						'<div class="divider">'+s.getPhrase('E')+'</div>'+
+					'</div>'+
+				'</div>');
 			$(hid+'_geo').css({width:w,'align':'center'})
 			$(hid+'_geo input').css({width:'6em'});
 			$(hid+'_geo_close').bind('click',{sky:s},function(e){
@@ -2872,7 +2919,13 @@ VirtualSky.prototype.addPointer = function(input){
 			img = p.img || 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(p.ra/15)+'&de='+p.dec+'&angle=0.25&output=PNG';
 			label = p.credit || "View in Wikisky";
 			credit = p.credit || "DSS2/Wikisky";
-			p.html =  p.html || '<div class="virtualskyinfocredit"><a href="'+url+'" style="color: white;">'+credit+'<\/a><\/div><a href="'+url+'" style="display:block;'+style+'"><img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" \/><\/a>';
+			p.html =  p.html ||
+				'<div class="virtualskyinfocredit">'+
+					'<a href="'+url+'" style="color: white;">'+credit+'</a>'+
+				'</div>'+
+				'<a href="'+url+'" style="display:block;'+style+'">'+
+					'<img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" />'+
+				'</a>';
 		}
 		this.pointers[i] = p;
 	}
