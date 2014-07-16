@@ -920,7 +920,6 @@ function VirtualSky(input){
 	this.skygrad;
 	this.infobox = "virtualskyinfobox";
 	this.container = '';
-	this.now = this.clock;
 	this.times = this.astronomicalTimes();
 	if(this.id) this.createSky();
 
@@ -1608,7 +1607,7 @@ VirtualSky.prototype.isPointBad = function(p){
 }
 // Return a structure with the Julian Date, Local Sidereal Time and Greenwich Sidereal Time
 VirtualSky.prototype.astronomicalTimes = function(clock,lon){
-	clock = clock || this.now;
+	clock = clock || this.clock;
 	lon = lon || this.longitude*this.r2d;
 	var JD,JD0,S,T,T0,UT,A,GST,d,LST;
 	JD = this.getJD(clock);
@@ -1902,8 +1901,6 @@ VirtualSky.prototype.draw = function(proj){
 		c.strokeStyle = black;
 		c.stroke();
 	}else if(typeof this.projection.draw==="function") this.projection.draw.call(this);
-
-	this.now = this.clock;
 
 	if(this.hasGradient()){
 		if(this.skygrad===undefined){
@@ -2873,7 +2870,9 @@ VirtualSky.prototype.advanceTime = function(by,wait){
 	return this;
 }
 VirtualSky.prototype.setClock = function(seconds){
-	if(typeof seconds==="string"){
+	if(seconds === undefined){
+		return this;
+	}if(typeof seconds==="string"){
 		seconds = convertTZ(seconds);
 		if(!this.input.clock){
 			if(seconds==="now") this.clock = new Date();
@@ -2884,9 +2883,7 @@ VirtualSky.prototype.setClock = function(seconds){
 		}
 	}else if(typeof seconds==="object"){
 		this.clock = seconds;
-		this.now = this.clock;
-	}else this.clock = new Date(this.clock.getTime() + seconds*1000);
-	this.now = this.clock;
+	}else this.clock = new Date(this.clock.getTime() + (seconds)*1000);
 	this.times = this.astronomicalTimes();
 	this.draw();
 	return this;
