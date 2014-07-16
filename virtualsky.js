@@ -1609,6 +1609,11 @@ VirtualSky.prototype.isPointBad = function(p){
 VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 	clock = clock || this.clock;
 	lon = lon || this.longitude*this.r2d;
+	var r = {};//object to return
+	r.JD = this.getJD(clock);
+	r.GST = this.getGST(clock);
+	r.LST = (r.GST+lon/15)%24;
+	return r;
 	var JD,JD0,S,T,T0,UT,A,GST,d,LST;
 	JD = this.getJD(clock);
 	JD0 = Math.floor(JD-0.5)+0.5;
@@ -2883,7 +2888,8 @@ VirtualSky.prototype.setClock = function(seconds){
 		}
 	}else if(typeof seconds==="object"){
 		this.clock = seconds;
-	}else this.clock = new Date(this.clock.getTime() + (seconds)*1000);
+	}else
+		this.clock = new Date(this.clock.getTime() + seconds*1000);
 	this.times = this.astronomicalTimes();
 	this.draw();
 	return this;
@@ -2988,10 +2994,14 @@ VirtualSky.prototype.getOffset = function(el){
 	}
 	return { top: _y, left: _x };
 }
-VirtualSky.prototype.getJD = function(today) {
+VirtualSky.prototype.getJD = function(clock) {
 	// The Julian Date of the Unix Time epoch is 2440587.5
-	if(!today) today = this.clock;
-	return ( today.getTime() / 86400000.0 ) + 2440587.5;
+	if(!clock) clock = this.clock;
+	return ( clock.getTime() / 86400000.0 ) + 2440587.5;
+}
+VirtualSky.prototype.getGST = function(clock){
+	if(!clock) clock = this.clock;
+	return (clock.getTime()/1000*1.002737909350795+24054.4016883)/86400*24%24.0;
 }
 VirtualSky.prototype.getNegative = function(colour){
 	var end = (colour.indexOf("rgb") == 0) ? (colour.lastIndexOf(")")) :  0;
