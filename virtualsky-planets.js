@@ -23,7 +23,7 @@
 		// Heliocentric Osculating Orbital Elements Referred to the Mean Equinox and Ecliptic of Date for 2013: http://asa.usno.navy.mil/static/files/2013/Osculating_Elements_2013.txt
 		// Values of the Osculating Orbital Elements for 8th August 1997: http://www.stargazing.net/kepler/ellipse.html
 		this.planets = [{
-			"name": "Mercury",
+			"name": "Me",
 			"radius":2439.7,	// km
 			"interval": 0.5,
 			"colour": "rgb(170,150,170)",
@@ -42,7 +42,7 @@
 				{"jd":2456680.5,"i":7.0052,"o":48.498,"p":77.677,"a":0.387098,"n":4.09234,"e":0.205633,"L":28.6524}
 			]
 		},{
-			"name": "Venus",
+			"name": "V",
 			"radius": 6051.9,	// km
 			"interval": 1,
 			"colour": "rgb(245,222,179)",
@@ -61,7 +61,7 @@
 				{"jd":2456680.5,"i":3.3948,"o":76.808,"p":131.63,"a":0.723345,"n":1.60209,"e":0.006770,"L":129.9169}
 			]
 		},{
-			"name":"Earth",
+			"name":"E",
 			"elements" : [
 				{"jd":2450680.5,"i":0.00041,"o":349.2,"p":102.8517,"a":1.0000200,"n":0.9855796,"e":0.0166967,"L":328.40353},
 				{"jd":2456280.5,"i":0.0,"o":349.2,"p":103.042,"a":1.000008,"n":0.985598,"e":0.016703,"L":87.9950},
@@ -77,7 +77,7 @@
 				{"jd":2456680.5,"i":0.0,"o":349.2,"p":103.166,"a":1.000005,"n":0.985603,"e":0.016693,"L":122.2544}
 			]
 		},{
-			"name":"Mars",
+			"name":"Ma",
 			"radius": 3386,	// km
 			"interval": 1,
 			"colour": "rgb(255,50,50)",
@@ -97,7 +97,7 @@
 				{"jd":2456680.5,"i":1.8495,"o":49.665,"p":336.330,"a":1.523631,"n":0.524066,"e":0.093482,"L":166.8051}
 			]
 		},{
-			"name":"Jupiter",
+			"name":"J",
 			"radius": 69173,	// km
 			"interval": 10,
 			"colour": "rgb(255,150,150)",
@@ -116,7 +116,7 @@
 				{"jd":2456680.5,"i":1.3033,"o":100.633,"p":14.592,"a":5.20259,"n":0.083096,"e":0.048891,"L":101.2751}
 			]
 		},{
-			"name":"Saturn",
+			"name":"S",
 			"radius": 57316,	// km
 			"interval": 10,
 			"colour": "rgb(200,150,150)",
@@ -144,7 +144,7 @@
 				{"jd":2456680.5,"i":2.4870,"o":113.733,"p":92.021,"a":9.52885,"n":0.033528,"e":0.055600,"L":221.9730}
 			]
 		},{
-			"name":"Uranus",
+			"name":"U",
 			"radius": 25266,	// km
 			"interval": 20,
 			"colour": "rgb(130,150,255)",
@@ -163,7 +163,7 @@
 				{"jd":2456680.5,"i":0.7728,"o":73.983,"p":169.962,"a":19.1729,"n":0.011747,"e":0.048650,"L":13.8617}
 			]
 		},{
-			"name":"Neptune",
+			"name":"N",
 			"radius": 24553,	// km
 			"interval": 20,
 			"colour": "rgb(100,100,255)",
