@@ -1064,6 +1064,7 @@ VirtualSky.prototype.changeLanguage = function(code){
 	return this;
 }
 VirtualSky.prototype.htmlDecode = function(input){
+	if(!input) return "";
 	var e = document.createElement('div');
 	e.innerHTML = input;
 	return e.childNodes[0].nodeValue;
@@ -1072,7 +1073,7 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 	if(key===undefined)
 		return undefined;
 	if(key==="constellations"){
-		if(key2 && this.lang.constellations[key2])
+		if(key2 && is(this.lang.constellations[key2],"string"))
 			return this.htmlDecode(this.lang.constellations[key2]);
 	}else if(key==="planets"){
 		if(this.lang.planets[key2])
