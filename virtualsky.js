@@ -1447,15 +1447,16 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 		}
 		aok = true;
 		for(i = 0 ; i < this.keys.length ; i++){ if(this.keys.charCode == ch && this.keys.altKey == alt) aok = false; }
-		if(aok)
+		if(aok){
 			this.keys.push({
-				str:str,
-				charCode:ch,
-				char:String.fromCharCode(ch),
-				fn:fn,
-				txt:txt,
-				altKey:alt
+				'str': str,
+				'charCode': ch,
+				'char': String.fromCharCode(ch),
+				'fn': fn,
+				'txt': txt,
+				'altKey': alt
 			});
+		}
 	}
 	return this;
 }
