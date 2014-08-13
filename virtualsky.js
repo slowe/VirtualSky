@@ -250,7 +250,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.6.0";
+	this.version = "0.6.1";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -1080,7 +1080,7 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 		else
 			return this.htmlDecode(this.lang[key2]);
 	}else
-		return this.lang[key] || this.langs[0][key] || "";
+		return this.htmlDecode(this.lang[key]) || this.htmlDecode(this.langs[0][key]) || "";
 }
 VirtualSky.prototype.resize = function(w,h){
 	if(!this.canvas) return;
@@ -2721,6 +2721,7 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 		if(x > 0) c.fillText(d[i],x,y);
 	}
 	c.fill();
+	
 	return this;
 }
 
