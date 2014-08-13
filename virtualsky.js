@@ -571,7 +571,7 @@ function VirtualSky(input){
 		"power": "Powered by LCOGT"
 	},{
 		"code" : "fr",
-		"name" : "French",
+		"name" : "Fran&#231;ais",
 		"constellations": ['Androm&egrave;de','Machine\npneumatique','Oiseau de paradis','Verseau','Aigle','Autel','B&eacute;lier','Cocher','Bouvier','Burin','Girafe','Cancer','Chiens de chasse','Grand Chien','Petit Chien','Capricorne','Car&egrave;ne','Cassiop&eacute;e','Centaure','C&eacute;ph&eacute;e','Baleine','Cam&eacute;l&eacute;on','Compas','Colombe','Chevelure de\nB&eacute;renice','Couronne\nAustrale','Couronne\Bor&eacute;ale','Corbeau','Coupe','Croix du Sud','Cygne','Dauphin','Dorade','Dragon','Petit Cheval','Eridan','Fourneau','G&eacute;meaux','Grue','Hercule','Horologe','Hydre','Hydre m&acirc;le','Indien','L&eacute;zard','Lion','Petit Lion','Li&egrave;vre','Balance','Loup','Lynx','Lyre','Table','Microscope','Licorne','Mouche','R&egrave;gle','Octant','Ophiuchus','Orion','Paon','P&eacute;gase','Pers&eacute;e','Ph&eacute;nix','Peintre','Poissons','Poisson austral','Poupe','Boussole','R&eacute;ticule','Fl&egrave;che','Sagittaire','Scorpion','Sculpteur','Ecu de\nSobieski','Serpent','Sextant','Taureau','T&eacute;lescope','Triangle','Triangle\naustral','Toucan','Grande Ourse','Petite Ourse','Voiles','Vierge','Poisson volant','Petit Renard'],
 		"planets": ["Mercure","Venus","Mars","Jupiter","Saturne","Uranus","Neptune"],
 		"sun":"Soleil",
