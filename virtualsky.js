@@ -73,6 +73,27 @@
 // Define a shortcut for checking variable types
 function is(a,b){return typeof a===b;}
 
+// Get the URL query string and parse it
+$.query = function() {
+	var r = {length:0};
+	var q = location.search;
+	if(q && q != '#'){
+		// remove the leading ? and trailing &
+		q = q.replace(/^\?/,'').replace(/\&$/,'');
+		jQuery.each(q.split('&'), function(){
+			var key = this.split('=')[0];
+			var val = this.split('=')[1];
+			// convert floats
+			if(/^-?[0-9.]+$/.test(val)) val = parseFloat(val);
+			if(val == "true") val = true;
+			if(val == "false") val = false;
+			if(/^\?[0-9\.]+$/.test(val)) val = parseFloat(val);	// convert floats
+			r[key] = val;
+		});
+	}
+	return r;
+};
+
 $.extend($.fn.addTouch = function(){
 	// Adapted from http://code.google.com/p/rsslounge/source/browse/trunk/public/javascript/addtouch.js?spec=svn115&r=115
 	this.each(function(i,el){
@@ -229,13 +250,16 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.5.0";
+	this.version = "0.6.0";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
 	/*@cc_on
 	this.ie = true
 	@*/
+
+	this.q = $.query();    // Query string
+	this.langurl = "lang/%LANG%.json";	// The location of the language files
 
 	this.id = '';						// The ID of the canvas/div tag - if none given it won't display
 	this.gradient = true;				// Show the sky gradient
@@ -710,26 +734,43 @@ function VirtualSky(input){
 	this.fullsky = false;    // Are we showing the entire sky?
 
 	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-	this.language = navigator.language || navigator.userLanguage;			// Set the user language
-	this.langcode = this.language.substring(0,2);
-	this.langs = new Array();
+	this.language = (typeof this.q.lang==="string") ? this.q.lang : (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
+	this.langshort = (this.language.indexOf('-') > 0 ? this.language.substring(0,this.language.indexOf('-')) : this.language.substring(0,2));
 	this.langs = [{
-		"code" : "en",
-		"name" : "English",
-		"constellations": ['Andromeda','Antlia','Apus','Aquarius','Aquila','Ara',
-			'Aries','Auriga','Bootes','Caelum','Camelopardalis','Cancer','Canes Venatici',
-			'Canis Major','Canis Minor','Capricornus','Carina','Cassiopeia','Centaurus',
-			'Cepheus','Cetus','Chamaeleon','Circinus','Columba','Coma Berenices',
-			'Corona\nAustrina','Corona Borealis','Corvus','Crater','Crux','Cygnus',
-			'Delphinus','Dorado','Draco','Equuleus','Eridanus','Fornax','Gemini',
-			'Grus','Hercules','Horologium','Hydra','Hydrus','Indus','Lacerta','Leo',
-			'Leo Minor','Lepus','Libra','Lupus','Lynx','Lyra','Mensa','Microscopium',
-			'Monoceros','Musca','Norma','Octans','Ophiuchus','Orion','Pavo','Pegasus',
-			'Perseus','Phoenix','Pictor','Pisces','Piscis Austrinus','Puppis','Pyxis',
-			'Reticulum','Sagitta','Sagittarius','Scorpius','Sculptor','Scutum','Serpens',
-			'Sextans','Taurus','Telescopium','Triangulum','Triangulum\nAustrale',
-			'Tucana','Ursa Major','Ursa Minor','Vela','Virgo','Volans','Vulpecula'],
-		"planets": ["Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune"],
+		"language": {
+			"code": "en",
+			"name": "English",
+			"alignment": "left"
+		},
+		"constellations": {
+			"And": "Andromeda", "Ant": "Antlia", "Aps": "Apus", "Aqr": "Aquarius", "Aql": "Aquila",
+			"Ara": "Ara", "Ari": "Aries", "Aur": "Auriga", "Boo": "Bo&ouml;tes", "Cae": "Caelum",
+			"Cam": "Camelopardalis", "Cnc": "Cancer", "CVn": "Canes Venatici", "CMa": "Canis Major",
+			"CMi": "Canis Minor", "Cap": "Capricornus", "Car": "Carina", "Cas": "Cassiopeia",
+			"Cen": "Centaurus", "Cep": "Cepheus", "Cet": "Cetus", "Cha": "Chamaeleon", "Cir": "Circinus",
+			"Col": "Columba", "Com": "Coma Berenices", "CrA": "Corona\nAustrina", "CrB": "Corona\nBorealis",
+			"Crv": "Corvus", "Crt": "Crater", "Cru": "Crux", "Cyg": "Cygnus", "Del": "Delphinus", 
+			"Dor": "Dorado", "Dra": "Draco", "Equ": "Equuleus", "Eri": "Eridanus", "For": "Fornax", 
+			"Gem": "Gemini", "Gru": "Grus", "Her": "Hercules", "Hor": "Horologium", "Hya": "Hydra", 
+			"Hyi": "Hydrus", "Ind": "Indus", "Lac": "Lacerta", "Leo": "Leo", "LMi": "Leo Minor", 
+			"Lep": "Lepus", "Lib": "Libra", "Lup": "Lupus", "Lyn": "Lynx", "Lyr": "Lyra", "Men": "Mensa",
+			"Mic": "Microscopium", "Mon": "Monoceros", "Mus": "Musca", "Nor": "Norma", "Oct": "Octans",
+			"Oph": "Ophiuchus", "Ori": "Orion", "Pav": "Pavo", "Peg": "Pegasus", "Per": "Perseus",
+			"Phe": "Phoenix", "Pic": "Pictor", "Psc": "Pisces", "PsA": "Piscis Austrinus", "Pup": "Puppis",
+			"Pyx": "Pyxis", "Ret": "Reticulum", "Sge": "Sagitta", "Sgr": "Sagittarius", "Sco": "Scorpius",
+			"Scl": "Sculptor", "Sct": "Scutum", "Ser": "Serpens", "Sex": "Sextans", "Tau": "Taurus",
+			"Tel": "Telescopium", "Tri": "Triangulum", "TrA": "Triangulum\nAustrale", "Tuc": "Tucana",
+			"UMa": "Ursa Major", "UMi": "Ursa Minor", "Vel": "Vela", "Vir": "Virgo", "Vol": "Volans", "Vul": "Vulpecula" 
+		},
+		"planets": {
+			"Me": "Mercury",
+			"V": "Venus",
+			"Ma": "Mars",
+			"J": "Jupiter",
+			"S": "Saturn",
+			"U": "Uranus",
+			"N": "Neptune"
+		},
 		"sun":"Sun",
 		"moon":"Moon",
 		"date": "Date &amp; Time",
@@ -779,157 +820,8 @@ function VirtualSky(input){
 		"up": "&uarr;",
 		"down": "&darr;",
 		"power": "Powered by LCOGT"
-	},{
-		"code" : "fr",
-		"name" : "Fran&#231;ais",
-		"constellations": ['Androm&egrave;de','Machine\npneumatique','Oiseau de paradis','Verseau','Aigle','Autel','B&eacute;lier','Cocher','Bouvier','Burin','Girafe','Cancer','Chiens de chasse','Grand Chien','Petit Chien','Capricorne','Car&egrave;ne','Cassiop&eacute;e','Centaure','C&eacute;ph&eacute;e','Baleine','Cam&eacute;l&eacute;on','Compas','Colombe','Chevelure de\nB&eacute;renice','Couronne\nAustrale','Couronne\Bor&eacute;ale','Corbeau','Coupe','Croix du Sud','Cygne','Dauphin','Dorade','Dragon','Petit Cheval','Eridan','Fourneau','G&eacute;meaux','Grue','Hercule','Horologe','Hydre','Hydre m&acirc;le','Indien','L&eacute;zard','Lion','Petit Lion','Li&egrave;vre','Balance','Loup','Lynx','Lyre','Table','Microscope','Licorne','Mouche','R&egrave;gle','Octant','Ophiuchus','Orion','Paon','P&eacute;gase','Pers&eacute;e','Ph&eacute;nix','Peintre','Poissons','Poisson austral','Poupe','Boussole','R&eacute;ticule','Fl&egrave;che','Sagittaire','Scorpion','Sculpteur','Ecu de\nSobieski','Serpent','Sextant','Taureau','T&eacute;lescope','Triangle','Triangle\naustral','Toucan','Grande Ourse','Petite Ourse','Voiles','Vierge','Poisson volant','Petit Renard'],
-		"planets": ["Mercure","Venus","Mars","Jupiter","Saturne","Uranus","Neptune"],
-		"sun":"Soleil",
-		"moon":"Lune",
-		"date": "Date &amp; Heure",
-		"datechange": "Changer date/heure (pr&eacute;sent&eacute;e en heure locale)",
-		"close": "fermer",
-		"position": "Latitude &amp; Longitude",
-		"positionchange": "Changer longitude/latitude",
-		"N": "N",
-		"E": "E",
-		"S": "S",
-		"W": "O",
-		"keyboard": "Raccourcis clavier:",
-		"fast": "augmenter vitesse temps",
-		"stop": "vitesse temps &agrave; z&eacute;ro",
-		"slow": "r&eacute;duire vitesse temps",
-		"reset": "temps &agrave; maintenant",
-		"cardinal": "basculer points cardinaux",
-		"stars": "afficher &eacute;toiles",
-		"starlabels": "basculer noms &eacute;toiles",
-		"neg": "inverser couleurs",
-		"atmos": "basculer atmosph&egrave;re",
-		"ground": "basculer sol",
-		"az": "afficher grille Az/El",
-		"eq": "afficher grille Ra/Dec",
-		"gal": "afficher grille galactique",
-		"galaxy": "afficher plan galactique",
-		"ec": "afficher ligne &eacute;cliptique",
-		"meridian": "afficher ligne m&eacute;dirien",
-		"con": "afficher lignes constellations",
-		"conbound": "afficher limites constellations",
-		"names": "afficher noms constellations",
-		"sol": "afficher plan&egrave;tes/Soleil/Lune",
-		"sollabels": "afficher noms plan&egrave;tes/Soleil/Lune",
-		"orbits": "afficher orbites plan&egrave;tes",
-		"projection":"changer projection carte",
-		"meteorshowers":"afficher pluie de m&eacute;t&eacute;ores",
-		"addday": "ajouter 1 jour",
-		"subtractday": "soustraire 1 jour",
-		"addweek": "ajouter 1 semaine",
-		"subtractweek": "soustraire 1 semaine",
-		"azleft": "tourner vers gauche",
-		"azright": "tourner vers droite",
-		"magup": "augmenter magnitude limite",
-		"magdown": "r&eacute;duire magnitude limite",
-		"left" : "&larr;",
-		"right" : "&rarr;",
-		"up": "&uarr;",
-		"down": "&darr;",
-		"power": "powered by LCOGT"
-	},{
-		"code" : "es",
-		"name" : "Espa&#241;ol",
-		"position": "Latitud &amp; Longitud",
-		"W": "O",
-		"planets": ["Mercurio","Venus","Marte","J&uacute;piter","Saturno","Urano","Neptuno"],
-		"sun":"Sol",
-		"moon":"Luna",
-		"constellations": ['Andr&oacute;meda','La M&aacute;quina neum&aacute;tica','El Ave del Para&iacute;so',
-			'Acuario','El &Aacute;guila','El Altar','Aries','Auriga','El Boyero',
-			'Caelum','La Jirafa','C&aacute;ncer','Canes Venatici','El Perro Mayor',
-			'El Perro peque&ntilde;o','Capricornio','Carina','Casiopea','El Centauro',
-			'Cefeo','Ceto','El Camale&oacute;n','El Comp&aacute;s','La Paloma',
-			'La cabellera de Berenice','La Corona Austral','La Corona Boreal','El Cuervo',
-			'La Copa','La Cruz','El Cisne','El Delf&iacute;n','El Pez dorado','El Drag&oacute;n',
-			'El Caballo','El R&iacute;o','El Horno','Los Gemelos','La Grulla','H&eacute;rcules',
-			'Reloj','Hydra','La Serpiente marina','El Indio','Lagarto','Le&oacute;n',
-			'Le&oacute; peque&ntilde;o','Conejo','La Balanza','Lobo','Lince','La Lira',
-			'La Mesa','Microscopio','El Unicornio','La Mosca','Regla','El Octante','Ofiuco',
-			'Ori&oacute;n','El Pavo','Pegaso','Perseo','El F&eacute;nix','La Paleta del Pintor',
-			'Los Peces','Pez Austral','La Popa','Br&uacute;jula','El Ret&iacute;culo','Flecha',
-			'Sagitario','El Escorpi&oacute;n','Escultor','Escudo','La Serpiente','El Sextante',
-			'Tauro','Telescopio','Tri&aacute;ngulo','El Tri&aacute;ngulo Austral','El Tuc&aacute;n',
-			'Oso Mayor','Oso Peque&ntilde;o','Vela','Virgo','El Pez volador','El Zorro']
-	},{
-		"code":"cs",
-		"name":"Čeština",
-		"position":"zeměpisná šířka a délka",
-		"N":"S",
-		"W":"Z",
-		"E":"V",
-		"S":"J",
-		"sun":"Slunce",
-		"moon":"Měsíc",
-		"planets": ["Merkur","Venuše","Mars","Jupiter","Saturn","Uran","Neptun"],
-		"constellations": ['Andromeda','Vývěva','Rajka','Vodnář','Orel','Oltář','Beran','Vozka',
-			'Pastýř','Rydlo','Žirafa','Rak','Honící psi','Velký pes','Malý pes','Kozoroh',
-			'Lodní kýl','Kasiopeja','Kentaur','Kefeus','Velryba','Chamaeleon','Kružítko',
-			'Holubice','Vlas Bereničin','Jižní koruna','Severní koruna','Havran','Pohár',
-			'Jižní kříž','Labuť','Delfín','Mečoun','Drak','Koníček','Řeka Eridanus','Pec',
-			'Blíženci','Jeřáb','Herkules','Hodiny','Hydra','Malý vodní hrad','Indián',
-			'Ještěrka','Lev','Malý lev','Zajíc','Váhy','Vlk','Rys','Lyra','Tabulová hora',
-			'Mikroskop','Jednorožec','Moucha','Pravítko','Oktant','Hladonoš','Orion','Páv',
-			'Pegas','Perseus','Fénix','Malíř','Ryby','Jižní ryba','Lodní záď','Kompas','Mřížka',
-			'Šíp','Střelec','Štír','Sochař','Štít','Had','Sextant','Býk','Dalekohled','Trojúhelník',
-			'Jižní trojúhelník','Tukan','Velká medvědice','Malý medvěd','Plachty','Panna','Letající ryba','Liška']
-	},{
-		"code" : "ar",
-		"name" : "Arabic",
-		"position": "الطول  &amp;  العرض",
-		"constellations": ['أندروميدا','مفرغة الهواء','طائر الفردوس','الدلو','العقاب','المجمرة','الحمل','ممسك الأعنة','العواء','آلة النقاش','الزرافة','السرطان','السلوقيين','الكلب الأكبر','الكلب الأصغر','الجدي','الجؤجؤ','ذات الكرسي','قنطورس','قيفاوس','قيطس','الزرافة','البيكار','الحمامة','ضفيرة برنيس','الإكليل الجنوبي','الإكليل الشمالي','الغراب','القصعة','Crux','الدجاجة','الدلفين','أبي سيف','التنين','قطعة الفرس','النهر','الكور','التوأمين','الكركي','الجاثي','الساعة','الشجاع','حية الماء','الهندي','العظاءة','الأسد','الأسد الأضغر','الأرنب','الميزان','السبع','الوشق','اللورا','الجبل','المجهر','وحيد القرن','الذبابة','مربع النجار','الثمن','الحواء','الجبّار','الطاووس','الفرس المجنح','برشاوس','العنقاء','آلة الرسام','الحوت','الحوت الجنوبي','الكوثل','البوصلة','الشبكة','السهم','الرامي','العقرب','معمل النحات','الترس','الحية','آلة السدس','الثور','التلسكوب','المثلث','المثلث الجنوبي','الطوقان','الدب الأكبر','الدب الأصغر','الشراع','العذراء','السمكة الطائرة','الثعلب'],
-		"planets": ["عطارد","الزهرة","المريخ","المشتري","زحل","أورانوس","نبتون"],
-		"sun":"الشمس",
-		"moon":"القمر",
-		"N": "شمال",
-		"E": "شرق",
-		"S": "جنوب",
-		"W": "غرب",
-		"keyboard": "اختصارات المفاتيح:",
-		"fast": "تسريع الزمن",
-		"stop": "إيقاف الزمن",
-		"slow": "إبطاء الزمن",
-		"reset": "الزمن الحالي",
-		"cardinal": "الإتجاهات",
-		"stars": "النجوم",
-		"starlabels": "أسماء النجوم",
-		"neg": "عكس الألوان",
-		"atmos": "الغلاف الجوي",
-		"ground": "الأفق",
-		"az": " Az/El الإحداثيات  السمتية",
-		"eq": " Ra/Dec الإحداثيات الاستوائية",
-		"gal": "الإحداثيات المجرية",
-		"galaxy": " المستوي المجري",
-		"ec": " دائرة الكسوف",
-		"meridian": " خط منتصف النهار",
-		"con": " خطوط الكوكبات",
-		"conbound": " حدود الكوكبات",
-		"names": " أسماء الكوكبات",
-		"sol": " الكواكب/الشمس/القمر",
-		"sollabels": " أسماء الكواكب/الشمس/القمر ",
-		"orbits": "مدارات الكواكب",
-		"projection":"تغيير طريقة الإسقاط",
-		"meteorshowers":"زخات الشهب",
-		"addday": "تقدم يوماً واحداً",
-		"subtractday": "تأخر يوماً واحداً",
-		"addweek": "تقدم أسبوعاً واحداً",
-		"subtractweek": "تأخر أسبوعاً واحداً",
-		"azleft": "اذهب يساراً",
-		"azright": "اذهب يميناً",
-		"magup": "زيادة عدد النجوم المرئية",
-		"magdown": "تخفيض عدد النجوم المرئية",
-		"left" : "&larr;",
-		"right" : "&rarr;",
-		"up": "&uarr;",
-		"down": "&darr;",
-		"power": "Powered by LCOGT"
 	}];
+	this.lang = this.langs[0];
 
 	// Define the colours that we will use
 	this.colours = {
@@ -985,7 +877,8 @@ function VirtualSky(input){
 	// Update the colours
 	this.updateColours();
 
-	this.changeLanguage(this.langcode);
+	// Load the language file
+	this.loadLanguage(this.language);
 
 	// Define some VirtualSky styles
 	var v,a,b,r,s,p;
@@ -1038,6 +931,7 @@ function VirtualSky(input){
 VirtualSky.prototype.init = function(d){
 	if(!d) return this;
 	var q = location.search;
+	
 	if(q && q != '#'){
 		var bits = q.replace(/^\?|\&$/g,'').split('&'); // remove the leading ? and trailing &
 		var key,val;
@@ -1047,7 +941,7 @@ VirtualSky.prototype.init = function(d){
 			if(/^-?[0-9.]+$/.test(val)) val = parseFloat(val);
 			if(val == "true") val = true;
 			if(val == "false") val = false;
-			//aply only first key occurency
+			// apply only first key occurency
 			if(d[key]===undefined) d[key] = val;
 		}
 	}
@@ -1121,7 +1015,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.width,n)) this.wide = d.width;
 	if(is(d.height,n)) this.tall = d.height;
 	if(is(d.live,b)) this.islive = d.live;
-	if(is(d.lang,s) && d.lang.length==2) this.langcode = d.lang;
+	if(is(d.lang,s) && d.lang.length==2) this.language = d.lang;
 	if(is(d.fontfamily,s)) this.fntfam = d.fontfamily.replace(/%20/g,' ');
 	if(is(d.fontsize,s)) this.fntsze = d.fontsize;
 	if(is(d.callback,o)){
@@ -1132,9 +1026,39 @@ VirtualSky.prototype.init = function(d){
 
 	return this;
 }
+
+// Load the specified language
+// If it fails and this was the long variation of the language (e.g. "en-gb" or "zh-yue"), try the short version (e.g. "en" or "zh")
+VirtualSky.prototype.loadLanguage = function(l,fn){
+	l = l || this.language;
+	if(!l) return;
+	var url = this.langurl.replace('%LANG%',l);
+	this.loadJSON(
+		url,
+		function(data){
+			this.langcode = l;
+			var found = -1;
+			for(var i = 0 ; i < this.langs.length ; i++){
+				if(this.langs[i].language && this.langs[i].language.code==l) found = i;
+			}
+			if(found < 0)
+				this.langs.push(data);
+			else
+				this.langs[found] = data;
+
+			this.changeLanguage(l).draw();
+		},
+		function(){},
+		function(){
+			if(url.indexOf(this.language) > 0) this.loadLanguage(this.langshort,fn);
+		}
+	);
+	return this;
+}
+// Change the active language
 VirtualSky.prototype.changeLanguage = function(code){
 	for(var i = 0; i < this.langs.length ; i++){
-		if(this.langs[i].code==code){ this.lang = this.langs[i]; return this; }
+		if(this.langs[i].language.code==code){ this.lang = this.langs[i]; return this; }
 	}
 	this.lang = this.langs[0];
 	return this;
@@ -1148,21 +1072,12 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 	if(key===undefined)
 		return undefined;
 	if(key==="constellations"){
-		if(key2 < this.lang.constellations.length)
+		if(key2 && this.lang.constellations[key2])
 			return this.htmlDecode(this.lang.constellations[key2]);
 	}else if(key==="planets"){
-		if(typeof key2==="string"){
-			// Loop over primary language planets to look for a match
-			for(var i = 0; i < this.langs[0].planets.length; i++){
-				if(this.langs[0].planets[i]==key2){
-					key2 = i;
-					continue;
-				}
-			}
-		}
-		if(typeof key2==="number" && key2 < this.lang.planets.length)
+		if(this.lang.planets[key2])
 			return this.htmlDecode(this.lang.planets[key2]);
-		else if(typeof key2==="string")
+		else
 			return this.htmlDecode(this.lang[key2]);
 	}else
 		return this.lang[key] || this.langs[0][key] || "";
@@ -1235,7 +1150,7 @@ VirtualSky.prototype.load = function(t,file,fn){
 		this.trigger("loaded"+(t.charAt(0).toUpperCase() + t.slice(1)),{data:data});
 	},fn);
 }
-VirtualSky.prototype.loadJSON = function(file,callback,complete){
+VirtualSky.prototype.loadJSON = function(file,callback,complete,error){
 	if(typeof file!=="string") return this;
 	var dt = file.match(/\.json$/i) ? "json" : "script";
 	if(dt=="script"){
@@ -1255,13 +1170,15 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete){
 		url: this.base+file,
 		context: this,
 		success: callback,
-		complete: complete || function(){}
+		complete: complete || function(){},
+		error: error || function(){}
 	};
 	if(dt=="json") config.jsonp = 'onJSONPLoad';
 	if(dt=="script") config.cache = true;	// Use a cached version
 	$.ajax(config);
 	return this;
 }
+
 VirtualSky.prototype.createSky = function(){
 	this.container = $('#'+this.id);
 	this.container.addTouch();
@@ -1509,7 +1426,7 @@ VirtualSky.prototype.toggleHelp = function(){
 }
 // Register keyboard commands and associated functions
 VirtualSky.prototype.registerKey = function(charCode,fn,txt){
-	if(is(fn,"function")) return this;
+	if(!is(fn,"function")) return this;
 	if(!is(charCode,"object")) charCode = [charCode];
 	var aok, ch, c, i, alt, str;
 	for(c = 0 ; c < charCode.length ; c++){
@@ -2494,7 +2411,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 		if(this.constellation.labels){
 			pos = this.radec2xy(this.lines[c][1]*this.d2r,this.lines[c][2]*this.d2r);
 			if(this.isVisible(pos.el)){
-				label = this.getPhrase('constellations',c);
+				label = this.getPhrase('constellations',this.lines[c][0]);
 				xoff = (x.measureText) ? -x.measureText(label).width/2 : 0;
 				x.fillText(label,pos.x+xoff,pos.y-fontsize/2)
 				x.fill();
