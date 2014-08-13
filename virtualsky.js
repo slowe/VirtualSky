@@ -1683,7 +1683,7 @@ VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 	return {
 		JD: this.getJD(clock),
 		GST: gst,
-		LST = (gst+lon/15)%24
+		LST: (gst+lon/15)%24
 	};
 }
 // Uses algorithm defined in Practical Astronomy (4th ed) by Peter Duffet-Smith and Jonathan Zwart
@@ -2972,6 +2972,7 @@ VirtualSky.prototype.toggleAzimuthMove = function(az){
 	if(this.az_step===0){
 		this.az_step = (typeof az==="number") ? az : -1;
 		this.moveIt();
+	}else{
 		this.az_step = 0;
 		if(this.timer_az!==undefined) clearTimeout(this.timer_az);
 	}
