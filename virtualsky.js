@@ -717,7 +717,7 @@ function VirtualSky(input){
 
 	// Identify the default base directory
 	this.dir = $('script[src*=virtualsky]').attr('src').match(/^.*\//);  // the JS file path
-	this.dir = this.dir && this.dir[0] || "";//set dir to match or ""
+	this.dir = this.dir && this.dir[0] || ""; // set dir to match or ""
 
 	// Define extra files (JSON/JS)
 	this.file = {
@@ -953,7 +953,7 @@ VirtualSky.prototype.init = function(d){
 	
 	
 	// Overwrite defaults with variables passed to the function
-	//directly mapped variables
+	// directly mapped variables
 	var pairs = {
 		id: s,
 		gradient: b,
@@ -991,7 +991,7 @@ VirtualSky.prototype.init = function(d){
 		if(is(d[key], pairs[key]))
 			this[key] = d[key];
 	
-	//undirecly paired values
+	// Undirectly paired values
 	if(is(d.projection,s)) this.selectProjection(d.projection);
 	if(is(d.constellations,b)) this.constellation.lines = d.constellations;
 	if(is(d.constellationboundaries,b)) this.constellation.boundaries = d.constellationboundaries;
@@ -2743,7 +2743,9 @@ VirtualSky.prototype.highlight = function(i,colour){
 			c.fillStyle = colour;
 			c.strokeStyle = colour;
 			c.beginPath();
-			c.arc(p.x,p.y,p.d/2,0,2*Math.PI);
+			// Draw a square to distinguish from other objects
+			// c.arc(p.x,p.y,p.d/2,0,2*Math.PI);
+			c.fillRect(p.x-p.d/2,p.y-p.d/2,p.d,p.d);
 			c.fill();
 			this.drawLabel(p.x,p.y,p.d,colour,p.label);
 		}
