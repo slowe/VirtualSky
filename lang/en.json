@@ -153,5 +153,16 @@
 	"right" : "&rarr;",
 	"up": "&uarr;",
 	"down": "&darr;",
-	"power": "Powered by LCOGT"
+	"power": "Powered by LCOGT",
+	"projections": {
+		"polar": "Polar projection",
+		"fisheye": "Fisheye projection",
+		"ortho": "Orthographic projection",
+		"stereo": "Stereo projection",
+		"lambert": "Lambert projection",
+		"gnomic": "Gnomic projection",
+		"equirectangular": "Equirectangular projection",
+		"mollweide": "Mollweide projection",
+		"planechart": "Planechart projection"
+	}
 }

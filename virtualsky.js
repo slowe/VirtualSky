@@ -1585,8 +1585,9 @@ VirtualSky.prototype.selectProjection = function(proj){
 		if(this.container){
 			var w = this.container.width();
 			var h = this.container.height();
+			var s = (this.lang.projections && this.lang.projections[proj]) ? this.lang.projections[proj] : this.projections[proj].title;
 			if($('.'+this.id+'_projection').length > 0) $('.'+this.id+'_projection').remove();
-			this.container.append('<div class="'+this.id+'_projection">'+this.projections[proj].title+'</div>');
+			this.container.append('<div class="'+this.id+'_projection">'+s+'</div>');
 			$('.'+this.id+'_projection')
 				.on('mouseover',{me:this},function(e){e.data.me.mouseover = true;})
 				.css({

@@ -108,6 +108,18 @@
 		"U": { "_title": "Uranus", "_text": "The word for Uranus", "_type": "string" },
 		"N": { "_title": "Neptune", "_text": "The word for Neptune", "_type": "string" }
 	},
+	"projections": {
+		"_title": "Projections",
+		"polar": { "_title": "Polar", "_text": "The name for a polar projection", "_type": "string" },
+		"fisheye": { "_title": "Fisheye", "_text": "The name for a fisheye projection", "_type": "string" },
+		"ortho": { "_title": "Orthographic", "_text": "The name for an orthographic projection", "_type": "string" },
+		"stereo": { "_title": "Stereographic", "_text": "The name for a stereographic projection", "_type": "string" },
+		"lambert": { "_title": "Lambert", "_text": "The name for a Lambert projection", "_type": "string" },
+		"gnomic": { "_title": "Gnomic", "_text": "The name for a Gnomic projection", "_type": "string" },
+		"equirectangular": { "_title": "Equirectangular", "_text": "The name for an equirectangular projection", "_type": "string" },
+		"mollweide": { "_title": "Mollweide", "_text": "The name for a Mollweide projection", "_type": "string" },
+		"planechart": { "_title": "Planechart", "_text": "The name for a planechart projection", "_type": "string" }
+	},
 	"sun": { "_title": "Sun", "_text": "The word for the Sun", "_type": "string" },
 	"moon": { "_title": "Moon", "_text": "The word of the Moon", "_type": "string" },
 	"date": { "_title": "", "_text": "Date &amp; Time", "_type": "string" },
