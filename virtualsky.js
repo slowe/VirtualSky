@@ -250,7 +250,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.6.1";
+	this.version = "0.6.2";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -1649,12 +1649,23 @@ VirtualSky.prototype.isPointBad = function(p){
 VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 	clock = clock || this.clock;
 	lon = lon || this.longitude*this.r2d;
-	var gst = this.getGST(clock);
-	return {
-		JD: this.getJD(clock),
-		GST: gst,
-		LST: (gst+lon/15)%24
-	};
+	var JD,JD0,S,T,T0,UT,A,GST,d,LST;
+	JD = this.getJD(clock);
+	JD0 = Math.floor(JD-0.5)+0.5;
+	S = JD0-2451545.0;
+	T = S/36525.0;
+	T0 = (6.697374558 + (2400.051336*T) + (0.000025862*T*T))%24;
+	if(T0 < 0) T0 += 24;
+	UT = (((clock.getUTCMilliseconds()/1000 + clock.getUTCSeconds())/60) + clock.getUTCMinutes())/60 + clock.getUTCHours();
+	A = UT*1.002737909;
+	T0 += A;
+	GST = T0%24;
+	if(GST < 0) GST += 24;
+	d = (GST + lon/15.0)/24.0;
+	d = d - Math.floor(d);
+	if(d < 0) d += 1;
+	LST = 24.0*d;
+	return { GST:GST, LST:LST, JD:JD };
 }
 // Uses algorithm defined in Practical Astronomy (4th ed) by Peter Duffet-Smith and Jonathan Zwart
 VirtualSky.prototype.moonPos = function(JD,sun){
@@ -3029,10 +3040,6 @@ VirtualSky.prototype.getJD = function(clock) {
 	// The Julian Date of the Unix Time epoch is 2440587.5
 	if(!clock) clock = this.clock;
 	return ( clock.getTime() / 86400000.0 ) + 2440587.5;
-}
-VirtualSky.prototype.getGST = function(clock){
-	if(!clock) clock = this.clock;
-	return (clock.getTime()/1000*1.002737909350795+24054.4016883)/86400*24%24.0;
 }
 VirtualSky.prototype.getNegative = function(colour){
 	var end = (colour.indexOf("rgb") == 0) ? (colour.lastIndexOf(")")) :  0;
