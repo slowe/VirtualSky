@@ -2675,16 +2675,17 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	c.beginPath(); 
 	if(type=="az"){
 		minb = 0;
-		maxb = 90-bstep;
+		maxb = 90-bstep*this.r2d;
 	}else{
-		minb = -90+step;
+		minb = -90+step*this.r2d;
 		maxb = 90;
 	}
+	console.log(minb,maxb,step)
 	minb *= this.d2r;
 	maxb *= this.d2r;
 	old = {x:-1,y:-1,moved:false};
 	// Draw grid lines in azimuth/RA/longitude
-	for(b = minb; b < maxb ; b+= step){
+	for(b = minb; b < maxb ; b += step){
 		old.moved = false;
 		for(a = 0 ; a <= 2*Math.PI ; a += bstep) old = joinpoint(this,type,a,b,old,maxl);
 	}
