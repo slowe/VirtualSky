@@ -2123,8 +2123,7 @@ VirtualSky.prototype.draw = function(proj){
 			$(hid+'_geo').css({width:w,'align':'center'})
 			$(hid+'_geo input').css({width:'6em'});
 			$(hid+'_geo_close').bind('click',{sky:s},function(e){
-				e.data.sky.setGeo($(hid+'_lat').val()+','+$(hid+'_long').val());
-				e.data.sky.draw();
+				e.data.sky.setGeo($(hid+'_lat').val()+','+$(hid+'_long').val()).setClock(0).draw();
 			});
 		}
 		s.lightbox($(hid+'_geo'));
@@ -2322,6 +2321,7 @@ VirtualSky.prototype.drawPlanets = function(){
 	
 	// Sun & Moon
 	if(this.showplanets || this.showplanetlabels){
+
 		// Only recalculate the Moon's ecliptic position if the time has changed
 		if(oldjd != this.jd){
 			var p = this.moonPos(this.jd);
@@ -2691,7 +2691,6 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		minb = -90+step*this.r2d;
 		maxb = 90;
 	}
-	console.log(minb,maxb,step)
 	minb *= this.d2r;
 	maxb *= this.d2r;
 	old = {x:-1,y:-1,moved:false};
