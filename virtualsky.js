@@ -733,96 +733,6 @@ function VirtualSky(input){
 	this.clock = new Date(); // Define the 'current' time
 	this.fullsky = false;    // Are we showing the entire sky?
 
-	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-	this.language = (typeof this.q.lang==="string") ? this.q.lang : (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
-	this.langshort = (this.language.indexOf('-') > 0 ? this.language.substring(0,this.language.indexOf('-')) : this.language.substring(0,2));
-	this.langs = [{
-		"language": {
-			"code": "en",
-			"name": "English",
-			"alignment": "left"
-		},
-		"constellations": {
-			"And": "Andromeda", "Ant": "Antlia", "Aps": "Apus", "Aqr": "Aquarius", "Aql": "Aquila",
-			"Ara": "Ara", "Ari": "Aries", "Aur": "Auriga", "Boo": "Bo&ouml;tes", "Cae": "Caelum",
-			"Cam": "Camelopardalis", "Cnc": "Cancer", "CVn": "Canes Venatici", "CMa": "Canis Major",
-			"CMi": "Canis Minor", "Cap": "Capricornus", "Car": "Carina", "Cas": "Cassiopeia",
-			"Cen": "Centaurus", "Cep": "Cepheus", "Cet": "Cetus", "Cha": "Chamaeleon", "Cir": "Circinus",
-			"Col": "Columba", "Com": "Coma Berenices", "CrA": "Corona\nAustrina", "CrB": "Corona\nBorealis",
-			"Crv": "Corvus", "Crt": "Crater", "Cru": "Crux", "Cyg": "Cygnus", "Del": "Delphinus", 
-			"Dor": "Dorado", "Dra": "Draco", "Equ": "Equuleus", "Eri": "Eridanus", "For": "Fornax", 
-			"Gem": "Gemini", "Gru": "Grus", "Her": "Hercules", "Hor": "Horologium", "Hya": "Hydra", 
-			"Hyi": "Hydrus", "Ind": "Indus", "Lac": "Lacerta", "Leo": "Leo", "LMi": "Leo Minor", 
-			"Lep": "Lepus", "Lib": "Libra", "Lup": "Lupus", "Lyn": "Lynx", "Lyr": "Lyra", "Men": "Mensa",
-			"Mic": "Microscopium", "Mon": "Monoceros", "Mus": "Musca", "Nor": "Norma", "Oct": "Octans",
-			"Oph": "Ophiuchus", "Ori": "Orion", "Pav": "Pavo", "Peg": "Pegasus", "Per": "Perseus",
-			"Phe": "Phoenix", "Pic": "Pictor", "Psc": "Pisces", "PsA": "Piscis Austrinus", "Pup": "Puppis",
-			"Pyx": "Pyxis", "Ret": "Reticulum", "Sge": "Sagitta", "Sgr": "Sagittarius", "Sco": "Scorpius",
-			"Scl": "Sculptor", "Sct": "Scutum", "Ser": "Serpens", "Sex": "Sextans", "Tau": "Taurus",
-			"Tel": "Telescopium", "Tri": "Triangulum", "TrA": "Triangulum\nAustrale", "Tuc": "Tucana",
-			"UMa": "Ursa Major", "UMi": "Ursa Minor", "Vel": "Vela", "Vir": "Virgo", "Vol": "Volans", "Vul": "Vulpecula" 
-		},
-		"planets": {
-			"Me": "Mercury",
-			"V": "Venus",
-			"Ma": "Mars",
-			"J": "Jupiter",
-			"S": "Saturn",
-			"U": "Uranus",
-			"N": "Neptune"
-		},
-		"sun":"Sun",
-		"moon":"Moon",
-		"date": "Date &amp; Time",
-		"datechange": "Change the date/time (shown in your local time)",
-		"close": "close",
-		"position": "Latitude &amp; Longitude",
-		"positionchange": "Change the longitude/latitude",
-		"N": "N",
-		"E": "E",
-		"S": "S",
-		"W": "W",
-		"keyboard": "Keyboard shortcuts:",
-		"fast": "increase time speed",
-		"stop": "set time rate to zero",
-		"slow": "decrease time speed",
-		"reset": "set time to now",
-		"cardinal": "toggle cardinal points",
-		"stars": "toggle stars",
-		"starlabels": "toggle star labels",
-		"neg": "invert colours",
-		"atmos": "toggle atmosphere",
-		"ground": "toggle ground",
-		"az": "toggle Az/El gridlines",
-		"eq": "toggle Ra/Dec gridlines",
-		"gal": "toggle Galactic gridlines",
-		"galaxy": "toggle Galactic plane",
-		"ec": "toggle Ecliptic line",
-		"meridian": "toggle Meridian line",
-		"con": "toggle constellation lines",
-		"conbound": "toggle constellation boundaries",
-		"names": "toggle constellation names",
-		"sol": "toggle planets/Sun/Moon",
-		"sollabels": "toggle planet/Sun/Moon labels",
-		"orbits": "toggle planet orbits",
-		"projection":"change map projection",
-		"meteorshowers":"toggle meteor shower radiants",
-		"addday": "add 1 day",
-		"subtractday": "subtract 1 day",
-		"addweek": "add 1 week",
-		"subtractweek": "subtract 1 week",
-		"azleft": "rotate left",
-		"azright": "rotate right",
-		"magup": "increase magnitude limit",
-		"magdown": "decrease magnitude limit",
-		"left" : "&larr;",
-		"right" : "&rarr;",
-		"up": "&uarr;",
-		"down": "&darr;",
-		"power": "Powered by LCOGT"
-	}];
-	this.lang = this.langs[0];
-
 	// Define the colours that we will use
 	this.colours = {
 		'normal' : {
@@ -871,6 +781,13 @@ function VirtualSky(input){
 
 	// Overwrite our defaults with input values
 	this.init(input);
+
+	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+	this.language = (typeof this.q.lang==="string") ? this.q.lang : (typeof this.setlang==="string" ? this.setlang : (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "");
+	this.langshort = (this.language.indexOf('-') > 0 ? this.language.substring(0,this.language.indexOf('-')) : this.language.substring(0,2));
+	this.langs = [{"language": {"code": "en","name": "English","alignment": "left" }}]; // The contents of the language will be loaded from the JSON language file
+	this.lang = this.langs[0];
+
 
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default projection
 
@@ -985,7 +902,8 @@ VirtualSky.prototype.init = function(d){
 		fullscreen: b,
 		credit: b,
 		transparent: b,
-		plugins: o
+		plugins: o,
+		lang: s
 	}
 	for(key in pairs)
 		if(is(d[key], pairs[key]))
@@ -1018,6 +936,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.lang,s) && d.lang.length==2) this.language = d.lang;
 	if(is(d.fontfamily,s)) this.fntfam = d.fontfamily.replace(/%20/g,' ');
 	if(is(d.fontsize,s)) this.fntsze = d.fontsize;
+	if(is(d.lang,s)) this.setlang = d.lang;
 	if(is(d.callback,o)){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
