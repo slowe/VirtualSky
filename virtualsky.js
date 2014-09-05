@@ -1000,7 +1000,7 @@ VirtualSky.prototype.getPhrase = function(key,key2){
 		if(key2 && is(this.lang.constellations[key2],"string"))
 			return this.htmlDecode(this.lang.constellations[key2]);
 	}else if(key==="planets"){
-		if(this.lang.planets[key2])
+		if(this.lang.planets && this.lang.planets[key2])
 			return this.htmlDecode(this.lang.planets[key2]);
 		else
 			return this.htmlDecode(this.lang[key2]);
