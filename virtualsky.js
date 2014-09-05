@@ -709,11 +709,8 @@ function VirtualSky(input){
 					[116584,3.8,354.391,46.46],[116727,3.2,354.837,77.63],[116771,4.1,354.988,5.63],[116928,4.5,355.512,1.78],
 					[118268,4,359.828,6.86]]);
 
-	// Data for star names to display (if showstarlabels is set to true) - index with Hipparcos number
-	this.starnames = {"7588":"Achernar","11767":"Polaris","21421":"Aldebaran","24436":"Rigel","24608":"Capella","27989":"Betelgeuse",
-		"30438":"Canopus","32349":"Sirius","33579":"Adara","37279":"Procyon","37826":"Pollux","49669":"Regulus","62434":"Mimosa",
-		"65378":"Mizar","65474":"Spica","68702":"Hadar","69673":"Arcturus","71683":"Alpha Centauri A","80763":"Antares","85927":"Shaula",
-		"91262":"Vega","97649":"Altair","102098":"Deneb","113368":"Fomalhaut"};
+	// Data for star names to display (if showstarlabels is set to true) - indexed by Hipparcos number
+	this.starnames = {};
 
 	// Identify the default base directory
 	this.dir = $('script[src*=virtualsky]').attr('src').match(/^.*\//);  // the JS file path
@@ -967,6 +964,11 @@ VirtualSky.prototype.loadLanguage = function(l,fn){
 				this.langs.push(data);
 			else
 				this.langs[found] = data;
+
+			// Update any starnames
+			if(data.starnames){
+				for(var n in data.starnames) this.starnames[n] = data.starnames[n];
+			}
 
 			this.changeLanguage(l).draw();
 		},
@@ -2125,7 +2127,7 @@ VirtualSky.prototype.drawStars = function(){
 				d *= f;
 				c.moveTo(p.x+d,p.y);
 				if(this.showstars) c.arc(p.x,p.y,d,0,Math.PI*2,true);
-				if(this.showstarlabels && this.starnames[this.stars[i][0]]) this.drawLabel(p.x,p.y,d,"",this.starnames[this.stars[i][0]]);
+				if(this.showstarlabels && this.starnames[this.stars[i][0]]) this.drawLabel(p.x,p.y,d,"",this.htmlDecode(this.starnames[this.stars[i][0]]));
 			}
 		}	
 	}

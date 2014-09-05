@@ -111,5 +111,11 @@
 		"Vir": "Panna",
 		"Vol": "Letaj&#237;c&#237; ryba",
 		"Vul": "Li&#353;ka"
+	},
+	"starnames":{
+		"7588":"Achernar","11767":"Polaris","21421":"Aldebaran","24436":"Rigel","24608":"Capella","27989":"Betelgeuse",
+		"30438":"Canopus","32349":"Sirius","33579":"Adara","37279":"Procyon","37826":"Pollux","49669":"Regulus","62434":"Mimosa",
+		"65378":"Mizar","65474":"Spica","68702":"Hadar","69673":"Arcturus","71683":"Alpha Centauri A","80763":"Antares","85927":"Shaula",
+		"91262":"Vega","97649":"Altair","102098":"Deneb","113368":"Fomalhaut"
 	}
 }
