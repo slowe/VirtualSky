@@ -139,6 +139,13 @@
 		$('button#M42').on('click',function(){
 			planetarium9.panTo(83.8220833,-5.3911111,3000)
 		});
+
+		var planetarium10 = $.virtualsky({
+			id: 'starmap10',
+			projection: 'stereo',
+			lang: 'ar'
+		});
+
 	});
 	</script>
 </head>
@@ -167,6 +174,7 @@
 					<li><a href="#ex6">Example 6</a></li>
 					<li><a href="#ex7">Example 7</a></li>
 					<li><a href="#ex8">Example 8</a></li>
+					<li><a href="#ex9">Example 9</a></li>
 				</ul>
 			</li>
 			<li><a href="#options">Options</a>
@@ -381,6 +389,23 @@ $(document).ready(function() {
 			<button id="M1">Move to M1</button>
 			<button id="M82">Move to M82</button>
 			<button id="M42">Move to M42</button>
+			</li>
+
+			<li class="example" id="ex9">A default view using <code>stereo</code> projection in Arabic
+				<pre class="prettyprint lang-js">
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		id: 'starmap',
+		projection: 'stereo',
+		lang: 'ar'
+	});
+});
+			</pre>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
+</pre>
+			<div id="starmap10" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
 
 
