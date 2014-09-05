@@ -798,31 +798,34 @@ function VirtualSky(input){
 	this.loadLanguage(this.language);
 
 	// Define some VirtualSky styles
-	var v,a,b,r,s,p;
+	var v,a,b,r,s,p,k,c;
 	v = '.virtualsky';
 	a = '#f0f0f0';
 	b = '#fcfcfc';
+	k = 'background';
+	c = k+'-color';
+	p = 'padding';
+	bs = 'box-shadow:0px 0px 20px rgba(255,255,255,0.5);';
 	function br(i){ return 'border-radius:'+i+';-moz-border-radius:'+i+';-webkit-border-radius:'+i+';';}
-	function bs(){ return 'box-shadow:0px 0px 20px rgba(255,255,255,0.5);';}
 	r = br('0.5em');
 	s = br('3px');
 	$('<style type="text/css">'+
-		v+'_help { padding:10px;background-color:white;'+r+'} '+
-		v+'_help ul { list-style:none;margin:0px;padding:0px; } '+
-		v+'infobox { background-color:rgb(200,200,200);color:black;padding:5px;'+r+bs()+'} '+
-		v+'infobox img {} '+
-		v+'infocredit {color:white;float:left;font-size:0.8em;padding:5px;position:absolute;} '+
-		v+'form { position:absolute;z-index:20;display:block;overflow:hidden;background-color:#ddd;padding:10px;'+bs()+r+' } '+
-		v+'_dismiss { float:right;padding-left:5px;padding-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } '+
-		v+'form input,'+v+'form .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } '+v+'form .divider { margin-top: 5px; padding: 2px;} '+
-		v+'_help_key:active{ background:#e9e9e9; } '+
+		v+'_help { '+p+':10px;'+c+':white;'+r+'} '+
+		v+'_help ul { list-style:none;margin:0px;'+p+':0px; } '+
+		v+'_infobox { '+c+':'+a+';color:black;'+p+':5px;'+r+bs+'} '+
+		v+'_infobox img {} '+
+		v+'_infocredit {color:white;float:left;font-size:0.8em;'+p+':5px;position:absolute;} '+
+		v+'form { position:absolute;z-index:20;display:block;overflow:hidden;'+c+':#ddd;'+p+':10px;'+bs+r+' } '+
+		v+'_dismiss { float:right;'+p+'-left:5px;'+p+'-right:5px;margin:0px;font-weight:bold;cursor:pointer;color:black;margin-right:-5px;margin-top:-5px; } '+
+		v+'form input,'+v+'form .divider { display:inline-block;font-size:1em;text-align:center;margin-right:2px; } '+v+'form .divider { margin-top: 5px; '+p+': 2px;} '+
+		v+'_help_key:active{ '+k+':#e9e9e9; } '+
 		v+'_help_key:hover{ border-color: #b0b0b0; } '+
 		v+'_help_key { cursor:pointer;display:inline-block;text-align:center;'+
-			'background:'+a+';background:-moz-linear-gradient(top,'+a+','+b+');'+
-			'background:-webkit-gradient(linear,center top,center bottom,from('+a+'),to('+b+'));'+
-			s+'-webkit-background-clip:padding-box;-moz-background-clip:padding;background-clip:'+
-			'padding-box;color:#303030;border:1px solid #e0e0e0;border-bottom-width:2px;white-space:nowrap;font-family:monospace'+
-			';padding:1px 6px;font-size:1.1em;}</style>').appendTo("head");
+			k+':'+a+';'+k+':-moz-linear-gradient(top,'+a+','+b+');'+
+			k+':-webkit-gradient(linear,center top,center bottom,from('+a+'),to('+b+'));'+
+			s+'-webkit-'+k+'-clip:'+p+'-box;-moz-'+k+'-clip:'+p+';'+k+'-clip:'+
+			p+'-box;color:#303030;border:1px solid #e0e0e0;border-bottom-width:2px;white-space:nowrap;font-family:monospace'+
+			';'+p+':1px 6px;font-size:1.1em;}</style>').appendTo("head");
 
 	this.pointers = []; // Define an empty list of pointers/markers
 
@@ -832,7 +835,7 @@ function VirtualSky(input){
 	this.y = "";
 	this.theta = 0;
 	this.skygrad;
-	this.infobox = "virtualskyinfobox";
+	this.infobox = "virtualsky_infobox";
 	this.container = '';
 	this.times = this.astronomicalTimes();
 	if(this.id) this.createSky();
@@ -1405,7 +1408,7 @@ VirtualSky.prototype.toggleInfoBox = function(i){
 		return this;
 
 	if($('#'+this.id+'_'+this.infobox).length <= 0)
-		this.container.append('<div id="'+this.id+'_'+this.infobox+'" class="virtualskyinfobox" style="display:none;"></div>');
+		this.container.append('<div id="'+this.id+'_'+this.infobox+'" class="'+this.infobox+'" style="display:none;"></div>');
 	var el = $('#'+this.id+'_'+this.infobox);
 	if(i >= 0 && this.isVisible(this.pointers[i].el) && this.pointers[i].x > 0 && this.pointers[i].y > 0 && this.pointers[i].x < this.wide && this.pointers[i].y < this.tall){
 		var offset = this.container.position();
@@ -2903,7 +2906,7 @@ VirtualSky.prototype.addPointer = function(input){
 			label = p.credit || "View in Wikisky";
 			credit = p.credit || "DSS2/Wikisky";
 			p.html =  p.html ||
-				'<div class="virtualskyinfocredit">'+
+				'<div class="virtualsky_infocredit">'+
 					'<a href="'+url+'" style="color: white;">'+credit+'</a>'+
 				'</div>'+
 				'<a href="'+url+'" style="display:block;'+style+'">'+
