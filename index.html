@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>VirtualSky - Canvas Experiment</title>
+	<title>VirtualSky</title>
 	<!--
 		VirtualSky <canvas> application
 		(c) 2010 Stuart Lowe (Las Cumbras Observatory Global Telescope)
@@ -96,6 +96,7 @@
 			projection: 'stereo',
 			clock:new Date("July 17, 2013 18:39:00 GMT")
 		});
+	
 		planetarium7.addPointer({
 			'ra':83.8220792,
 			'dec':-5.3911111,
@@ -105,7 +106,45 @@
 			'credit':'Wikisky',
 			colour:'rgb(255,220,220)'
 		});
-		var planetarium8 = $.virtualsky({id:'starmap8', projection:'stereo', lang:'es'});
+
+		var planetarium8 = $.virtualsky({
+			id: 'starmap8',
+			projection: 'gnomic',
+			ra: 83.8220833,
+			dec:-5.3911111,
+			ground:false,
+			constellations: true,
+			fov: 15
+		});
+
+		var planetarium9 = $.virtualsky({
+			id: 'starmap9',
+			projection: 'gnomic',
+			ra: 83.8220833,
+			dec:-5.3911111,
+			ground:false,
+			constellations: true,
+			fov: 15
+		});
+
+		$('button#pleiades').on('click',function(){
+			planetarium9.panTo(56.8690917,24.1053111,3000)
+		});
+		$('button#M82').on('click',function(){
+			planetarium9.panTo(148.9684583,69.6797028,3000)
+		});
+		$('button#M1').on('click',function(){
+			planetarium9.panTo(83.6330833,22.0145000,3000)
+		});
+		$('button#M42').on('click',function(){
+			planetarium9.panTo(83.8220833,-5.3911111,3000)
+		});
+
+		var planetarium10 = $.virtualsky({
+			id: 'starmap10',
+			projection: 'stereo',
+			lang: 'ar'
+		});
 
 	});
 	</script>
@@ -123,10 +162,29 @@
 
 		<div id="starmap" class="planetarium" style="width:100%;height:300px;"></div>
 
+		<ul>
+			<li><a href="#keys">Keyboard shortcuts</a></li>
+			<li><a href="#instructions">Instructions for embedding</a>
+				<ul>
+					<li><a href="#ex1">Example 1</a></li>
+					<li><a href="#ex2">Example 2</a></li>
+					<li><a href="#ex3">Example 3</a></li>
+					<li><a href="#ex4">Example 4</a></li>
+					<li><a href="#ex5">Example 5</a></li>
+					<li><a href="#ex6">Example 6</a></li>
+					<li><a href="#ex7">Example 7</a></li>
+					<li><a href="#ex8">Example 8</a></li>
+					<li><a href="#ex9">Example 9</a></li>
+				</ul>
+			</li>
+			<li><a href="#options">Options</a>
+			<li><a href="#tech">Technical details</a>
+		</ul>
+
 		<h2 id="keys">Keyboard shortcuts</h2>
 		<p>Press the "?" key (with your mouse over VirtualSky) to see the full list of keyboard controls.</p>
 		
-		<h2>Instructions for embedding</h2>
+		<h2 id="instructions">Instructions for embedding</h2>
 		<p>The <a href="http://lcogt.net/virtualsky/embed/custom.html">easiest way to include VirtualSky</a> on your website is to use the custom form to create an embed link (uses an <code>&lt;iframe&gt;</code>).</p>
 		<p>Sometimes an <code>&lt;iframe&gt;</code> just doesn't give you the flexibility you need (or you might want to include it in an offline page during a public talk). In that case you could download a copy of <a href="https://github.com/slowe/VirtualSky">the source from GitHub</a> and include VirtualSky in your page using Javascript. You will need to include the following code block in the <code>&lt;head&gt;</code> of your page:</p>
 		
@@ -154,7 +212,7 @@ $(document).ready(function() {
 
 		<p>That is a version of VirtualSky with all the default options. However, one of the great things about VirtualSky is that it can be customised. Here are some examples to give you some ideas:</p>
 		<ol>
-			<li class="example">A <code>stereo</code> projection set for Santa Barbara's lat/long:
+			<li class="example" id="ex1">A <code>stereo</code> projection set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -170,7 +228,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap3" class="planetarium" style="width:100%;height:500px;"></div>
 			</li>
-			<li class="example">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
+			<li class="example" id="ex2">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
 		
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
@@ -192,7 +250,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap4" class="planetarium" style="width:500px;height:300px;"></div>
 			</li>
-			<li class="example">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid and the Meridian line displayed. The view is facing south east from Hill Valley, California at 1:21 am on October 25, 1985.
+			<li class="example" id="ex3">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid and the Meridian line displayed. The view is facing south east from Hill Valley, California at 1:21 am on October 25, 1985.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -214,7 +272,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap5" class="planetarium" style="width:650px;height:300px;"></div>
 			</li>
-			<li class="example">A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
+			<li class="example" id="ex4">A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -230,7 +288,7 @@ $(document).ready(function() {
 </pre>
 				<div id="starmap6" class="planetarium" style="width:920px;height:460px;"></div>
 			</li>
-			<li class="example">A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
+			<li class="example" id="ex5">A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -253,7 +311,7 @@ $(document).ready(function() {
 </pre>
 			<div id="starmap2" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
-			<li class="example">A default view using <code>stereo</code> projection with a place marker
+			<li class="example" id="ex6">A default view using <code>stereo</code> projection with a place marker
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
@@ -269,7 +327,7 @@ $(document).ready(function() {
 		'img':'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra=5.58813861333333&de=-5.3911111&angle=1.25&output=PNG',
 		'url':'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=M42',
 		'credit':'Wikisky',
-		colour:'rgb(255,220,220)'
+		'colour':'rgb(255,220,220)'
 	})
 
 });
@@ -279,14 +337,19 @@ $(document).ready(function() {
 </pre>
 			<div id="starmap7" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
-			<li class="example">A default view using <code>stereo</code> projection in Spanish.
+
+			<li class="example" id="ex7">A default view using <code>gnomic-tan</code> projection centred on M42
 				<pre class="prettyprint lang-js">
 $(document).ready(function() {
 
 	var planetarium = $.virtualsky({
-		id: 'starmap',
-		projection: 'stereo',
-		lang: 'es'
+		'id': 'starmap',
+		'projection': 'gnomic',
+		'ra': 83.8220833,
+		'dec': -5.3911111,
+		'ground': false,
+		'constellations': true,
+		'fov': 15
 	});
 
 });
@@ -296,9 +359,59 @@ $(document).ready(function() {
 </pre>
 			<div id="starmap8" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
+
+			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move
+				<pre class="prettyprint lang-js">
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		'id': 'starmap',
+		'projection': 'gnomic',
+		'ra': 83.8220833,
+		'dec': -5.3911111,
+		'ground': false,
+		'constellations': true,
+		'fov': 15
+	});
+	
+	$('button#moveit').on('click',function(){
+		planetarium.panTo(56.8690917,24.1053111,3000)
+	});
+
+});
+			</pre>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
+&lt;button id="moveit"&gt;Move to The Pleiades&lt;/button&gt;
+</pre>
+			<div id="starmap9" class="planetarium" style="width:944x;height:400px;"></div>
+			<button id="pleiades">Move to The Pleiades</button>
+			<button id="M1">Move to M1</button>
+			<button id="M82">Move to M82</button>
+			<button id="M42">Move to M42</button>
+			</li>
+
+			<li class="example" id="ex9">A default view using <code>stereo</code> projection in Arabic
+				<pre class="prettyprint lang-js">
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		id: 'starmap',
+		projection: 'stereo',
+		lang: 'ar'
+	});
+});
+			</pre>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
+</pre>
+			<div id="starmap10" class="planetarium" style="width:944x;height:400px;"></div>
+			</li>
+
+
 		</ol>
 
-		<h2>Options</h2>
+		<h2 id="options">Options</h2>
 		<p>There are a range of options to try (default values in brackets):</p>
 		<ul>
 			<li><code>id</code> ('starmap') - The ID for the HTML element where you want the sky inserted</li>
@@ -344,11 +457,12 @@ $(document).ready(function() {
 			<li><code>fontfamily</code> - VirtualSky inherits the font family when it is added to an element on a page but can't when using an iframe. To solve that situation, you can provide a CSS <code>font-family</code> string.</li>
 		</ul>
 		
-		<h2>Technical details</h2>
+		<h2 id="tech">Technical details</h2>
 		<p>Virtual Sky uses the <a href="http://diveintohtml5.org/canvas.html#divingin">&lt;canvas&gt; element</a> - part of the <a href="http://whatwg.org/html5">HTML5 proposal</a> - so should work in most modern browsers such as Firefox (there are issues in Firefox 3.0 on Ubuntu), Opera, Chrome and Safari. It should also work in Internet Explorer 7.0 and 8.0 through the use of the <a href="http://code.google.com/p/explorercanvas/">excanvas.js</a> library. The <a href="https://github.com/slowe/VirtualSky">code can be found on Github</a>.</p>
 		
-		<h2>Alternatives</h2>
-		<p>There are other browser-based planetaria available online e.g. <a href="http://ivan.ivanych.net/dev/starmap-canvas/">Ivan Boldyrev's Starchartjs</a>, <a href="http://canvas.staratlas.com/">Luther Huffman's StarAtlas</a>, <a href="http://tonightsky.free.fr/all-sky-map/">Thomas Boch's All Sky Map</a>, <a href="http://in-the-sky.org/skymap.php">Dominic Ford's Interactive Planetarium</a> and <a href="http://in-the-sky.org/skymap.php">Sky Map</a>. On the desktop, <a href="http://stellarium.org/">Stellarium</a> is a highly featured planetarium program that works on Windows, Mac and Linux platforms.</p>
+		<h2 id="alt">Alternatives</h2>
+		<p>There are other browser-based planetaria available online e.g. <a href="http://ivan.ivanych.net/dev/starmap-canvas/">Ivan Boldyrev's Starchartjs</a>, <a href="http://canvas.staratlas.com/">Luther Huffman's StarAtlas</a> and <a href="http://tonightsky.free.fr/all-sky-map/">Thomas Boch's All Sky Map</a>. On the desktop, <a href="http://stellarium.org/">Stellarium</a> is a highly featured planetarium program that works on Windows, Mac and Linux platforms.</p>
+
 		
 	</div>
 </body>
