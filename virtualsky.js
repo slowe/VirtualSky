@@ -881,7 +881,7 @@ VirtualSky.prototype.init = function(d){
 		scalestars: n,
 		showstarlabels: b,
 		starnames: o,
-		showplanets: o,
+		showplanets: b,
 		showplanetlabels: b,
 		showorbits: b,
 		showgalaxy: b,
