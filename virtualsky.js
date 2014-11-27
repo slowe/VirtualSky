@@ -974,6 +974,8 @@ VirtualSky.prototype.loadLanguage = function(l,fn){
 		},
 		function(){},
 		function(){
+			// If we tried to load the short version of the language and it failed, default to English
+			if(this.langshort==url){ this.loadLanguage('en',fn); }
 			if(url.indexOf(this.language) > 0) this.loadLanguage(this.langshort,fn);
 		}
 	);
