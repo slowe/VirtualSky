@@ -3,6 +3,8 @@ VirtualSky
 
 A browser-based planetarium that can be [customized and embedded in web pages](http://lcogt.net/virtualsky/embed/custom.html). View as [full-window](http://lcogt.net/virtualsky/embed/index.html?projection=stereo). Some [examples with code excerpts](http://slowe.github.io/VirtualSky/) and some [unit tests](http://slowe.github.io/VirtualSky/tests.html).
 
+This is a Fork for Stuart Lowe's version of VirtualSky specific to the official installation at http://lcogt.net/virtualsky/
+
 Usage
 -----
     <html>
