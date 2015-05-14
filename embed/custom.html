@@ -1,0 +1,471 @@
+<html>
+<head>
+	<title>Customize Virtual Sky</title>
+	<!--
+		Virtual Sky <canvas> application
+		(c) 2010-2014 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+	-->
+	<style>
+	body {
+		background: #fff;
+		font-family: Helvetica, sans-serif;
+		color: black;
+	}
+	li.options .i {
+		clear: both;
+		min-height: 2em;
+	}
+	li.options .p {
+		display: inline-block;
+		width: 10em;
+	}
+	li.options .o {
+		display: inline-block;
+		margin-right: 16px;
+	}
+	li.options .h {
+		margin-bottom: 1em;
+		display: inline-block;
+		opacity: 0.2;
+		filter: alpha(20);
+	}
+	li.options .i:hover .h {
+		opacity: 0.7;
+		filter: alpha(70);
+	}
+	</style>
+	<!--[if lt IE 9]><script src="excanvas.min.js"></script><![endif]-->
+	<script src="jquery-1.10.0.min.js"></script>
+	<script src="virtualsky.min.js" type="text/javascript"></script>
+
+	<script>
+		window.onload = function(){
+			skydefault = $.virtualsky({});
+			$('.version').html(skydefault.version);
+			planetarium = $.virtualsky({id:'preview',width:500,height:350});
+			planetarium.draw();
+			update();
+		};
+		var changedtime = false;
+		function update(el) {
+			property = (el) ? el.name : "";
+			value = (el) ? el.value : "";
+
+			if(property == 'projection') planetarium.selectProjection(value);
+			if(property == 'mouse') planetarium.mouse = (value == "true") ? true: false;
+			if(property == 'keyboard') planetarium.keyboard = (value == "true") ? true: false;
+			if(property == 'gradient') planetarium.gradient = (value == "true") ? true: false;
+			if(property == 'negative') planetarium.negative = (value == "true") ? true: false;
+			if(property == 'cardinalpoints') planetarium.cardinalpoints = (value == "true") ? true: false;
+			if(property == 'constellations') planetarium.constellation.lines = (value == "true") ? true: false;
+			if(property == 'constellationlabels') planetarium.constellation.labels = (value == "true") ? true: false;
+			if(property == 'constellationboundaries') planetarium.constellation.boundaries = (value == "true") ? true: false;
+			if(property == 'meteorshowers') planetarium.meteorshowers = (value == "true") ? true: false;
+			if(property == 'showstars') planetarium.showstars = (value == "true") ? true: false;
+			if(property == 'showstarlabels') planetarium.showstarlabels = (value == "true") ? true: false;
+			if(property == 'showplanets') planetarium.showplanets = (value == "true") ? true: false;
+			if(property == 'showplanetlabels') planetarium.showplanetlabels = (value == "true") ? true: false;
+			if(property == 'showorbits') planetarium.showorbits = (value == "true") ? true: false;
+			if(property == 'showdate') planetarium.showdate = (value == "true") ? true: false;
+			if(property == 'showposition') planetarium.showposition = (value == "true") ? true: false;
+			if(property == 'ecliptic') planetarium.ecliptic = (value == "true") ? true: false;
+			if(property == 'meridian') planetarium.meridian = (value == "true") ? true: false;
+			if(property == 'gridlines_az') planetarium.grid.az = (value == "true") ? true: false;
+			if(property == 'gridlines_eq') planetarium.grid.eq = (value == "true") ? true: false;
+			if(property == 'gridlines_gal') planetarium.grid.gal = (value == "true") ? true: false;
+			if(property == 'showgalaxy') planetarium.showgalaxy = (value == "true") ? true: false;
+			if(property == 'clock'){
+				if(value){
+					planetarium.clock = new Date(value);
+					changedtime = true;
+				}else{
+					planetarium.clock = new Date();
+					changedtime = false;
+				}
+			}
+			if(property == 'dimensions'){
+				dim = value.split('x');
+				if(dim.length == 2){
+					planetarium.resize(dim[0],dim[1]);
+					el = document.getElementById(planetarium.id+'');
+					$('#'+planetarium.id+'').css({'height':planetarium.tall,'width':planetarium.wide})
+				}
+			}
+			el = document.getElementById('dimensions');
+			el.value = planetarium.wide+'x'+planetarium.tall;
+			if(property == 'position'){
+				pos = value.split(',');
+				planetarium.setLatitude(pos[0]);
+				planetarium.setLongitude(pos[1]);
+			}
+			if(property == 'background') planetarium.background = value;
+			if(property == 'color') planetarium.color = value;
+			if(property == 'magnitude') planetarium.magnitude = parseFloat(value);
+			if(property == 'scalestars') planetarium.scalestars = parseFloat(value);
+
+			if(property == 'az_off') planetarium.az_off = value;
+			el = document.getElementById('az_off');
+			el.value = ((planetarium.az_off+180)%360);
+
+			el = document.getElementById('position');
+			el.value = (planetarium.latitude*planetarium.r2d)+','+(planetarium.longitude*planetarium.r2d);
+			//if(typeof jQuery != 'undefined') $('#'+planetarium.id).unbind('click').unbind('mousemove').unbind('mousedown').unbind('mouseup');
+			//if(typeof jQuery != 'undefined'){
+			//	$('#'+planetarium.id).bind('mouseup',function(){
+			//		update();
+			//	});
+			//}
+
+			planetarium.draw();
+
+			if(property == 'live') planetarium.liveSky();
+
+			var str = "<iframe width=\""+planetarium.wide+"\" height=\""+planetarium.tall+"\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"";
+			var uri = "http://lcogt.net/virtualsky/embed/?";
+			uri += "longitude="+(planetarium.longitude*planetarium.r2d);
+			uri += "&latitude="+(planetarium.latitude*planetarium.r2d);
+			if(skydefault.gradient != planetarium.gradient) uri += "&gradient="+planetarium.gradient;
+			if(skydefault.projection != planetarium.projection) uri += "&projection="+planetarium.projection.id;
+			if(skydefault.negative != planetarium.negative) uri += "&negative="+planetarium.negative;
+			if(skydefault.mouse != planetarium.mouse) uri += "&mouse="+planetarium.mouse;
+			if(skydefault.keyboard != planetarium.keyboard) uri += "&keyboard="+planetarium.keyboard;
+			if(skydefault.cardinalpoints != planetarium.cardinalpoints) uri += "&cardinalpoints="+planetarium.cardinalpoints;
+			if(skydefault.constellation.lines != planetarium.constellation.lines) uri += "&constellations="+planetarium.constellation.lines;
+			if(skydefault.constellation.labels != planetarium.constellation.labels) uri += "&constellationlabels="+planetarium.constellation.labels;
+			if(skydefault.constellation.boundaries != planetarium.constellation.boundaries) uri += "&constellationboundaries="+planetarium.constellation.boundaries;
+			if(skydefault.meteorshowers != planetarium.meteorshowers) uri += "&meteorshowers="+planetarium.meteorshowers;
+			if(skydefault.showstars != planetarium.showstars) uri += "&showstars="+planetarium.showstars;
+			if(skydefault.showstarlabels != planetarium.showstarlabels) uri += "&showstarlabels="+planetarium.showstarlabels;
+			if(skydefault.scalestars != planetarium.scalestars) uri += "&scalestars="+planetarium.scalestars;
+			if(skydefault.showplanets != planetarium.showplanets) uri += "&showplanets="+planetarium.showplanets;
+			if(skydefault.showplanetlabels != planetarium.showplanetlabels) uri += "&showplanetlabels="+planetarium.showplanetlabels;
+			if(skydefault.showorbits != planetarium.showorbits) uri += "&showorbits="+planetarium.showorbits;
+			if(skydefault.showdate != planetarium.showdate) uri += "&showdate="+planetarium.showdate;
+			if(skydefault.showposition != planetarium.showposition) uri += "&showposition="+planetarium.showposition;
+			if(skydefault.ecliptic != planetarium.ecliptic) uri += "&ecliptic="+planetarium.ecliptic;
+			if(skydefault.meridian != planetarium.meridian) uri += "&meridian="+planetarium.meridian;
+			if(skydefault.grid.az != planetarium.grid.az) uri += "&gridlines_az="+planetarium.grid.az;
+			if(skydefault.grid.eq != planetarium.grid.eq) uri += "&gridlines_eq="+planetarium.grid.eq;
+			if(skydefault.grid.gal != planetarium.grid.gal) uri += "&gridlines_gal="+planetarium.grid.gal;
+			if(skydefault.showgalaxy != planetarium.showgalaxy) uri += "&showgalaxy="+planetarium.showgalaxy;
+			if(skydefault.background != planetarium.background) uri += "&background="+planetarium.background;
+			if(skydefault.color != planetarium.color) uri += "&color="+planetarium.color;
+			if(skydefault.magnitude != planetarium.magnitude) uri += "&magnitude="+planetarium.magnitude;
+			if(skydefault.islive != planetarium.islive) uri += "&live="+planetarium.islive;
+			if(skydefault.az_off != planetarium.az_off) uri += "&az="+((planetarium.az_off+180)%360);
+			if(changedtime) uri += "&clock="+planetarium.clock;
+			str += encodeURI(uri);
+			str += "\" allowTransparency=\"true\"></iframe>";
+
+			el = document.getElementById('embedcode');
+			el.value = str
+		}
+	</script>
+</head>
+
+<body>
+<a href="http://lcogt.net/"><img src="http://lcogt.net/files/logos/flat.png" style="border:0px;float:left; margin-right: 20px;width:100px;margin-left:20px;" /></a>
+<h1>Virtual Sky<sup style="font-size:0.4em;">(v<span class="version"></span>)</sup></h1>
+<p style="margin:18px;"><a href="http://lcogt.net/virtualsky">Virtual Sky</a> is a browser-based planetarium for embedding in websites. Choose from the options below, check the preview is how you'd like, and then cut-and-paste the code into your web page.</p>
+<form>
+<ol>
+	<li class="options">
+
+		<h2>Customize</h2>
+		<div class="i">
+			<div class="p">Projection</div>
+			<div class="o">
+			<select name="projection" onChange="update(this)">
+			<option selected>polar</option>
+			<option>stereo</option>
+			<option>lambert</option>
+			<option>equirectangular</option>
+			<option>mollweide</option>
+			<option>planechart</option>
+			<option>gnomic</option>
+			</select>
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Width/Height</div>
+			<div class="o">
+			<input type="text" name="dimensions" id="dimensions" value="" onChange="update(this)" /> e.g. 500x400
+			</div>
+		</div>
+
+		<div class="i">
+
+			<div class="p">Specific date?</div>
+			<div class="o">
+			<input type="text" name="clock" value="" onChange="update(this)" /> e.g. Sun, 02 Jan 2011 14:46:28 +0000 (leave blank for the current time)
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Latitude/longitude</div>
+
+			<div class="o">
+			<input type="text" name="position" id="position" value="" onChange="update(this)" /> in decimal degrees
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Azimuthal offset</div>
+			<div class="o">
+			<input type="text" name="az_off" id="az_off" value="" onChange="update(this)" /> in decimal degrees with north=0, east=90
+			</div>
+
+		</div>
+
+		<div class="i">
+			<div class="p">Background color</div>
+			<div class="o">
+			<input type="text" name="background" id="background" value="rgba(0,0,0,0)" onChange="update(this)" /> default is transparent (only relevant in polar/mollweide projections)
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Text color</div>
+			<div class="o">
+			<input type="text" name="color" id="color" value="" onChange="update(this)" /> e.g. #3366dd (leave blank for automatic)
+			</div>
+		</div>
+
+		<div class="i">
+
+			<div class="p">Magnitude Limit</div>
+			<div class="o">
+			<input type="text" name="magnitude" id="magnitude" value="5" onChange="update(this)" /> larger number is fainter
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Scale stars</div>
+			<div class="o">
+				<input type="text" name="scalestars" id="scalestars" value="1" onChange="update(this)" /> a scale factor by which to change the star sizes
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Sky gradient?</div>
+
+			<div class="o">
+			<input type="radio" name="gradient" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="gradient" value="false" onChange="update(this)" /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Mouse control?</div>
+			<div class="o">
+
+			<input type="radio" name="mouse" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="mouse" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Allow the user to use their mouse to drag the sky.</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Keyboard control?</div>
+			<div class="o">
+			<input type="radio" name="keyboard" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="keyboard" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Allow the user to make use of the keyboard shortcuts when their cursor is over the sky.</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Invert sky colors?</div>
+			<div class="o">
+			<input type="radio" name="negative" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="negative" value="false" onChange="update(this)" checked /> No
+			</div>
+			<div class="h">Display black stars on a white sky. Useful for printing.</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Cardinal points?</div>
+			<div class="o">
+			<input type="radio" name="cardinalpoints" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="cardinalpoints" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">e.g. "N", "S", "E" and "W"</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Constellation lines?</div>
+			<div class="o">
+			<input type="radio" name="constellations" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="constellations" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+
+			<div class="p">Constellation labels?</div>
+			<div class="o">
+			<input type="radio" name="constellationlabels" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="constellationlabels" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+
+			<div class="p">Const. boundaries?</div>
+			<div class="o">
+			<input type="radio" name="constellationboundaries" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="constellationboundaries" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Meteor showers?</div>
+
+			<div class="o">
+			<input type="radio" name="meteorshowers" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="meteorshowers" value="false" onChange="update(this)" checked /> No
+			</div>
+			<div class="h">Labels the radiants of current meteor showers</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show planets?</div>
+			<div class="o">
+				<input type="radio" name="showplanets" value="true" onChange="update(this)" checked /> Yes
+				<input type="radio" name="showplanets" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Will also show the Sun and Moon</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show planet labels</div>
+
+			<div class="o">
+			<input type="radio" name="showplanetlabels" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="showplanetlabels" value="false" onChange="update(this)" /> No
+			</div>
+
+		</div>
+
+		<div class="i">
+			<div class="p">Show stars?</div>
+			<div class="o">
+				<input type="radio" name="showstars" value="true" onChange="update(this)" checked /> Yes
+				<input type="radio" name="showstars" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Will also show the Sun and Moon</div>
+		</div>
+		<div class="i">
+			<div class="p">Show star labels</div>
+
+			<div class="o">
+			<input type="radio" name="showstarlabels" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="showstarlabels" value="false" onChange="update(this)" checked /> No
+			</div>
+
+			<div class="h">Display labels for the brightest stars e.g. "Sirius", "Deneb", "Pollux" etc?</div>
+		</div>
+
+
+		<div class="i">
+			<div class="p">Show orbits?</div>
+
+			<div class="o">
+			<input type="radio" name="showorbits" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="showorbits" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show date?</div>
+			<div class="o">
+
+			<input type="radio" name="showdate" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="showdate" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Displays the date and time in the top left corner.</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show position?</div>
+			<div class="o">
+			<input type="radio" name="showposition" value="true" onChange="update(this)" checked /> Yes
+			<input type="radio" name="showposition" value="false" onChange="update(this)" /> No
+			</div>
+			<div class="h">Displays the longitude and latitude in the top left corner.</div>
+
+		</div>
+
+		<div class="i">
+			<div class="p">Show Ecliptic?</div>
+			<div class="o">
+			<input type="radio" name="ecliptic" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="ecliptic" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show Meridian?</div>
+			<div class="o">
+			<input type="radio" name="meridian" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="meridian" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Azimuth gridlines?</div>
+			<div class="o">
+			<input type="radio" name="gridlines_az" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="gridlines_az" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Equatorial gridlines?</div>
+			<div class="o">
+			<input type="radio" name="gridlines_eq" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="gridlines_eq" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Galactic gridlines?</div>
+			<div class="o">
+			<input type="radio" name="gridlines_gal" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="gridlines_gal" value="false" onChange="update(this)" checked /> No
+			</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Show Galactic plane?</div>
+			<div class="o">
+			<input type="radio" name="showgalaxy" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="showgalaxy" value="false" onChange="update(this)" checked /> No
+			</div>
+			<div class="h">Show an outline of the plane of the Milky Way.</div>
+		</div>
+
+		<div class="i">
+			<div class="p">Live?</div>
+			<div class="o">
+			<input type="radio" name="live" value="true" onChange="update(this)" /> Yes
+			<input type="radio" name="live" value="false" onChange="update(this)" checked /> No
+			</div>
+			<div class="h">The sky will update every second.</div>
+		</div>
+	</li>
+
+	<li>
+		<h2>Preview</h2>
+		<div id="preview" style="margin-bottom:10px;"></div>
+	</li>
+	<li>
+		<h2>Embed</h2>
+		<textarea name="embed" id="embedcode" rows="8" cols="50" onFocus="this.select()"></textarea>
+	</li>
+</ol>
+</form>
+
+</body>
+</html>
