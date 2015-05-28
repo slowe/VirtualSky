@@ -1,3 +1,20 @@
+################################################################################
+#
+# Runs the LCOGT VirtualSky webapp using nginx 
+#
+#
+# Build with
+# docker build -t registry.lcogt.net/virtualsky:latest .
+#
+# Push to Registry with
+# docker push registry.lcogt.net/virtualsky:latest
+#
+# To run with nginx + uwsgi both exposed:
+# docker run -d -p 8500:80  -m="64m" --name=virtualsky registry.lcogt.net/virtualsky:latest
+#
+# See the notes in the code below about NFS mounts.
+#
+################################################################################
 FROM centos:centos7
 MAINTAINER Ira W. Snyder <isnyder@lcogt.net>
 
