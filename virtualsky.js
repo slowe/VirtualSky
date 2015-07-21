@@ -303,7 +303,7 @@ function VirtualSky(input){
 	this.transparent = false;			// Show the sky background or not
 	this.fps = 10;						// Number of frames per second when animating
 	this.credit = (location.host == "lcogt.net" && location.href.indexOf("/embed") < 0) ? false : true;
-	this.callback = { geo:'', mouseenter:'', mouseout:'' };
+	this.callback = { geo:'', mouseenter:'', mouseout:'', mousedrag:'' };
 	this.keys = new Array();
 	this.base = "";
 	this.az_step = 0;
@@ -941,6 +941,7 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
+		if(is(d.callback.mousedrag,f)) this.callback.mousedrag = d.callback.mousedrag;
 	}
 
 	return this;
@@ -1225,6 +1226,7 @@ VirtualSky.prototype.createSky = function(){
 				s.x = x;
 				s.y = y;
 				s.draw();
+				if(typeof s.callback.mousedrag=="function") s.callback.mousedrag.call(s);
 				$(s.canvas).css({cursor:'-moz-grabbing'});
 			}else{
 				matched = s.whichPointer(x,y);
