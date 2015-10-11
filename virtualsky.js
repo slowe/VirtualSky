@@ -2679,11 +2679,18 @@ VirtualSky.prototype.highlight = function(i,colour){
 			p.y = pos.y;
 			c.fillStyle = colour;
 			c.strokeStyle = colour;
+			if(p.drawfunction){
+			p.drawfunction(c,p); 
+			}else{
 			c.beginPath();
-			// Draw a square to distinguish from other objects
-			// c.arc(p.x,p.y,p.d/2,0,2*Math.PI);
-			c.fillRect(p.x-p.d/2,p.y-p.d/2,p.d,p.d);
-			c.fill();
+			c.moveTo(p.x,p.y-p.d/2);
+			c.lineTo(p.x,p.y+p.d/2);
+			c.stroke();
+			c.moveTo(p.x-p.d/2,p.y);
+			c.lineTo(p.x+p.d/2,p.y);
+			c.stroke();
+			c.closePath();
+		}
 			this.drawLabel(p.x,p.y,p.d,colour,p.label);
 		}
 	}
