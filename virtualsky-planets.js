@@ -14,6 +14,15 @@
 			var p = new Planets();
 			var days = 365.25;
 			this.planets = p.build(Math.floor(this.jd)-days*0.25,days*1.25);
+			var loadtime = this.times.JD;
+			var i = this.calendarevents.length;
+			this.calendarevents.push(function(){
+				if(Math.abs(loadtime-this.times.JD) >= days*0.25){
+					this.calendarevents.splice(i,1);	// Remove this one-time event
+					this.trigger('loadedPlanets');
+					this.draw();
+				}
+			})
 			this.draw();
 		});
 	}
@@ -310,11 +319,12 @@
 			// Loop over elements and pick the one closest in time
 			for(var j = 0; j < planet.elements.length ;j++){
 				mn = Math.abs(planet.elements[j].jd-jd);
-				if(mn < min) i = j;
-				min = mn;
+				if(mn < min){
+					i = j;
+					min = mn;
+				}
 			}
 		}
-	
 		p = planet.elements[i];
 
 		// The day number is the number of days (decimal) since epoch of elements.

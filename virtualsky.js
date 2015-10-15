@@ -312,6 +312,7 @@ function VirtualSky(input){
 	this.dc_off = 0;
 	this.fov = 30;
 	this.plugins = [];
+	this.calendarevents = [];
 	this.events = {};	// Let's add some default events
 
 	// Projections
@@ -723,12 +724,12 @@ function VirtualSky(input){
 		boundaries: this.dir+"boundaries.json",       // Data for constellation boundaries - 20 kB
 		showers: this.dir+"showers.json",             // Data for meteor showers - 4 kB
 		galaxy: this.dir+"galaxy.json",               // Data for milky way - 12 kB
-		planets: this.dir+"virtualsky-planets.min.js" // Plugin for planet ephemeris - 12kB
+		planets: this.dir+"virtualsky-planets.js" // Plugin for planet ephemeris - 12kB
 	}
 
-	this.hipparcos = {};     // Define our star catalogue
-	this.clock = new Date(); // Define the 'current' time
-	this.fullsky = false;    // Are we showing the entire sky?
+	this.hipparcos = {};          // Define our star catalogue
+	this.updateClock(new Date()); // Define the 'current' time
+	this.fullsky = false;         // Are we showing the entire sky?
 
 	// Define the colours that we will use
 	this.colours = {
@@ -844,7 +845,9 @@ function VirtualSky(input){
 
 	if(this.islive) interval = window.setInterval(function(sky){ sky.setClock('now'); },1000,this);
 
+	return this;
 }
+
 VirtualSky.prototype.init = function(d){
 	if(!d) return this;
 	var q = location.search;
@@ -920,7 +923,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.gridstep,n)) this.grid.step = d.gridstep;
 	if(is(d.longitude,n)) this.setLongitude(d.longitude);
 	if(is(d.latitude,n)) this.setLatitude(d.latitude);
-	if(is(d.clock,s)) this.clock = new Date(d.clock.replace(/%20/g,' '));
+	if(is(d.clock,s)) this.updateClock(new Date(d.clock.replace(/%20/g,' ')));
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.ra,n)) this.setRA(d.ra);
 	if(is(d.dec,n)) this.setDec(d.dec);
@@ -1284,14 +1287,14 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'conbound');
 	this.registerKey('R',function(){ this.toggleMeteorShowers(); },'meteorshowers');
 	this.registerKey('1',function(){ this.toggleHelp(); });
-	this.registerKey('8',function(){ this.setClock('now'); },'reset');
+	this.registerKey('8',function(){ this.setClock('now').calendarUpdate(); },'reset');
 	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
 	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
-	this.registerKey('-',function(){ this.setClock(-86400); },'subtractday');
-	this.registerKey('=',function(){ this.setClock(86400); },'addday');
-	this.registerKey('[',function(){ this.setClock(-86400*7); },'subtractweek');
-	this.registerKey(']',function(){ this.setClock(86400*7); },'addweek');
+	this.registerKey('-',function(){ this.setClock(-86400).calendarUpdate(); },'subtractday');
+	this.registerKey('=',function(){ this.setClock(86400).calendarUpdate(); },'addday');
+	this.registerKey('[',function(){ this.setClock(-86400*7).calendarUpdate(); },'subtractweek');
+	this.registerKey(']',function(){ this.setClock(86400*7).calendarUpdate(); },'addweek');
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); },'azleft'); // left
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); },'azright'); // right
 	this.registerKey(38,function(){ this.changeMagnitude(0.25); },'magup'); // up
@@ -1995,8 +1998,9 @@ VirtualSky.prototype.draw = function(proj){
 				'</div>');
 			$(hid+'_calendar').css({width:w});
 			$(hid+'_calendar input').bind('change',{sky:s},function(e){
-				e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
-				e.data.sky.advanceTime(0,0);
+				e.data.sky.updateClock(new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0));
+				e.data.sky.calendarUpdate();
+				e.data.sky.draw();
 			});
 		}
 		s.lightbox($(hid+'_calendar'));
@@ -2827,14 +2831,28 @@ VirtualSky.prototype.stop = function(){
 // Increment the clock by the amount specified
 VirtualSky.prototype.advanceTime = function(by,wait){
 	if(by===undefined){
-		this.clock = new Date();
-		this.times = this.astronomicalTimes();
+		this.updateClock(new Date());
 	}else{
 		by = parseFloat(by);
 		if(!wait) wait = 1000/this.fps; // ms between frames
 		var fn = function(vs,by){ vs.setClock(by); };
 		clearInterval(this.interval_time)
+		clearInterval(this.interval_calendar)
 		this.interval_time = window.setInterval(fn,wait,this,by);
+		// Whilst animating we'll periodically check to see if the calendar events need calling
+		this.interval_calendar = window.setInterval(function(vs){ vs.calendarUpdate(); },1000,this);
+	}
+	return this;
+}
+// Send a Javascript Date() object and update the clock
+VirtualSky.prototype.updateClock = function(d){
+	this.clock = d;
+	this.times = this.astronomicalTimes();
+}
+// Call any calendar-based events
+VirtualSky.prototype.calendarUpdate = function(){
+	for(var e = 0; e < sky.calendarevents.length; e++){
+		if(is(sky.calendarevents[e],"function")) sky.calendarevents[e].call(sky);
 	}
 	return this;
 }
@@ -2844,17 +2862,17 @@ VirtualSky.prototype.setClock = function(seconds){
 	}if(typeof seconds==="string"){
 		seconds = convertTZ(seconds);
 		if(!this.input.clock){
-			if(seconds==="now") this.clock = new Date();
-			else this.clock = new Date(seconds);
+			if(seconds==="now") this.updateClock(new Date());
+			else this.updateClock(new Date(seconds));
 		}else{
-			this.clock = (typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock;
-			if(typeof this.clock==="string") this.clock = new Date(this.clock);
+			this.updateClock((typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock);
+			if(typeof this.clock==="string") this.updateClock(new Date(this.clock));
 		}
 	}else if(typeof seconds==="object"){
-		this.clock = seconds;
-	}else
-		this.clock = new Date(this.clock.getTime() + seconds*1000);
-	this.times = this.astronomicalTimes();
+		this.updateClock(seconds);
+	}else{
+		this.updateClock(new Date(this.clock.getTime() + seconds*1000));
+	}
 	this.draw();
 	return this;
 }
