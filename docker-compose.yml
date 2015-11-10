@@ -1,6 +1,6 @@
 web:
-  build: .
+  image: docker.lcogt.net/virtualsky:latest
   ports:
-    - "7575:80"
+    - "8500:80"
   restart: "always"
   mem_limit: "64m"
