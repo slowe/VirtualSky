@@ -1295,9 +1295,9 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('R',function(){ this.toggleMeteorShowers(); },'meteorshowers');
 	this.registerKey('1',function(){ this.toggleHelp(); });
 	this.registerKey('8',function(){ this.setClock('now').calendarUpdate(); },'reset');
-	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
+	this.registerKey('j',function(){ if(!this.islive) this.spinIt("down"); },'slow');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
-	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
+	this.registerKey('l',function(){ if(!this.islive) this.spinIt("up"); },'fast');
 	this.registerKey('-',function(){ this.setClock(-86400).calendarUpdate(); },'subtractday');
 	this.registerKey('=',function(){ this.setClock(86400).calendarUpdate(); },'addday');
 	this.registerKey('[',function(){ this.setClock(-86400*7).calendarUpdate(); },'subtractweek');
