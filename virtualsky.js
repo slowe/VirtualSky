@@ -250,7 +250,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.6.3";
+	this.version = "0.6.4";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
