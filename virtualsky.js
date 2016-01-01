@@ -250,7 +250,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.6.3";
+	this.version = "0.6.4";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -312,6 +312,7 @@ function VirtualSky(input){
 	this.dc_off = 0;
 	this.fov = 30;
 	this.plugins = [];
+	this.calendarevents = [];
 	this.events = {};	// Let's add some default events
 
 	// Projections
@@ -723,12 +724,12 @@ function VirtualSky(input){
 		boundaries: this.dir+"boundaries.json",       // Data for constellation boundaries - 20 kB
 		showers: this.dir+"showers.json",             // Data for meteor showers - 4 kB
 		galaxy: this.dir+"galaxy.json",               // Data for milky way - 12 kB
-		planets: this.dir+"virtualsky-planets.min.js" // Plugin for planet ephemeris - 12kB
+		planets: this.dir+"virtualsky-planets.js" // Plugin for planet ephemeris - 12kB
 	}
 
-	this.hipparcos = {};     // Define our star catalogue
-	this.clock = new Date(); // Define the 'current' time
-	this.fullsky = false;    // Are we showing the entire sky?
+	this.hipparcos = {};          // Define our star catalogue
+	this.updateClock(new Date()); // Define the 'current' time
+	this.fullsky = false;         // Are we showing the entire sky?
 
 	// Define the colours that we will use
 	this.colours = {
@@ -781,10 +782,14 @@ function VirtualSky(input){
 
 	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	this.language = (typeof this.q.lang==="string") ? this.q.lang : (typeof this.setlang==="string" ? this.setlang : (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "");
-	this.langshort = (this.language.indexOf('-') > 0 ? this.language.substring(0,this.language.indexOf('-')) : this.language.substring(0,2));
-	this.langs = [{"language": {"code": "en","name": "English","alignment": "left" }}]; // The contents of the language will be loaded from the JSON language file
-	this.lang = this.langs[0];
-
+	this.langs = {
+		'ar': { "language": {"name": "&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;","alignment": "right" } },
+		'cs': { "language": {"name": "Čeština","alignment": "left" } },
+		'en': { "language": {"name": "English","alignment": "left" } },
+		'es': { "language": {"name": "Espa&#241;ol","alignment": "left" } },
+		'fr': { "language": {"name": "Fran&#231;ais","alignment": "left" } },
+	}; // The contents of the language will be loaded from the JSON language file
+	this.lang = this.langs['en'];	// default
 
 	if(typeof this.polartype=="undefined") this.selectProjection('polar');	// Set the default projection
 
@@ -844,7 +849,9 @@ function VirtualSky(input){
 
 	if(this.islive) interval = window.setInterval(function(sky){ sky.setClock('now'); },1000,this);
 
+	return this;
 }
+
 VirtualSky.prototype.init = function(d){
 	if(!d) return this;
 	var q = location.search;
@@ -881,7 +888,7 @@ VirtualSky.prototype.init = function(d){
 		scalestars: n,
 		showstarlabels: b,
 		starnames: o,
-		showplanets: o,
+		showplanets: b,
 		showplanetlabels: b,
 		showorbits: b,
 		showgalaxy: b,
@@ -920,7 +927,7 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.gridstep,n)) this.grid.step = d.gridstep;
 	if(is(d.longitude,n)) this.setLongitude(d.longitude);
 	if(is(d.latitude,n)) this.setLatitude(d.latitude);
-	if(is(d.clock,s)) this.clock = new Date(d.clock.replace(/%20/g,' '));
+	if(is(d.clock,s)) this.updateClock(new Date(d.clock.replace(/%20/g,' ')));
 	if(is(d.az,n)) this.az_off = (d.az%360)-180;
 	if(is(d.ra,n)) this.setRA(d.ra);
 	if(is(d.dec,n)) this.setDec(d.dec);
@@ -950,41 +957,50 @@ VirtualSky.prototype.init = function(d){
 // If it fails and this was the long variation of the language (e.g. "en-gb" or "zh-yue"), try the short version (e.g. "en" or "zh")
 VirtualSky.prototype.loadLanguage = function(l,fn){
 	l = l || this.language;
+	var lang = "";
+	if(this.langs[l]) lang = l;
+	if(!lang){
+		// Try loading a short version of the language code
+		l = (l.indexOf('-') > 0 ? l.substring(0,l.indexOf('-')) : l.substring(0,2));
+		if(this.langs[l]) lang = l;
+	}
+	l = lang;
 	if(!l) return;
 	var url = this.langurl.replace('%LANG%',l);
 	this.loadJSON(
 		url,
 		function(data){
 			this.langcode = l;
-			var found = -1;
-			for(var i = 0 ; i < this.langs.length ; i++){
-				if(this.langs[i].language && this.langs[i].language.code==l) found = i;
-			}
-			if(found < 0)
-				this.langs.push(data);
-			else
-				this.langs[found] = data;
+			this.langs[l] = data;
+			this.langs[l].loaded = true;
 
 			// Update any starnames
-			if(data.starnames){
-				for(var n in data.starnames) this.starnames[n] = data.starnames[n];
-			}
+			if(data.starnames) for(var n in data.starnames) this.starnames[n] = data.starnames[n];
 
-			this.changeLanguage(l).draw();
+			this.changeLanguage(l);
+			if(typeof fn==="function") fn.call(this);
 		},
-		function(){},
-		function(){
-			if(url.indexOf(this.language) > 0) this.loadLanguage(this.langshort,fn);
+		function(data){ },
+		function(e){
+			// If we tried to load the short version of the language and it failed, default to English
+			this.loadLanguage('en',fn);
 		}
 	);
 	return this;
 }
 // Change the active language
-VirtualSky.prototype.changeLanguage = function(code){
-	for(var i = 0; i < this.langs.length ; i++){
-		if(this.langs[i].language.code==code){ this.lang = this.langs[i]; return this; }
+VirtualSky.prototype.changeLanguage = function(code,fn){
+	if(this.langs[code]){
+		if(!this.langs[code].loaded) this.loadLanguage(code,fn);
+		else {
+			this.lang = this.langs[code];
+			this.langcode = code;
+			this.draw();
+			if(typeof fn==="function") fn.call(this);
+		}
+		return this;
 	}
-	this.lang = this.langs[0];
+	this.lang = this.langs['en'];
 	return this;
 }
 VirtualSky.prototype.htmlDecode = function(input){
@@ -994,18 +1010,14 @@ VirtualSky.prototype.htmlDecode = function(input){
 	return e.childNodes[0].nodeValue;
 }
 VirtualSky.prototype.getPhrase = function(key,key2){
-	if(key===undefined)
-		return undefined;
+	if(key===undefined) return undefined;
 	if(key==="constellations"){
 		if(key2 && is(this.lang.constellations[key2],"string"))
 			return this.htmlDecode(this.lang.constellations[key2]);
 	}else if(key==="planets"){
-		if(this.lang.planets && this.lang.planets[key2])
-			return this.htmlDecode(this.lang.planets[key2]);
-		else
-			return this.htmlDecode(this.lang[key2]);
-	}else
-		return this.htmlDecode(this.lang[key]) || this.htmlDecode(this.langs[0][key]) || "";
+		if(this.lang.planets && this.lang.planets[key2]) return this.htmlDecode(this.lang.planets[key2]);
+		else return this.htmlDecode(this.lang[key2]);
+	}else return this.htmlDecode(this.lang[key]) || this.htmlDecode(this.langs['en'][key]) || "";
 }
 VirtualSky.prototype.resize = function(w,h){
 	if(!this.canvas) return;
@@ -1282,14 +1294,14 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey('b',function(){ this.toggleConstellationBoundaries(); },'conbound');
 	this.registerKey('R',function(){ this.toggleMeteorShowers(); },'meteorshowers');
 	this.registerKey('1',function(){ this.toggleHelp(); });
-	this.registerKey('8',function(){ this.setClock('now'); },'reset');
-	this.registerKey('j',function(){ this.spinIt("down"); },'slow');
+	this.registerKey('8',function(){ this.setClock('now').calendarUpdate(); },'reset');
+	this.registerKey('j',function(){ if(!this.islive) this.spinIt("down"); },'slow');
 	this.registerKey('k',function(){ this.spinIt(0) },'stop');
-	this.registerKey('l',function(){ this.spinIt("up"); },'fast');
-	this.registerKey('-',function(){ this.setClock(-86400); },'subtractday');
-	this.registerKey('=',function(){ this.setClock(86400); },'addday');
-	this.registerKey('[',function(){ this.setClock(-86400*7); },'subtractweek');
-	this.registerKey(']',function(){ this.setClock(86400*7); },'addweek');
+	this.registerKey('l',function(){ if(!this.islive) this.spinIt("up"); },'fast');
+	this.registerKey('-',function(){ this.setClock(-86400).calendarUpdate(); },'subtractday');
+	this.registerKey('=',function(){ this.setClock(86400).calendarUpdate(); },'addday');
+	this.registerKey('[',function(){ this.setClock(-86400*7).calendarUpdate(); },'subtractweek');
+	this.registerKey(']',function(){ this.setClock(86400*7).calendarUpdate(); },'addweek');
 	this.registerKey(37,function(){ this.az_off -= 2; this.draw(); },'azleft'); // left
 	this.registerKey(39,function(){ this.az_off += 2; this.draw(); },'azright'); // right
 	this.registerKey(38,function(){ this.changeMagnitude(0.25); },'magup'); // up
@@ -1320,7 +1332,7 @@ VirtualSky.prototype.toggleHelp = function(){
 						'<strong class="'+v+'_help_key '+v+'_'+this.keys[i].txt+'">'+this.keys[i].str+'</strong> &rarr; <a href="#" class="'+v+'_'+this.keys[i].txt+'" style="text-decoration:none;">'+this.getPhrase(this.keys[i].txt)+'</a>'+
 					'</li>'; }
 		$('<div class="'+v+'_help">'+
-			'<div class="'+v+'_dismiss" title="close">&times;</div>'+
+			'<div class="'+v+'_dismiss" title="'+this.getPhrase('close')+'">&times;</div>'+
 			'<span>'+this.getPhrase('keyboard')+'</span>'+
 			'<div class="'+v+'_helpinner"><ul></ul></div>'+	
 		'</div>').appendTo(this.container);
@@ -1387,8 +1399,7 @@ VirtualSky.prototype.registerKey = function(charCode,fn,txt){
 }
 // Work out if the keypress has a function that needs to be called.
 VirtualSky.prototype.keypress = function(charCode,event){
-	if(!event)
-		event = { altKey: false };
+	if(!event) event = { altKey: false };
 	if(this.mouseover && this.keyboard){
 		for(var i = 0 ; i < this.keys.length ; i++){
 			if(this.keys[i].charCode == charCode && event.altKey == this.keys[i].altKey){
@@ -1918,8 +1929,7 @@ VirtualSky.prototype.draw = function(proj){
 		var credit = this.getPhrase('power');
 		var metric_credit = this.drawText(credit,5,this.tall-5);
 		// Float a transparent link on top of the credit text
-		if(d.find('.'+this.id+'_credit').length == 0)
-			d.append('<div class="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" title="Created by the Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
+		if(d.find('.'+this.id+'_credit').length == 0) d.append('<div class="'+this.id+'_credit"><a href="http://lcogt.net/virtualsky" target="_parent" title="Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
 		d.find('.'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
 		d.find('.'+this.id+'_credit a').css({display:'block',width:Math.ceil(metric_credit)+'px',height:fontsize+'px','font-size':fontsize+'px'});
 		this.positionCredit();
@@ -1945,8 +1955,7 @@ VirtualSky.prototype.draw = function(proj){
 			}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
 		d.find('.'+this.id+'_help').css({'font-size':fontsize}).find('a').css({color:txtcolour});
 	}
-	if(this.container.find('.'+this.id+'_clock').length == 0)
-		this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
+	if(this.container.find('.'+this.id+'_clock').length == 0) this.container.append('<div class="'+this.id+'_clock" title="'+this.getPhrase('datechange')+'">'+clockstring+'</div>');
 	var off = $('#'+this.idinner).position();
 	this.container.find('.'+this.id+'_clock').css({
 		position:'absolute',
@@ -1973,12 +1982,8 @@ VirtualSky.prototype.draw = function(proj){
 			if(s.wide < w) w = s.wide;
 			s.container.append(
 				'<div id="'+id+'_calendar" class="'+v+'form">'+
-					'<div style="" id="'+id+'_calendar_close" class="'+v+'_dismiss" title="close">'+
-						'&times;'+
-					'</div>'+
-					'<div style="text-align:center;margin:2px;">'+
-						e.data.sky.getPhrase('date')+
-					'</div>'+
+					'<div style="" id="'+id+'_calendar_close" class="'+v+'_dismiss" title="'+e.data.sky.getPhrase('close')+'">&times;</div>'+
+					'<div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div>'+
 					'<div style="text-align:center;">'+
 						'<input type="text" id="'+id+'_year" style="width:3.2em;" value="" />'+
 						'<div class="divider">/</div>'+
@@ -1993,8 +1998,9 @@ VirtualSky.prototype.draw = function(proj){
 				'</div>');
 			$(hid+'_calendar').css({width:w});
 			$(hid+'_calendar input').bind('change',{sky:s},function(e){
-				e.data.sky.clock = new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0);
-				e.data.sky.advanceTime(0,0);
+				e.data.sky.updateClock(new Date(parseInt($('#'+id+'_year').val()), parseInt($('#'+id+'_month').val()-1), parseInt($('#'+id+'_day').val()), parseInt($('#'+id+'_hours').val()), parseInt($('#'+id+'_mins').val()), 0,0));
+				e.data.sky.calendarUpdate();
+				e.data.sky.draw();
 			});
 		}
 		s.lightbox($(hid+'_calendar'));
@@ -2035,7 +2041,7 @@ VirtualSky.prototype.draw = function(proj){
 			}
 			s.container.append(
 				'<div id="'+id+'_geo" class="'+v+'form">'+
-					'<div id="'+id+'_geo_close" class="'+v+'_dismiss" title="close">&times;</div>'+
+					'<div id="'+id+'_geo_close" class="'+v+'_dismiss" title="'+s.getPhrase('close')+'">&times;</div>'+
 					'<div style="text-align:center;margin:2px;">'+s.getPhrase('position')+'</div>'+
 					'<div style="text-align:center;">'+
 						'<input type="text" id="'+id+'_lat" value="" style="padding-right:10px!important;">'+
@@ -2825,14 +2831,28 @@ VirtualSky.prototype.stop = function(){
 // Increment the clock by the amount specified
 VirtualSky.prototype.advanceTime = function(by,wait){
 	if(by===undefined){
-		this.clock = new Date();
-		this.times = this.astronomicalTimes();
+		this.updateClock(new Date());
 	}else{
 		by = parseFloat(by);
 		if(!wait) wait = 1000/this.fps; // ms between frames
 		var fn = function(vs,by){ vs.setClock(by); };
 		clearInterval(this.interval_time)
+		clearInterval(this.interval_calendar)
 		this.interval_time = window.setInterval(fn,wait,this,by);
+		// Whilst animating we'll periodically check to see if the calendar events need calling
+		this.interval_calendar = window.setInterval(function(vs){ vs.calendarUpdate(); },1000,this);
+	}
+	return this;
+}
+// Send a Javascript Date() object and update the clock
+VirtualSky.prototype.updateClock = function(d){
+	this.clock = d;
+	this.times = this.astronomicalTimes();
+}
+// Call any calendar-based events
+VirtualSky.prototype.calendarUpdate = function(){
+	for(var e = 0; e < this.calendarevents.length; e++){
+		if(is(this.calendarevents[e],"function")) this.calendarevents[e].call(this);
 	}
 	return this;
 }
@@ -2842,17 +2862,17 @@ VirtualSky.prototype.setClock = function(seconds){
 	}if(typeof seconds==="string"){
 		seconds = convertTZ(seconds);
 		if(!this.input.clock){
-			if(seconds==="now") this.clock = new Date();
-			else this.clock = new Date(seconds);
+			if(seconds==="now") this.updateClock(new Date());
+			else this.updateClock(new Date(seconds));
 		}else{
-			this.clock = (typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock;
-			if(typeof this.clock==="string") this.clock = new Date(this.clock);
+			this.updateClock((typeof this.input.clock==="string") ? this.input.clock.replace(/%20/g,' ') : this.input.clock);
+			if(typeof this.clock==="string") this.updateClock(new Date(this.clock));
 		}
 	}else if(typeof seconds==="object"){
-		this.clock = seconds;
-	}else
-		this.clock = new Date(this.clock.getTime() + seconds*1000);
-	this.times = this.astronomicalTimes();
+		this.updateClock(seconds);
+	}else{
+		this.updateClock(new Date(this.clock.getTime() + seconds*1000));
+	}
 	this.draw();
 	return this;
 }

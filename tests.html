@@ -18,7 +18,7 @@
 		padding: 0px;
 		font-size: 1em;
 	}
-	#starmapper { height: 400px; width:500px; position: relative; }
+	#starmapper, #starmapper2 { height: 400px; width:500px; position: relative; }
 	#virtualskyinfobox{
 		font-size: 12px;
 		display:none;
@@ -48,6 +48,7 @@
 	<script src="virtualsky.js" type="text/javascript"></script>
 	<script>
 		$.noConflict();
+		var sky;
 		jQuery(document).ready(function($) {
 			function assert_equal(actual,expected,message){
 				equal(actual,expected,message);
@@ -67,9 +68,10 @@
 			test("Initiation",function(){
 
 				jQuery('#starmapper').remove();
+				jQuery('#starmapper2').remove();
 
 				// Try setting up a planetarium with no ID provided
-				var sky = jQuery.virtualsky({});
+				sky = jQuery.virtualsky({});
 				assert_equal(sky.id,"","No ID should be set if none is provided");
 
 				var match = 0;
@@ -85,6 +87,7 @@
 				// We will add a DOM element then assign it
 				// Remove the existing DOM element
 				jQuery('#starmapper').remove();
+				jQuery('#starmapper2').remove();
 				jQuery('body').append('<div id="starmapper"><\/div>');
 				
 				sky = jQuery.virtualsky({id:'starmapper',projection:'stereo'});
@@ -106,9 +109,25 @@
 			
 			var d2r = Math.PI/180;
 
-			test("Times and Locations",function(){
+			test("Angles",function(){
 
-				var sky = jQuery.virtualsky({id:'starmapper'});
+				sky = jQuery.virtualsky({id:'angletest','projection':'polar','width':700,'height':700});
+
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,0),0*d2r,8,"Great Circle distance for same point is zero");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,90*d2r,0),90*d2r,8,"Great Circle distance for points separated around the equator");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination");
+				assert_almost_equal(sky.greatCircle(0,0,360*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different");
+				assert_almost_equal(sky.greatCircle(10*d2r,0,10*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(10*d2r,45*d2r,10*d2r,-45*d2r),90*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(-180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
+				assert_almost_equal(sky.greatCircle(190*d2r,20*d2r,10*d2r,20*d2r),140*d2r,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
+
+			});
+
+			sky = jQuery.virtualsky({id:'starmapper'});
+
+
+			test("Times and Locations",function(){
 
 				var str = 'October 25, 1985 01:21:00'
 				var clock = new Date(str);
@@ -151,22 +170,6 @@
 
 			});
 
-			test("Angles",function(){
-
-				var sky = jQuery.virtualsky({id:'angletest','projection':'polar','width':700,'height':700});
-
-				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,0),0*d2r,8,"Great Circle distance for same point is zero");
-				assert_almost_equal(sky.greatCircle(180*d2r,0,90*d2r,0),90*d2r,8,"Great Circle distance for points separated around the equator");
-				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination");
-				assert_almost_equal(sky.greatCircle(0,0,360*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different");
-				assert_almost_equal(sky.greatCircle(10*d2r,0,10*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
-				assert_almost_equal(sky.greatCircle(10*d2r,45*d2r,10*d2r,-45*d2r),90*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
-				assert_almost_equal(sky.greatCircle(-180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
-				assert_almost_equal(sky.greatCircle(190*d2r,20*d2r,10*d2r,20*d2r),140*d2r,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
-
-			});
-
-
 			test("Keyboard input",function(){
 
 				function keypress(key,sky){
@@ -177,7 +180,6 @@
 					sky.mouseover = mouse;
 				}
 
-				var sky = jQuery.virtualsky({id:'starmapper'});
 				var mag = sky.magnitude;
 
 				keypress(38,sky);
@@ -199,36 +201,30 @@
 
 				var clock = new Date();
 				keypress('8',sky);
-				ok(sky.clock-clock < 2,"Keypress (8): Time is set to now");
+				var diff = sky.clock-clock;
+				ok(diff < 10,"Keypress (8): Time is set to now ("+clock+", "+sky.clock+", "+(diff)+")");
 				
 			});
  
-			test("Custom input",function(){
-
-				var sky = jQuery.virtualsky({id:'starmapper',constellationboundaries: true,
-					boundaries: [
-						["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
-						["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
-					]
-				});
-				assert_equal(sky.boundaries.length,2,"Provided boundaries are used")
-
-
-			});
-
 			test("Languages",function(){
-				var sky = jQuery.virtualsky({id:'starmapper',lang:'en'});
-				assert_equal(sky.getPhrase("sun"),"Sun","Check English Sun exists");
-				sky.changeLanguage('es');
-				assert_equal(sky.lang.code,"es","Change language to Spanish");
-				assert_equal(sky.getPhrase("sun"),"Sol","Check Spanish Sol exists");
+				function testLang(code,sun){
+					stop();
+					sky.changeLanguage(code,function(e){
+						assert_equal(sky.langcode,code,"Change language to "+this.htmlDecode(this.langs[code].language.name));
+						assert_equal(sky.getPhrase("sun"),sun,"Check "+sun+" is translation of 'Sun'");
+						start();
+					});
+				
+				}
 
+				testLang('en','Sun');
+				testLang('es','Sol');
+				testLang('fr','Soleil');
 			});
+
 
 			test("JSON callbacks",function(){
 				
-				var sky = jQuery.virtualsky({id:'starmapper'});
-
 				// We need to stop qunit until we get the ajax callback
 				stop();
 				sky.load('stars',sky.file.stars,function(e){
@@ -269,10 +265,21 @@
 
 			test("Add Pointers",function(){
 
-				var sky = jQuery.virtualsky({id:'starmapper'});
-
 				assert_equal(1,sky.addPointer({'ra':83.6330833,'dec':22.0145,'label':'M1 - Crab Nebula','html':'Blah blah','url':'http://www.strudel.org.uk/lookUP/?name=M1',colour:'rgb(220,220,255)'}),"Add a first pointer");
 				assert_equal(2,sky.addPointer({'ra':148.9684583,'dec':69.6797028,'label':'M82','url':'http://www.strudel.org.uk/lookUP/?name=M82',colour:'rgb(220,220,255)'}),"Add a 2nd pointer");
+
+			});
+
+			test("Custom input",function(){
+
+				jQuery('#starmapper2').remove();
+				var sky2 = jQuery.virtualsky({id:'starmapper2',constellationboundaries: true,
+					boundaries: [
+						["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+						["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+					]
+				});
+				assert_equal(sky2.boundaries.length,2,"Provided boundaries are used")
 
 			});
 
