@@ -259,7 +259,9 @@ function VirtualSky(input){
 	@*/
 
 	this.q = $.query();    // Query string
-	this.langurl = "lang/%LANG%.json";	// The location of the language files
+	this.dir = $('script[src*=virtualsky]').attr('src').match(/^.*\//);  // the JS file path
+	this.dir = this.dir && this.dir[0] || ""; // set dir to match or ""
+	this.langurl = this.dir + "lang/%LANG%.json";	// The location of the language files
 
 	this.id = '';						// The ID of the canvas/div tag - if none given it won't display
 	this.gradient = true;				// Show the sky gradient
