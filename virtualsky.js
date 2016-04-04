@@ -259,7 +259,9 @@ function VirtualSky(input){
 	@*/
 
 	this.q = $.query();    // Query string
-	this.langurl = "lang/%LANG%.json";	// The location of the language files
+	this.dir = $('script[src*=virtualsky]').attr('src').match(/^.*\//);  // the JS file path
+	this.dir = this.dir && this.dir[0] || ""; // set dir to match or ""
+	this.langurl = this.dir + "lang/%LANG%.json";	// The location of the language files
 
 	this.id = '';						// The ID of the canvas/div tag - if none given it won't display
 	this.gradient = true;				// Show the sky gradient
@@ -788,6 +790,7 @@ function VirtualSky(input){
 		'en': { "language": {"name": "English","alignment": "left" } },
 		'es': { "language": {"name": "Espa&#241;ol","alignment": "left" } },
 		'fr': { "language": {"name": "Fran&#231;ais","alignment": "left" } },
+		'pt': { "language": {"name": "Portugu&#234;s","alignment": "left" } },
 	}; // The contents of the language will be loaded from the JSON language file
 	this.lang = this.langs['en'];	// default
 
