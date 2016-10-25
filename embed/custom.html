@@ -3,7 +3,7 @@
 	<title>Customize Virtual Sky</title>
 	<!--
 		Virtual Sky <canvas> application
-		(c) 2010-2014 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+		(c) 2010-2014 Stuart Lowe (Las Cumbres Observatory)
 	-->
 	<style>
 	body {
@@ -121,7 +121,11 @@
 			if(property == 'live') planetarium.liveSky();
 
 			var str = "<iframe width=\""+planetarium.wide+"\" height=\""+planetarium.tall+"\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"";
+<<<<<<< HEAD
 			var uri = "http://lcogt.net/virtualsky/embed/?";
+=======
+			var uri = "https://virtualsky.lco.global/embed/?";
+>>>>>>> origin/dev
 			uri += "longitude="+(planetarium.longitude*planetarium.r2d);
 			uri += "&latitude="+(planetarium.latitude*planetarium.r2d);
 			if(skydefault.gradient != planetarium.gradient) uri += "&gradient="+planetarium.gradient;
@@ -164,9 +168,15 @@
 </head>
 
 <body>
+<<<<<<< HEAD
 <a href="http://lcogt.net/"><img src="http://lcogt.net/files/logos/flat.png" style="border:0px;float:left; margin-right: 20px;width:100px;margin-left:20px;" /></a>
 <h1>Virtual Sky<sup style="font-size:0.4em;">(v<span class="version"></span>)</sup></h1>
 <p style="margin:18px;"><a href="http://lcogt.net/virtualsky">Virtual Sky</a> is a browser-based planetarium for embedding in websites. Choose from the options below, check the preview is how you'd like, and then cut-and-paste the code into your web page.</p>
+=======
+<a href="https://lco.global/"><img src="https://cdn.lco.global/mainstyle/img/LCO_logo_Color_Horizontal_sm.jpg" style="border:0px;float:left; margin-right: 20px;margin-left:20px;" /></a>
+<h1>Virtual Sky<sup style="font-size:0.4em;">(v<span class="version"></span>)</sup></h1>
+<p style="margin:18px;"><a href="https://virtualsky.lco.global/">Virtual Sky</a> is a browser-based planetarium for embedding in websites. Choose from the options below, check the preview is how you'd like, and then cut-and-paste the code into your web page.</p>
+>>>>>>> origin/dev
 <form>
 <ol>
 	<li class="options">

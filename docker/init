@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# run under URL prefix
-echo "Running under prefix: $PREFIX"
-sed -i -e "s:@PREFIX@:${PREFIX}:g" /etc/nginx/nginx.conf
-
-# run under supervisord
-exec /usr/bin/supervisord -n -c /etc/supervisord.conf
