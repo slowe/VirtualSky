@@ -195,5 +195,5 @@
 	"right" : { "_title": "", "_text": "&rarr;", "_type": "string" },
 	"up": { "_title": "", "_text": "&uarr;", "_type": "string" },
 	"down": { "_title": "", "_text": "&darr;", "_type": "string" },
-	"power": { "_title": "", "_text": "Powered by LCOGT", "_type": "string" }
+	"power": { "_title": "", "_text": "Powered by LCO", "_type": "string" }
 }

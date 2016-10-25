@@ -44,8 +44,8 @@
 	</style>
 	<!-- IE seems to get very confused if it loads Javascript from within a Javascript when in an iframe. We'll have to load it here -->
 	<!--[if IE]><script src="excanvas.min.js"></script><![endif]-->
-	<script src="jquery-1.10.0.min.js"></script>
-	<script src="virtualsky.js" type="text/javascript"></script>
+	<script src="../jquery-1.10.0.min.js"></script>
+	<script src="../virtualsky.js" type="text/javascript"></script>
 	<script>
 		function geoIP(){
 			if($('#'+this.id+'_geoip').length == 0){
@@ -74,7 +74,7 @@
 					$('#'+e.data.sky.id+'_geoip_message').html('Trying to identify location...')
 					loc = escape($('#'+e.data.sky.id+'_location').val());
 					$.ajax({
-						dataType: "json", 
+						dataType: "json",
 						url:'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.places%20where%20text%3D%22'+loc+'%22&format=json&diagnostics=true&callback=?',
 						context: _object,
 						success: function(data){

@@ -1,7 +1,7 @@
 VirtualSky
 ==========
 
-A browser-based planetarium that can be [customized and embedded in web pages](http://lcogt.net/virtualsky/embed/custom.html). View as [full-window](http://lcogt.net/virtualsky/embed/index.html?projection=stereo). Some [examples with code excerpts](http://slowe.github.io/VirtualSky/) and some [unit tests](http://slowe.github.io/VirtualSky/tests.html).
+A browser-based planetarium that can be [customized and embedded in web pages](https://virtualsky.lco.global/embed/custom.html). View as [full-window](https://virtualsky.lco.global/embed/index.html?projection=stereo). Some [examples with code excerpts](http://slowe.github.io/VirtualSky/) and some [unit tests](http://slowe.github.io/VirtualSky/tests.html).
 
 Usage
 -----
@@ -20,9 +20,9 @@ Usage
 
     </head>
     <body>
-    
+
         <div id="starmap" style="width:944x;height:400px;"></div>
-    
+
     </body>
     </html>
 
@@ -77,4 +77,4 @@ The following options can be specified (defaults in brackets):
 
 Author
 ------
-Stuart Lowe developed this at [Las Cumbres Observatory Global Telescope](http://lcogt.net/). LCOGT is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
+Stuart Lowe developed this at [Las Cumbres Observatory](https://lco.global/). LCO is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
