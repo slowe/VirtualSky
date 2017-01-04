@@ -146,6 +146,15 @@
 			lang: 'ar'
 		});
 
+		var planetarium11 = $.virtualsky({
+			id: 'starmap11',
+			projection: 'stereo',
+			constellations: true,
+			objects: 'messier.json',
+			fov: 15
+		});
+
+
 	});
 	</script>
 </head>
@@ -175,6 +184,7 @@
 					<li><a href="#ex7">Example 7</a></li>
 					<li><a href="#ex8">Example 8</a></li>
 					<li><a href="#ex9">Example 9</a></li>
+					<li><a href="#ex10">Example 10</a></li>
 				</ul>
 			</li>
 			<li><a href="#options">Options</a>
@@ -406,6 +416,23 @@ $(document).ready(function() {
 &lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
 </pre>
 			<div id="starmap10" class="planetarium" style="width:944x;height:400px;"></div>
+			</li>
+
+			<li class="example" id="ex10">A default view using <code>stereo</code> projection showing <code>objects</code> (in this case the Messier catalogue) included from a local JSON file
+				<pre class="prettyprint lang-js">
+$(document).ready(function() {
+
+	var planetarium = $.virtualsky({
+		id: 'starmap',
+		projection: 'stereo',
+		objects: 'messier.json'
+	});
+});
+			</pre>
+<pre class="prettyprint lang-html">
+&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
+</pre>
+			<div id="starmap11" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
 
 

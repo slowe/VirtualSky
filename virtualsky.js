@@ -1155,19 +1155,41 @@ VirtualSky.prototype.createSky = function(){
 
 	// Add named objects to the display
 	if(this.objects){
+		// To stop lookUp being hammered, we'll only lookup a maximum of 5 objects
+		// If you need more objects (e.g. for the Messier catalogue) build a JSON
+		// file containing all the results one time only.
 		var ob = this.objects.split(';');
-		for(var o = 0; o < ob.length ; o++)
-			$.ajax({ dataType: "jsonp", url: 'http://www.strudel.org.uk/lookUP/json/?name='+ob[o], context: this, success: function(data){
-				if(data && data.dec && data.ra){
-					this.addPointer({
-						ra:data.ra.decimal,
-						dec:data.dec.decimal,
-						label:data.target.name,
-						colour:this.col.pointers
-					});
-					this.draw();
-				}
-			}});
+
+		// Build the array of JSON requests
+		for(var o = 0; o < ob.length ; o++) ob[o] = ((ob[o].search(/\.json$/) >= 0) ? {'url':ob[o], 'src':'file', 'type':'json' } : {'url': 'http://www.strudel.org.uk/lookUP/json/?name='+ob[o],'src':'lookup','type':'jsonp'});
+
+		// Loop over the requests
+		var lookups = 0;
+		var ok = true;
+		for(var o = 0; o < ob.length ; o++){
+			if(ob[o].src == "lookup") lookups++;
+			if(lookups > 5) ok = false;
+			if(ok || ob[o].src != "lookup"){
+				$.ajax({ dataType: ob[o].type, url: ob[o].url, context: this, success: function(data){
+					// If we don't have a length property, we only have one result so make it an array
+					if(typeof data.length === "undefined") data = [data];
+					// Loop over the array of objects
+					for(var i = 0; i < data.length ; i++){
+						// The object needs an RA and Declination
+						if(data[i] && data[i].dec && data[i].ra){
+							this.addPointer({
+								ra: data[i].ra.decimal,
+								dec: data[i].dec.decimal,
+								label: data[i].target.name,
+								colour: this.col.pointers
+							});
+						}
+						// Update the sky with all the points we've added
+						this.draw();
+					}
+				}});
+			}
+		}
 	}
 
 	// If the Javascript function has been passed a width/height
