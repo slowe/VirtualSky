@@ -784,6 +784,7 @@ function VirtualSky(input){
 
 	// Country codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	this.language = (typeof this.q.lang==="string") ? this.q.lang : (typeof this.setlang==="string" ? this.setlang : (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "");
+	var fromqs = (typeof this.q.lang==="string" || typeof this.setlang==="string");
 	this.langs = {
 		'ar': { "language": {"name": "&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;","alignment": "right" } },
 		'cs': { "language": {"name": "Čeština","alignment": "left" } },
@@ -801,7 +802,7 @@ function VirtualSky(input){
 	this.updateColours();
 
 	// Load the language file
-	this.loadLanguage(this.language);
+	this.loadLanguage(this.language,'',fromqs);
 
 	// Define some VirtualSky styles
 	var v,a,b,r,s,p,k,c;
@@ -959,17 +960,20 @@ VirtualSky.prototype.init = function(d){
 
 // Load the specified language
 // If it fails and this was the long variation of the language (e.g. "en-gb" or "zh-yue"), try the short version (e.g. "en" or "zh")
-VirtualSky.prototype.loadLanguage = function(l,fn){
+VirtualSky.prototype.loadLanguage = function(l,fn,fromquerystring){
 	l = l || this.language;
 	var lang = "";
 	if(this.langs[l]) lang = l;
 	if(!lang){
 		// Try loading a short version of the language code
 		l = (l.indexOf('-') > 0 ? l.substring(0,l.indexOf('-')) : l.substring(0,2));
-		lang = l;
-		// We tried to reduce 404 errors on the server with the following line
-		// However, it causes issue #33
-		// if(this.langs[l]) lang = l;
+		if(fromquerystring){
+			// If it was set in the query string we try it
+			lang = l;
+		}else{
+			// If it was just from the browser settings, we'll limit to known translations
+			if(this.langs[l]) lang = l;
+		}
 	}
 	l = lang;
 	if(!l) l = "en";	// Use English as a default if we haven't got a language here
