@@ -250,7 +250,7 @@ $.extend($.fn.addTouch = function(){
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.6.6";
+	this.version = "0.6.7";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -966,10 +966,13 @@ VirtualSky.prototype.loadLanguage = function(l,fn){
 	if(!lang){
 		// Try loading a short version of the language code
 		l = (l.indexOf('-') > 0 ? l.substring(0,l.indexOf('-')) : l.substring(0,2));
-		if(this.langs[l]) lang = l;
+		lang = l;
+		// We tried to reduce 404 errors on the server with the following line
+		// However, it causes issue #33
+		// if(this.langs[l]) lang = l;
 	}
 	l = lang;
-	if(!l) return;
+	if(!l) l = "en";	// Use English as a default if we haven't got a language here
 	var url = this.langurl.replace('%LANG%',l);
 	this.loadJSON(
 		url,
