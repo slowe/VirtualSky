@@ -99,7 +99,7 @@ $.extend($.fn.addTouch = function(){
 	this.each(function(i,el){
 		// Pass the original event object because the jQuery event object
 		// is normalized to w3c specs and does not provide the TouchList.
-		$(el).bind('touchstart touchmove touchend touchcancel touchdbltap',function(){ handleTouch(event); });
+		$(el).bind('touchstart touchmove touchend touchcancel touchdbltap',function(event){ handleTouch(event); });
 	});
 	var handleTouch = function(event){
 		event.preventDefault();
