@@ -15,7 +15,7 @@
 			});
 		// -->
 		</script>
-		
+
 	OPTIONS (default values in brackets):
 		id ('starmap') - The ID for the HTML element where you want the sky inserted
 		projection ('polar') - The projection type as 'polar', 'stereo', 'lambert', 'equirectangular', or 'ortho'
@@ -99,7 +99,7 @@ $.extend($.fn.addTouch = function(){
 	this.each(function(i,el){
 		// Pass the original event object because the jQuery event object
 		// is normalized to w3c specs and does not provide the TouchList.
-		$(el).bind('touchstart touchmove touchend touchcancel touchdbltap',function(){ handleTouch(event); });
+		$(el).bind('touchstart touchmove touchend touchcancel touchdbltap',function(event){ handleTouch(event); });
 	});
 	var handleTouch = function(event){
 		event.preventDefault();
@@ -114,7 +114,7 @@ $.extend($.fn.addTouch = function(){
 				break;
 			case 'touchmove':
 				type = ['mousemove'];
-				break;        
+				break;
 			case 'touchend':
 				type = ['mouseup'];
 				break;
@@ -399,7 +399,7 @@ function VirtualSky(input){
 
 				// Should we show things below the horizon?
 				if(this.ground && coords[0] < -1e-6) return {x:-1, y:-1, el:coords[0]*this.r2d};
-				
+
 				// number of pixels per degree in the map
 				scale = this.tall/this.fov;
 
@@ -410,7 +410,7 @@ function VirtualSky(input){
 
 				dA = ra-this.ra_off;
 				dA = inrangeAz(dA);
-				
+
 				A = cd*Math.cos(dA);
 				F = scale*this.r2d/(sd0*sd + A*cd0);
 
@@ -511,7 +511,7 @@ function VirtualSky(input){
 			atmos: false
 		}
 	};
-	
+
 	// Data for stars < mag 4.5 or that are a vertex for a constellation line - 20 kB [id, mag, right ascension, declination]
 	// index with Hipparcos number
 	this.stars = this.convertStarsToRadians([[677,2.1,2.097,29.09],[746,2.3,2.295,59.15],[765,3.9,2.353,-45.75],
@@ -860,7 +860,7 @@ function VirtualSky(input){
 VirtualSky.prototype.init = function(d){
 	if(!d) return this;
 	var q = location.search;
-	
+
 	if(q && q != '#'){
 		var bits = q.replace(/^\?|\&$/g,'').split('&'); // remove the leading ? and trailing &
 		var key,val;
@@ -879,8 +879,8 @@ VirtualSky.prototype.init = function(d){
 	var b = "boolean";
 	var o = "object";
 	var f = "function";
-	
-	
+
+
 	// Overwrite defaults with variables passed to the function
 	// directly mapped variables
 	var pairs = {
@@ -920,7 +920,7 @@ VirtualSky.prototype.init = function(d){
 	for(key in pairs)
 		if(is(d[key], pairs[key]))
 			this[key] = d[key];
-	
+
 	// Undirectly paired values
 	if(is(d.projection,s)) this.selectProjection(d.projection);
 	if(is(d.constellations,b)) this.constellation.lines = d.constellations;
@@ -1102,7 +1102,7 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete,error){
 	if(typeof file!=="string") return this;
 	var dt = file.match(/\.json$/i) ? "json" : "script";
 	if(dt=="script"){
-		// If we are loading an external script we need to make sure we initiate 
+		// If we are loading an external script we need to make sure we initiate
 		// it first. To do that we will re-write the callback that was provided.
 		var tmp = callback;
 		callback = function(data){
@@ -1148,10 +1148,10 @@ VirtualSky.prototype.createSky = function(){
 
 	// Get the constellation line data
 	if(!this.lines) this.load('lines',this.file.lines);
-	
+
 	// Get the constellation line data
 	if(!this.boundaries) this.load('boundaries',this.file.boundaries);
-	
+
 	// Get the meteor showers
 	if(!this.showers) this.load('showers',this.file.showers);
 
@@ -1218,7 +1218,7 @@ VirtualSky.prototype.createSky = function(){
 	if(this.excanvas)
 		this.c = G_vmlCanvasManager.initElement(this.c);
 
-	if(this.c && this.c.getContext){  
+	if(this.c && this.c.getContext){
 		this.setWH(this.wide,this.tall);
 		var ctx = this.ctx = this.c.getContext('2d');
 		ctx.clearRect(0,0,this.wide,this.tall);
@@ -1367,7 +1367,7 @@ VirtualSky.prototype.toggleHelp = function(){
 		$('<div class="'+v+'_help">'+
 			'<div class="'+v+'_dismiss" title="'+this.getPhrase('close')+'">&times;</div>'+
 			'<span>'+this.getPhrase('keyboard')+'</span>'+
-			'<div class="'+v+'_helpinner"><ul></ul></div>'+	
+			'<div class="'+v+'_helpinner"><ul></ul></div>'+
 		'</div>').appendTo(this.container);
 
 		var hlp = $('.'+v+'_help');
@@ -1446,7 +1446,7 @@ VirtualSky.prototype.whichPointer = function(x,y){
 	for(var i = 0 ; i < this.pointers.length ; i++)
 		if(Math.abs(x-this.pointers[i].x) < 5 && Math.abs(y-this.pointers[i].y) < 5)
 			return i
-	
+
 	return -1;
 }
 VirtualSky.prototype.toggleInfoBox = function(i){
@@ -1491,7 +1491,7 @@ function inrangeAz(a,deg){
 	}else{
 		var twopi = (2*Math.PI);
 		while(a < 0) a += twopi;
-		while(a > twopi) a -= twopi;	
+		while(a > twopi) a -= twopi;
 	}
 	return a;
 }
@@ -1513,7 +1513,7 @@ VirtualSky.prototype.selectProjection = function(proj){
 		this.polartype = this.projection.polartype == true;
 
 		// Set coordinate transforms
-		
+
 		// Convert AZ,EL -> X,Y
 		// Inputs: az (rad), el (rad), width (px), height (px)
 		if(typeof this.projection.azel2xy==="function")
@@ -1823,7 +1823,7 @@ VirtualSky.prototype.Transform = function(p, rot, indeg){
 	var cp1 = Math.cos(p[1]);
 	var m = [Math.cos(p[0])*cp1, Math.sin(p[0])*cp1, Math.sin(p[1])];
 	var s = [m[0]*rot[0] + m[1]*rot[1] + m[2]*rot[2], m[0]*rot[3] + m[1]*rot[4] + m[2]*rot[5], m[0]*rot[6] + m[1]*rot[7] + m[2]*rot[8] ];
-	var r = Math.sqrt(s[0]*s[0] + s[1]*s[1] + s[2]*s[2]); 
+	var r = Math.sqrt(s[0]*s[0] + s[1]*s[1] + s[2]*s[2]);
 	var b = Math.asin(s[2]/r); // Declination in range -90 -> +90
 	var cb = Math.cos(b);
 	var a = Math.atan2(((s[1]/r)/cb),((s[0]/r)/cb));
@@ -1922,7 +1922,7 @@ VirtualSky.prototype.draw = function(proj){
 			c.closePath();
 		}
 	}
-	
+
 	this.drawGridlines("az")
 		.drawGridlines("eq")
 		.drawGridlines("gal")
@@ -2096,7 +2096,7 @@ VirtualSky.prototype.draw = function(proj){
 	});
 
 	return this;
-} 
+}
 
 VirtualSky.prototype.lightbox = function(lb){
 	if(!lb.length) return this;
@@ -2168,7 +2168,7 @@ VirtualSky.prototype.drawStars = function(){
 				if(this.showstars) c.arc(p.x,p.y,d,0,Math.PI*2,true);
 				if(this.showstarlabels && this.starnames[this.stars[i][0]]) this.drawLabel(p.x,p.y,d,"",this.htmlDecode(this.starnames[this.stars[i][0]]));
 			}
-		}	
+		}
 	}
 	c.fill();
 
@@ -2281,7 +2281,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			c.stroke();
 		}
 	}
-	
+
 	// Sun & Moon
 	if(this.showplanets || this.showplanetlabels){
 
@@ -2315,7 +2315,7 @@ VirtualSky.prototype.drawPlanet = function(x,y,d,colour,label){
 	return this;
 }
 VirtualSky.prototype.drawText = function(txt,x,y){
-	this.ctx.beginPath(); 
+	this.ctx.beginPath();
 	this.ctx.fillText(txt,x,y);
 	return this.ctx.measureText(txt).width;
 }
@@ -2402,7 +2402,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 // Draw the boundaries of constellations
 // Input: colour (e.g. "rgb(255,255,0)")
 // We should have all the boundary points stored in this.boundaries. As many of the constellations
-// will share boundaries we don't want to bother drawing lines that we've already done so we will 
+// will share boundaries we don't want to bother drawing lines that we've already done so we will
 // keep a record of the lines we've drawn as we go. As some segments may be large on the sky we will
 // interpolate a few points between so that boundaries follow the curvature of the projection better.
 // As the boundaries are in FK1 we will calculate the J2000 positions once and keep them cached as
@@ -2449,15 +2449,15 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 							if(ra < -180) ra = ra+360;
 							dc = (b[1]-a[1]);
 
-							// If we've already done this line we'll only calculate 
+							// If we've already done this line we'll only calculate
 							// two points on the line otherwise we'll do 5
 							n = (move) ? 5 : 2;
 							if(ra/2 > n) n = parseInt(ra);
 							if(dc/2 > n) n = parseInt(dc);
-							
+
 							dra = ra/n;
 							ddc = dc/n;
-							
+
 							for(var i = 1; i <= n; i++){
 								ra = a[0]+(i*dra);
 								if(ra < 0) ra += 360;
@@ -2580,14 +2580,14 @@ VirtualSky.prototype.drawEcliptic = function(colour){
 	if(!colour || typeof colour!="string") colour = this.col.ec;
 	var c = this.ctx;
 	var step = 2*this.d2r;
-	c.beginPath(); 
+	c.beginPath();
 	c.strokeStyle = colour;
 	c.lineWidth = 3;
 	var maxl = this.maxLine();
 
 	var old = {x:-1,y:-1,moved:false};
 	for(var a = 0 ; a < Math.PI*2 ; a += step) old = joinpoint(this,"ec",a,0,old,maxl);
-	
+
 	c.stroke();
 	return this;
 }
@@ -2601,7 +2601,7 @@ VirtualSky.prototype.drawMeridian = function(colour){
 	var maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb*this.d2r : Math.PI/2;
 	var step = 2*this.d2r;
 	var maxl = this.maxLine();
-	c.beginPath(); 
+	c.beginPath();
 	c.strokeStyle = colour;
 	c.lineWidth = 2;
 
@@ -2623,7 +2623,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	c = this.ctx;
 	oldx = 0;
 	oldy = 0;
-	c.beginPath(); 
+	c.beginPath();
 	c.strokeStyle = colour;
 	c.lineWidth = 1.0;
 	bstep = 2;
@@ -2646,7 +2646,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 		for(b = minb; b <= maxb ; b+= bstep) old = joinpoint(this,type,a,b,old,maxl);
 	}
 	c.stroke();
-	c.beginPath(); 
+	c.beginPath();
 	if(type=="az"){
 		minb = 0;
 		maxb = 90-bstep*this.r2d;
@@ -2697,7 +2697,7 @@ VirtualSky.prototype.drawCardinalPoints = function(){
 		if(x > 0) c.fillText(d[i],x,y);
 	}
 	c.fill();
-	
+
 	return this;
 }
 
@@ -2746,7 +2746,7 @@ function joinpoint(s,type,a,b,old,maxl){
 			old.moved = true;
 		}else{
 			// If the last point on s contour is more than a canvas width away
-			// it is probably supposed to be behind us so we won't draw a line 
+			// it is probably supposed to be behind us so we won't draw a line
 			if(!old.moved || Math.sqrt(Math.pow(old.x-x,2)+Math.pow(old.y-y,2)) > maxl){
 				c.moveTo(x,y);
 				old.moved = true;
@@ -2776,7 +2776,7 @@ VirtualSky.prototype.setGeo = function(pos){
 // Input: latitude (deg)
 VirtualSky.prototype.setLatitude = function(l){
 	this.latitude = inrangeEl(parseFloat(l)*this.d2r);
-	return this; 
+	return this;
 }
 
 // Input: longitude (deg)
@@ -2784,7 +2784,7 @@ VirtualSky.prototype.setLongitude = function(l){
 	this.longitude = parseFloat(l)*this.d2r;
 	while(this.longitude <= -Math.PI) this.longitude += 2*Math.PI;
 	while(this.longitude > Math.PI) this.longitude -= 2*Math.PI;
-	return this; 
+	return this;
 }
 
 VirtualSky.prototype.setRADec = function(r,d){
@@ -2830,7 +2830,7 @@ VirtualSky.prototype.panStep = function(){
 	// Still animating
 	if(t < 1){
 		// update and draw
-		this.setRADec(ra,dc).draw();	
+		this.setRADec(ra,dc).draw();
 		var _obj = this;
 		// request new frame
 		requestAnimFrame(function() { _obj.panStep(); });
@@ -2987,7 +2987,7 @@ VirtualSky.prototype.spinIt = function(tick,wait){
 	else{
 		var t = 1.0/this.fps;
 		var s = 2;
-		// this.spin is the number of seconds to update the clock by 
+		// this.spin is the number of seconds to update the clock by
 		if(this.spin == 0) this.spin = (tick == "up") ? t : -t;
 		else{
 			if(Math.abs(this.spin) < 1) s *= 2;
