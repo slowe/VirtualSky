@@ -106,6 +106,9 @@ $.extend($.fn.addTouch = function(){
 
 		var simulatedEvent;
 		var touches = event.changedTouches,
+		if (!touches) {
+			return;
+		}
 		first = touches[0],
 		type = '';
 		switch(event.type){
