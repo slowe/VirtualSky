@@ -410,7 +410,7 @@ stuQuery.prototype.ajax = function(url,attrs){
 	if(attrs.data) qs += (qs ? '&':'')+attrs.data;
 
 	// Build the URL to query
-	attrs['url'] = url+(qs ? '?'+qs:'');
+	attrs['url'] = url+(qs ? (url.indexOf('?') > 0 ? '&':'?')+qs:'');
 	
 	// code for IE7+/Firefox/Chrome/Opera/Safari or for IE6/IE5
 	var oReq = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
@@ -460,7 +460,5 @@ stuQuery.prototype.loadJSON = function(url,fn,attrs){
 }
 
 function S(e) {
-
-	if(e) return new stuQuery(e);
-	else return this;
+	return new stuQuery(e);
 }
