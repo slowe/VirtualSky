@@ -1270,6 +1270,7 @@ VirtualSky.prototype.createSky = function(){
 			s.mouseover = true;
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
+			e.preventDefault();
 			var delta = -(e.originalEvent.deltaY || e.originalEvent.wheelDelta);
 			if(!delta) delta = 0;
 			var s = e.data.sky;
@@ -1933,7 +1934,7 @@ VirtualSky.prototype.draw = function(proj){
 	c.fillStyle = txtcolour;
 	c.lineWidth = 1.5;
 	this.setFont();
-	this.container.css({'font-size':this.fontsize()+'px'});
+	this.container.css({'font-size':this.fontsize()+'px','position':'relative'});
 
 	// Time line
 	if(this.showdate){
