@@ -1156,7 +1156,6 @@ VirtualSky.prototype.createSky = function(){
 			if(ok || ob[o].src != "lookup"){
 				S(document).ajax(ob[o].url, { dataType: ob[o].type, this: this, success: function(data){
 					// If we don't have a length property, we only have one result so make it an array
-					console.log(data)
 					if(typeof data.length === "undefined") data = [data];
 					// Loop over the array of objects
 					for(var i = 0; i < data.length ; i++){

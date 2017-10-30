@@ -402,11 +402,12 @@ stuQuery.prototype.ajax = function(url,attrs){
 	if(!attrs) attrs = {};
 	var cb = "",qs = "";
 	if(attrs['dataType']=="jsonp"){
-		cb = 'fn_'+(new Date()).getTime();
+		if(url.indexOf('callback=') > 0) cb = url.match(/callback=[^\&]*/)[0].substr(9);
+		else cb = 'fn_'+(new Date()).getTime();
 		window[cb] = function(evt){ complete(evt); };
 	}
 	if(typeof attrs.cache==="boolean" && !attrs.cache) qs += (qs ? '&':'')+(new Date()).valueOf();
-	if(cb) qs += (qs ? '&':'')+'callback='+cb;
+	if(cb && url.indexOf('callback=') < 0) qs += (qs ? '&':'')+'callback='+cb;
 	if(attrs.data) qs += (qs ? '&':'')+attrs.data;
 
 	// Build the URL to query
