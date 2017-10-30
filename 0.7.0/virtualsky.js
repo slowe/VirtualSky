@@ -164,6 +164,58 @@ S.query = function() {
 	return r;
 };
 
+// Full Screen API - http://johndyer.name/native-fullscreen-javascript-api-plus-jquery-plugin/
+var fullScreenApi = {
+		supportsFullScreen: false,
+		isFullScreen: function() { return false; },
+		requestFullScreen: function() {},
+		cancelFullScreen: function() {},
+		fullScreenEventName: '',
+		prefix: ''
+	},
+	browserPrefixes = 'webkit moz o ms khtml'.split(' ');
+
+// check for native support
+if(typeof document.cancelFullScreen != 'undefined') {
+	fullScreenApi.supportsFullScreen = true;
+}else{
+	// check for fullscreen support by vendor prefix
+	for(var i = 0, il = browserPrefixes.length; i < il; i++ ) {
+		fullScreenApi.prefix = browserPrefixes[i];
+		if(typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
+			fullScreenApi.supportsFullScreen = true;
+			break;
+		}
+	}
+}
+
+// update methods to do something useful
+if(fullScreenApi.supportsFullScreen) {
+	fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
+
+	fullScreenApi.isFullScreen = function() {
+		switch (this.prefix) {
+			case '':
+				return document.fullScreen;
+			case 'webkit':
+				return document.webkitIsFullScreen;
+			default:
+				return document[this.prefix + 'FullScreen'];
+		}
+	}
+	fullScreenApi.requestFullScreen = function(el) {
+		return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
+	}
+	fullScreenApi.cancelFullScreen = function(el) {
+		return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
+	}
+}
+
+// export api
+window.fullScreenApi = fullScreenApi;
+// End of Full Screen API
+
+
 /*! VirtualSky */
 function VirtualSky(input){
 
@@ -974,6 +1026,7 @@ VirtualSky.prototype.resize = function(w,h){
 	this.positionCredit();
 	this.updateSkyGradient();
 	this.draw();
+	this.container.css({'font-size':this.fontsize()+'px'});
 	this.trigger('resize',{vs:this});
 }
 VirtualSky.prototype.setWH = function(w,h){
@@ -1160,6 +1213,8 @@ VirtualSky.prototype.createSky = function(){
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
+		}).on('dblclick',{sky:this},function(e){
+			e.data.sky.toggleFullScreen();
 		}).on('mousemove',{sky:this},function(e){
 			var s = e.data.sky;
 			var x = e.originalEvent.layerX;
@@ -1879,8 +1934,6 @@ VirtualSky.prototype.draw = function(proj){
 	c.lineWidth = 1.5;
 	this.setFont();
 	this.container.css({'font-size':this.fontsize()+'px'});
-
-
 
 	// Time line
 	if(this.showdate){
@@ -2770,6 +2823,21 @@ VirtualSky.prototype.setLongitude = function(l){
 	while(this.longitude <= -Math.PI) this.longitude += 2*Math.PI;
 	while(this.longitude > Math.PI) this.longitude -= 2*Math.PI;
 	return this; 
+}
+
+
+VirtualSky.prototype.toggleFullScreen = function(){
+	if(fullScreenApi.isFullScreen()){
+		fullScreenApi.cancelFullScreen(this.container[0]);
+		this.fullscreen = false;
+		this.container.removeClass('fullscreen');
+	}else{
+		fullScreenApi.requestFullScreen(this.container[0]);
+		this.fullscreen = true;
+		this.container.addClass('fullscreen');
+	}
+
+	return this;
 }
 
 VirtualSky.prototype.setRADec = function(r,d){
