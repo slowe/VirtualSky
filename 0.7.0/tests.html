@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Virtual Sky - unit tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+	<link rel="stylesheet" href="extra/qunit-1.12.0.css">
+	<script src="extra/qunit-1.12.0.js"></script>
+	<!--
+		Virtual Sky <canvas> application
+		(c) 2010-2012 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+	-->
+	<style>
+	body {
+		font-size: 14px;
+		font-family: Helvetica, sans-serif;
+		color: black;
+		margin: 0px;
+		padding: 0px;
+		font-size: 1em;
+	}
+	#starmapper, #starmapper2 { height: 400px; width:500px; position: relative; }
+	#virtualskyinfobox{
+		font-size: 12px;
+		display:none;
+		background-color:rgba(200,200,200,1);
+		color:black;
+		padding:5px;
+		max-width:150px;
+		border-radius:0.5em;
+		-moz-border-radius: 0.5em;
+		-webkit-border-radius: 0.5em;
+		box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+	}
+	.virtualskyinfocredit{
+		font-size:0.5em;
+		float:left;
+		position:absolute;
+		padding:5px;
+		color: white;
+	}
+	#virtualskyinfobox img { width: 128px; height: 128px; }
+	</style>
+	<!-- IE seems to get very confused if it loads Javascript from within a Javascript when in an iframe. We'll have to load it here -->
+	<!--[if IE]><script src="../excanvas.min.js"></script><![endif]-->
+	<script src="jquery-1.10.0.min.js"></script>
+	<script src="stuquery.js"></script>
+	<script src="virtualsky.js" type="text/javascript"></script>
+	<script>
+		//jQuery = S;
+
+		var sky;
+		S(document).ready(function() {
+			function assert_equal(actual,expected,message){
+				equal(actual,expected,message);
+			}
+			function assert_almost_equal(actual,expected,precision,message){
+				if(typeof actual!=="number" || typeof expected!=="number"){
+					ok(false,"One or both of the inputs aren't numbers");
+					return;
+				}
+				if(typeof precision==="string"){
+					message = precision;
+					precision = 9;	// default
+				}
+				equal(parseFloat(actual.toFixed(precision)),parseFloat(expected.toFixed(precision)),message);
+			}
+
+			test("Initiation",function(){
+
+				S('#starmapper').remove();
+				S('#starmapper2').remove();
+
+				// Try setting up a planetarium with no ID provided
+				sky = S.virtualsky({});
+				assert_equal(sky.id,"","No ID should be set if none is provided");
+
+				var match = 0;
+				var divs = S('div')
+				for(var i = 0; i < divs.length; i++){
+					var id = S(divs[i]).attr('id');
+					if(id && id.indexOf("qunit") < 0){
+						match++;
+						console.log('Found '+id)
+					}
+				}
+				assert_equal(match,0,"No DOM element should be created as we don't have a name and don't want to clash");
+
+				// We will add a DOM element then assign it
+				// Remove the existing DOM element
+				S('#starmapper').remove();
+				S('#starmapper2').remove();
+				S('body').append('<div id="starmapper"><\/div>');
+				
+				sky = S.virtualsky({id:'starmapper',projection:'stereo'});
+				assert_equal(sky.id,"starmapper","The ID should be set correctly");
+				assert_equal(S('#starmapper').length,1,"The DOM element should still exist");
+				assert_equal(sky.projection.id,"stereo","Projection should be stereo");
+
+				var w = 400;
+				var mag = 6;
+				S('#starmapper').remove();
+				sky = S.virtualsky({id:'starmapper',projection:'blah',width:w,magnitude:mag});
+				assert_equal(S('#starmapper').length,1,"A DOM element was created");
+				assert_equal(sky.id,"starmapper","The ID should be set to that provided");
+				assert_equal(sky.projection.id,"polar","Projection should default to polar if unrecognized");
+				assert_equal(S('#starmapper').outerWidth(),w,"Width should be set from input as "+w);
+				assert_equal(sky.magnitude,mag,"The magnitude limit should be set from input as "+mag);
+
+			});
+			
+			var d2r = Math.PI/180;
+
+			test("Angles",function(){
+
+				sky = S.virtualsky({id:'angletest','projection':'polar','width':700,'height':700});
+
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,0),0*d2r,8,"Great Circle distance for same point is zero");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,90*d2r,0),90*d2r,8,"Great Circle distance for points separated around the equator");
+				assert_almost_equal(sky.greatCircle(180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination");
+				assert_almost_equal(sky.greatCircle(0,0,360*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different");
+				assert_almost_equal(sky.greatCircle(10*d2r,0,10*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(10*d2r,45*d2r,10*d2r,-45*d2r),90*d2r,8,"Great Circle distance for points separated in declination but at the same non-zero RA");
+				assert_almost_equal(sky.greatCircle(-180*d2r,0,180*d2r,45*d2r),45*d2r,8,"Great Circle distance for points separated in declination and 360 degrees different (one negative)");
+				assert_almost_equal(sky.greatCircle(190*d2r,20*d2r,10*d2r,20*d2r),140*d2r,8,"Great Circle distance for points at the same non-zero declination but 360 degrees appart in RA");
+
+			});
+
+			sky = S.virtualsky({id:'starmapper'});
+
+
+			test("Times and Locations",function(){
+
+				var str = 'October 25, 1985 01:21:00'
+				var clock = new Date(str);
+				sky.setClock(str);
+				assert_equal(sky.clock-clock,0,"Clock can be set with a string")
+
+				str = 'October 25, 1985 23:21:00 PST';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==26 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==7),true,"A date/time string with a PST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 CET'
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==22),true,"A date/time string with a CEST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 AEST';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==13),true,"A date/time string with an AEST time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 -0800';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==26 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==7),true,"A date/time string with a -0800 time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 +0100';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==22),true,"A date/time string with a +0100 time zone ("+str+") is correctly set");
+
+				str = 'October 25, 1985 23:21:00 +1030';
+				sky.setClock(str);
+				assert_equal((sky.clock.getUTCDate()==25 && sky.clock.getUTCFullYear()==1985 && sky.clock.getUTCHours()==12 && sky.clock.getUTCMinutes()==51),true,"A date/time string with a +1030 time zone ("+str+") is correctly set");
+
+				clock = new Date('July 5, 2013 18:00:00 UTC');
+				var JD = sky.getJD(clock);
+				assert_equal(JD,2456479.25,"Julian Date");
+
+				sky.setClock('now');
+
+				sky.setGeo("53.5,-2.3");
+				assert_almost_equal(sky.latitude,53.5*d2r,6,"Latitude should be set")
+				assert_almost_equal(sky.longitude,-2.3*d2r,6,"Longitude should be set")
+
+			});
+
+			test("Keyboard input",function(){
+
+				function keypress(key,sky){
+					var mouse = sky.mouseover;
+					sky.mouseover = true;
+					if(typeof key=="string") key = key.charCodeAt(0);
+					sky.keypress(key);
+					sky.mouseover = mouse;
+				}
+
+				var mag = sky.magnitude;
+
+				keypress(38,sky);
+				assert_equal(sky.magnitude,(mag+0.25),"Keypress (38): The magnitude limit should be "+(mag+0.25));
+				keypress(40,sky);
+				assert_equal(sky.magnitude,mag,"Keypress (40):The magnitude limit should be "+(mag));
+				keypress(63,sky);
+				assert_equal(S('.virtualsky_help').length,1,"Keypress (63): The help is now visible");
+				ok(S('.virtualsky_help li').length > 1,"The help contains a list");
+				keypress(63,sky); // Hide help
+				assert_equal(S('.virtualsky_help').length,0,"Keypress (63): The help is hidden");
+				
+				assert_equal(sky.spin,0,"Not moving initially");
+
+				keypress('l',sky);
+				assert_equal(sky.spin,0.1,"Keypress (l): Slow");
+				keypress('k',sky);
+				assert_equal(sky.spin,0,"Keypress (k): Stationary again");
+
+				var clock = new Date();
+				keypress('8',sky);
+				var diff = sky.clock-clock;
+				ok(diff < 10,"Keypress (8): Time is set to now ("+clock+", "+sky.clock+", "+(diff)+")");
+				
+			});
+ 
+			test("Languages",function(){
+				function testLang(code,sun){
+					stop();
+					sky.changeLanguage(code,function(e){
+						assert_equal(sky.langcode,code,"Change language to "+this.htmlDecode(this.langs[code].language.name));
+						assert_equal(sky.getPhrase("sun"),sun,"Check "+sun+" is translation of 'Sun'");
+						start();
+					});
+				
+				}
+
+				testLang('en','Sun');
+				testLang('es','Sol');
+				testLang('fr','Soleil');
+				testLang('pt', 'Sol');
+			});
+
+
+			test("JSON callbacks",function(){
+				
+				// We need to stop qunit until we get the ajax callback
+				stop();
+				sky.load('stars',sky.file.stars,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for extra stars ("+this.file.stars+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.load('boundaries',sky.file.boundaries,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation boundaries ("+this.file.boundaries+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.load('lines',sky.file.lines,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for constellation lines ("+this.file.lines+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.load('planets',sky.file.planets,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for planets ("+this.file.planets+")");
+					start();	// Start qunit again
+				});
+
+				stop();
+				sky.load('showers',sky.file.showers,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for meteor showers ("+this.file.showers+")");
+					start();	// Start qunit again
+				});
+				stop();
+				sky.load('galaxy',sky.file.galaxy,function(d,e){
+					ok(((e.statusText=="success" || e.statusText=="OK") ? true : false),"AJAX request for galaxy outline ("+this.file.galaxy+")");
+					start();	// Start qunit again
+				});
+
+			});
+
+			test("Add Pointers",function(){
+
+				assert_equal(1,sky.addPointer({'ra':83.6330833,'dec':22.0145,'label':'M1 - Crab Nebula','html':'Blah blah','url':'http://www.strudel.org.uk/lookUP/?name=M1',colour:'rgb(220,220,255)'}),"Add a first pointer");
+				assert_equal(2,sky.addPointer({'ra':148.9684583,'dec':69.6797028,'label':'M82','url':'http://www.strudel.org.uk/lookUP/?name=M82',colour:'rgb(220,220,255)'}),"Add a 2nd pointer");
+
+			});
+
+			test("Custom input",function(){
+
+				S('#starmapper2').remove();
+				var sky2 = S.virtualsky({id:'starmapper2',constellationboundaries: true,
+					boundaries: [
+						["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+						["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+					]
+				});
+				assert_equal(sky2.boundaries.length,2,"Provided boundaries are used")
+
+			});
+
+
+		});
+
+
+	</script>
+</head>
+
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+</body>
+</html>
