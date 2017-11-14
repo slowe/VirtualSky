@@ -1098,7 +1098,7 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete,error){
 	}
 	var config = {
 		dataType: dt,
-		this: this,
+		"this": this,
 		success: callback,
 		complete: complete || function(){},
 		error: error || function(){}
@@ -1161,7 +1161,7 @@ VirtualSky.prototype.createSky = function(){
 			if(ob[o].src == "lookup") lookups++;
 			if(lookups > 5) ok = false;
 			if(ok || ob[o].src != "lookup"){
-				S(document).ajax(ob[o].url, { dataType: ob[o].type, this: this, success: function(data){
+				S(document).ajax(ob[o].url, { dataType: ob[o].type, "this": this, success: function(data){
 					// If we don't have a length property, we only have one result so make it an array
 					if(typeof data.length === "undefined") data = [data];
 					// Loop over the array of objects
