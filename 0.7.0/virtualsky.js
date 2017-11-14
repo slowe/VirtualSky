@@ -1217,6 +1217,8 @@ VirtualSky.prototype.createSky = function(){
 		S("#"+this.idinner).on('click touch',{sky:this},function(e){
 			var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
 			var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
+			console.log('touch',x,y)
+
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
