@@ -23,7 +23,7 @@ function geoIP(){
 
 	if(S('#'+this.id+'_geoname').length == 0){
 		var eg = "e.g. Cardiff, UK";
-		S('#'+this.id+'_geo').append('<div style="text-align:center;margin-top:4px;"><form id="'+this.id+'_geoname"><input id="'+this.id+'_location" value="'+eg+'"><!-- <input id="'+this.id+'_geoname_btn" type="submit" value="Search" />--><br /><span id="'+this.id+'_geoname_message"><\/span><div id="'+this.id+'_searchresults"><\/div><\/form><\/div>');
+		S('#'+this.id+'_geo').append('<div style="text-align:center;margin-top:4px;"><form id="'+this.id+'_geoname" onsubmit="return false;"><input id="'+this.id+'_location" value="'+eg+'"><!-- <input id="'+this.id+'_geoname_btn" type="submit" value="Search" />--><br /><span id="'+this.id+'_geoname_message"><\/span><div id="'+this.id+'_searchresults"><\/div><\/form><\/div>');
 		this.lightbox.resize();
 		// Store current state of the keyboard variable
 		// When we're in the input field, we don't want to change the sky
