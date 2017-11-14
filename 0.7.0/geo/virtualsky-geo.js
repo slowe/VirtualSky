@@ -29,7 +29,7 @@ function geoIP(){
 		// When we're in the input field, we don't want to change the sky
 		S('#'+this.id+'_location').on('focus',{sky:this},function(e){
 			e.data.sky.keyboard = false;
-			if(S('#'+e.data.sky.id+'_location').val() == eg) S('#'+e.data.sky.id+'_location').val('');
+			if(S('#'+e.data.sky.id+'_location').val() == eg) S('#'+e.data.sky.id+'_location')[0].value = '';
 		}).on('blur',{sky:this,key:this.keyboard},function(e){
 			e.data.sky.keyboard = e.data.key;
 			if(!S('#'+e.data.sky.id+'_location').val()){
