@@ -1217,14 +1217,12 @@ VirtualSky.prototype.createSky = function(){
 		S("#"+this.idinner).on('click touch',{sky:this},function(e){
 			var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
 			var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
-			console.log('touch',x,y)
-
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
 		}).on('dblclick',{sky:this},function(e){
 			e.data.sky.toggleFullScreen();
-		}).on('mousemove',{sky:this},function(e){
+		}).on('mousemove touchmove',{sky:this},function(e){
 			var s = e.data.sky;
 			var x = e.originalEvent.layerX;
 			var y = e.originalEvent.layerY;
@@ -1259,9 +1257,9 @@ VirtualSky.prototype.createSky = function(){
 				matched = s.whichPointer(x,y);
 				s.toggleInfoBox(matched);
 			}
-		}).on('mousedown',{sky:this},function(e){
+		}).on('mousedown touchstart',{sky:this},function(e){
 			e.data.sky.dragging = true;
-		}).on('mouseup',{sky:this},function(e){
+		}).on('mouseup touchend',{sky:this},function(e){
 			var s = e.data.sky;
 			s.dragging = false;
 			s.x = "";
