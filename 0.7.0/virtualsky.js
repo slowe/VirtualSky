@@ -1223,6 +1223,7 @@ VirtualSky.prototype.createSky = function(){
 		}).on('dblclick',{sky:this},function(e){
 			e.data.sky.toggleFullScreen();
 		}).on('mousemove touchmove',{sky:this},function(e){
+			e.preventDefault();
 			var s = e.data.sky;
 			var x = e.originalEvent.layerX;
 			var y = e.originalEvent.layerY;
