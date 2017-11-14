@@ -229,15 +229,22 @@ function VirtualSky(input){
 
 	// Identify the default base directory
 	this.setDir = function(){
-		var d = S('script[src*=virtualsky]').attr('src').match(/^.*\//);
+		var d = S('script[src*=virtualsky]').attr('src')[0].match(/^.*\//);
 		this.dir = d && d[0] || "";
 		return;
+	}
+	this.getDir = function(pattern){
+		if(typeof pattern!=="string") pattern = "virtualsky";
+		var d = S('script[src*='+pattern+']').attr('src');
+		if(typeof d==="string") d = [d];
+		if(d.length < 1) d = [""];
+		d = d[0].match(/^.*\//);
+		return d && d[0] || "";
 	}
 
 	this.q = S.query();    // Query string
 	this.setDir();	// Set the default base directory
-	this.dir = S('script[src*=virtualsky]').attr('src').match(/^.*\//);  // the JS file path
-	this.dir = this.dir && this.dir[0] || ""; // set dir to match or ""
+	this.dir = this.getDir();  // the JS file path
 	this.langurl = this.dir + "lang/%LANG%.json";	// The location of the language files
 
 	this.id = '';						// The ID of the canvas/div tag - if none given it won't display
@@ -2073,7 +2080,7 @@ VirtualSky.prototype.draw = function(proj){
 							'<div class="divider">'+s.getPhrase('E')+'</div>'+
 						'</div>'+
 					'</div>');
-				S(hid+'_geo').css({width:w,'align':'center'});
+				S(hid+'_geo').css({width:w+'px','align':'center'});
 				S(hid+'_geo input').css({width:'6em'});
 			}
 			s.createLightbox(S(hid+'_geo'),{

@@ -45,13 +45,11 @@
 	<!-- IE seems to get very confused if it loads Javascript from within a Javascript when in an iframe. We'll have to load it here -->
 	<!--[if IE]><script src="excanvas.min.js"></script><![endif]-->
 	<script src="stuquery.js"></script>
-	<script>
-		//jQuery = S;
-		//$ = jQuery;
-	</script>
 	<script src="virtualsky.js" type="text/javascript"></script>
+	<script src="geo/virtualsky-geo.js" type="text/javascript"></script>
 	<script>
-		function geoIP(){
+		/*function geoIP(){
+			console.log('here')
 			if(S('#'+this.id+'_geoip').length == 0){
 				var eg = "e.g. Cardiff, UK";
 				S('#'+this.id+'_geo').append('<div style="text-align:center;margin-top:4px;"><form id="'+this.id+'_geoip"><input id="'+this.id+'_location" value="'+eg+'" style="width:12em;"> <input id="'+this.id+'_geoip_btn" type="submit" value="Search" /><br /><span id="'+this.id+'_geoip_message"><\/span><\/form><\/div>');
@@ -130,7 +128,7 @@
 					});
 				});
 			}
-		}
+		}*/
 		S(document).ready(function(){
 			planetarium = S.virtualsky({id:'starmapper',callback:{geo:geoIP},fullscreen:true});
 		});
