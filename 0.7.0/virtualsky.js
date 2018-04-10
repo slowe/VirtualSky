@@ -1275,7 +1275,10 @@ VirtualSky.prototype.createSky = function(){
 			}
 		}).on('touchmove',{sky:this},function(e){
 			e.preventDefault();
-			e.data.sky.debug('touchmove')
+			e.data.sky.debug('touchmove');
+		}).on('touchdown',{sky:this},function(e){
+			e.data.sky.debug('touchdowndown')
+			e.data.sky.dragging = true;
 		}).on('mousedown',{sky:this},function(e){
 			e.data.sky.debug('mousedown')
 			e.data.sky.dragging = true;
