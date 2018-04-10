@@ -215,6 +215,8 @@ if(fullScreenApi.supportsFullScreen) {
 window.fullScreenApi = fullScreenApi;
 // End of Full Screen API
 
+// Thumbs.js
+(function(c){try{document.createEvent("TouchEvent");return}catch(f){}var d={mousedown:"touchstart",mouseup:"touchend",mousemove:"touchmove"};var a=function(){for(var e in d){document.body.addEventListener(e,function(i){var h=b(d[i.type],i);i.target.dispatchEvent(h);var g=i.target["on"+d[i.type]];if(typeof g==="function"){g(i)}},false)}};var b=function(g,i){var h=document.createEvent("MouseEvents");h.initMouseEvent(g,i.bubbles,i.cancelable,i.view,i.detail,i.screenX,i.screenY,i.clientX,i.clientY,i.ctrlKey,i.altKey,i.shiftKey,i.metaKey,i.button,i.relatedTarget);return h};if(document.readyState==="complete"||document.readyState==="loaded"){a()}else{c.addEventListener("load",a,false)}})(window);
 
 /*! VirtualSky */
 function VirtualSky(input){
@@ -937,39 +939,6 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
 	}
 
-	function touchHandler(event){
-		var touches = event.changedTouches,
-			first = touches[0],
-			type = "";
-		switch(event.type)
-		{
-			case "touchstart": type = "mousedown"; break;
-			case "touchmove":  type = "mousemove"; break;        
-			case "touchend":   type = "mouseup";   break;
-			default:           return;
-		}
-
-		// initMouseEvent(type, canBubble, cancelable, view, clickCount, 
-		//                screenX, screenY, clientX, clientY, ctrlKey, 
-		//                altKey, shiftKey, metaKey, button, relatedTarget);
-
-		var simulatedEvent = document.createEvent("MouseEvent");
-		simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-									  first.screenX, first.screenY, 
-									  first.clientX, first.clientY, false, 
-									  false, false, false, 0/*left*/, null);
-
-		first.target.dispatchEvent(simulatedEvent);
-		event.preventDefault();
-	}
-
-	function init() 
-	{
-		document.addEventListener("touchstart", touchHandler, true);
-		document.addEventListener("touchmove", touchHandler, true);
-		document.addEventListener("touchend", touchHandler, true);
-		document.addEventListener("touchcancel", touchHandler, true);    
-	}
 	return this;
 }
 
