@@ -1236,7 +1236,7 @@ VirtualSky.prototype.createSky = function(){
 		}).on('dblclick',{sky:this},function(e){
 			e.data.sky.debug('dblclick')
 			e.data.sky.toggleFullScreen();
-		}).on('mousemove',{sky:this},function(e){
+		}).on('mousemove touchmove',{sky:this},function(e){
 			e.preventDefault();
 			e.data.sky.debug('mousemove')
 			var s = e.data.sky;
@@ -1273,10 +1273,10 @@ VirtualSky.prototype.createSky = function(){
 				matched = s.whichPointer(x,y);
 				s.toggleInfoBox(matched);
 			}
-		}).on('mousedown',{sky:this},function(e){
+		}).on('mousedown touchdown',{sky:this},function(e){
 			e.data.sky.debug('mousedown')
 			e.data.sky.dragging = true;
-		}).on('mouseup',{sky:this},function(e){
+		}).on('mouseup touchup',{sky:this},function(e){
 			e.data.sky.debug('mouseup')
 			var s = e.data.sky;
 			s.dragging = false;
