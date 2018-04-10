@@ -1337,8 +1337,12 @@ VirtualSky.prototype.createSky = function(){
 			}
 		}).on('touchdown',{sky:this},function(e){
 			e.data.sky.debug('touchdown')
-		}).on('touchup',{sky:this},function(e){
-			e.data.sky.debug('touchup')
+		}).on('touchend',{sky:this},function(e){
+			e.data.sky.debug('touchend')
+		}).on('touchenter',{sky:this},function(e){
+			e.data.sky.debug('touchenter')
+		}).on('touchleave',{sky:this},function(e){
+			e.data.sky.debug('touchleave')
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
 			e.data.sky.debug('mousewheel')
