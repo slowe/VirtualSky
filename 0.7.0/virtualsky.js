@@ -2529,74 +2529,73 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	if(!this.constellation.bpts) this.constellation.bpts = new Array(this.boundaries.length);
 	// We'll record which boundary lines we've already processed
 	var cbdone = [];
-	if(this.constellation.boundaries){
-		for(c = 0; c < this.boundaries.length; c++){
-			if(typeof this.boundaries!=="string" && c < this.boundaries.length){
+	for(c = 0; c < this.boundaries.length; c++){
+		if(typeof this.boundaries!=="string" && c < this.boundaries.length){
 
-				if(this.constellation.bpts[c]){
-					// Use the old array
-					var points = this.constellation.bpts[c];
-				}else{
-					// Create a new array of points
-					var points = [];
-					for(l = 1; l < this.boundaries[c].length; l+=2){
-						b = [this.boundaries[c][l],this.boundaries[c][l+1]];
-						if(a){
-							atob = a[0]+','+a[1]+'-'+b[0]+','+b[1];
-							btoa = b[0]+','+b[1]+'-'+a[0]+','+a[1];
-						}
-						if(l > 1){
-							move = (cbdone[atob] || cbdone[btoa]);
-							ra = (b[0]-a[0])%360;
-							if(ra > 180) ra = ra-360;
-							if(ra < -180) ra = ra+360;
-							dc = (b[1]-a[1]);
-
-							// If we've already done this line we'll only calculate 
-							// two points on the line otherwise we'll do 5
-							n = (move) ? 5 : 2;
-							if(ra/2 > n) n = parseInt(ra);
-							if(dc/2 > n) n = parseInt(dc);
-							
-							dra = ra/n;
-							ddc = dc/n;
-							
-							for(var i = 1; i <= n; i++){
-								ra = a[0]+(i*dra);
-								if(ra < 0) ra += 360;
-								dc = a[1]+(i*ddc);
-								// Convert to J2000
-								d = this.fk1tofk5(ra*this.d2r,dc*this.d2r);
-								points.push([d[0],d[1],move]);
-							}
-						}
-						// Mark this line as drawn
-						cbdone[atob] = true;
-						cbdone[btoa] = true;
-						a = b;
+			if(this.constellation.bpts[c]){
+				// Use the old array
+				var points = this.constellation.bpts[c];
+			}else{
+				// Create a new array of points
+				var points = [];
+				for(l = 1; l < this.boundaries[c].length; l+=2){
+					b = [this.boundaries[c][l],this.boundaries[c][l+1]];
+					if(a){
+						atob = a[0]+','+a[1]+'-'+b[0]+','+b[1];
+						btoa = b[0]+','+b[1]+'-'+a[0]+','+a[1];
 					}
-					this.constellation.bpts[c] = points;
-				}
-				posa = null;
-				// Now loop over joining the points
-				for(i = 0; i <= points.length; i++){
-					j = (i == points.length) ? 0 : i;
-					posb = this.radec2xy(points[j][0],points[j][1]);
-					if(posa && this.isVisible(posa.el) && this.isVisible(posb.el) && points[j][2]){
-						if(!this.isPointBad(posa) && !this.isPointBad(posb)){
-							// Basic error checking: constellations behind us often have very long lines so we'll zap them
-							if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
-								this.ctx.moveTo(posa.x,posa.y);
-								this.ctx.lineTo(posb.x,posb.y);
-							}
+					if(l > 1){
+						move = (cbdone[atob] || cbdone[btoa]);
+						if(typeof move==="undefined") move = true;
+						ra = (b[0]-a[0])%360;
+						if(ra > 180) ra = ra-360;
+						if(ra < -180) ra = ra+360;
+						dc = (b[1]-a[1]);
+
+						// If we've already done this line we'll only calculate 
+						// two points on the line otherwise we'll do 5
+						n = (move) ? 5 : 2;
+						if(ra/2 > n) n = parseInt(ra);
+						if(dc/2 > n) n = parseInt(dc);
+						
+						dra = ra/n;
+						ddc = dc/n;
+						
+						for(var i = 1; i <= n; i++){
+							ra = a[0]+(i*dra);
+							if(ra < 0) ra += 360;
+							dc = a[1]+(i*ddc);
+							// Convert to J2000
+							d = this.fk1tofk5(ra*this.d2r,dc*this.d2r);
+							points.push([d[0],d[1],move]);
 						}
 					}
-					posa = posb;
+					// Mark this line as drawn
+					cbdone[atob] = true;
+					cbdone[btoa] = true;
+					a = b;
 				}
+				this.constellation.bpts[c] = points;
+			}
+			posa = null;
+			// Now loop over joining the points
+			for(i = 0; i <= points.length; i++){
+				j = (i == points.length) ? 0 : i;
+				posb = this.radec2xy(points[j][0],points[j][1]);
+				if(posa && this.isVisible(posa.el) && this.isVisible(posb.el) && points[j][2]){
+					if(!this.isPointBad(posa) && !this.isPointBad(posb)){
+						// Basic error checking: constellations behind us often have very long lines so we'll zap them
+						if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
+							this.ctx.moveTo(posa.x,posa.y);
+							this.ctx.lineTo(posb.x,posb.y);
+						}
+					}
+				}
+				posa = posb;
 			}
 		}
-		cbdone = [];
 	}
+	cbdone = [];
 	this.ctx.stroke();
 	return this;
 }
