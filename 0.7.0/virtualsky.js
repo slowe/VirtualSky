@@ -1111,11 +1111,21 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete,error){
 	return this;
 }
 
+VirtualSky.prototype.debug = function(msg){
+	if(S('#debug').length==1){
+		var id = 'debug-'+(new Date()).valueOf();
+		S('#debug').append('<span id="'+id+'">'+msg+'</span>');
+		setTimeout(function(){ S('#'+id).remove(); },1000)
+	}
+	return this;
+}
+
 VirtualSky.prototype.createSky = function(){
 	this.container = S('#'+this.id);
 	//this.container.addTouch();
 	this.times = this.astronomicalTimes();
 
+	if(this.q.debug) S('body').append('<div style="position: absolute;bottom:0px;right:0px;padding: 0.25em 0.5em;background-color:white;color:black;" id="debug"></div>');
 	if(this.fntfam) this.container.css({'font-family':this.fntfam});
 	if(this.fntsze) this.container.css({'font-size':this.fntsze});
 
@@ -1217,15 +1227,18 @@ VirtualSky.prototype.createSky = function(){
 		ctx.fill();
 
 		S("#"+this.idinner).on('click',{sky:this},function(e){
+			e.data.sky.debug('click')
 			var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
 			var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
 		}).on('dblclick',{sky:this},function(e){
+			e.data.sky.debug('dblclick')
 			e.data.sky.toggleFullScreen();
 		}).on('mousemove',{sky:this},function(e){
 			e.preventDefault();
+			e.data.sky.debug('mousemove')
 			var s = e.data.sky;
 			var x = e.originalEvent.layerX;
 			var y = e.originalEvent.layerY;
@@ -1261,14 +1274,17 @@ VirtualSky.prototype.createSky = function(){
 				s.toggleInfoBox(matched);
 			}
 		}).on('mousedown',{sky:this},function(e){
+			e.data.sky.debug('mousedown')
 			e.data.sky.dragging = true;
 		}).on('mouseup',{sky:this},function(e){
+			e.data.sky.debug('mouseup')
 			var s = e.data.sky;
 			s.dragging = false;
 			s.x = "";
 			s.y = "";
 			s.theta = "";
 		}).on('mouseout',{sky:this},function(e){
+			e.data.sky.debug('mouseout')
 			var s = e.data.sky;
 			s.dragging = false;
 			s.mouseover = false;
@@ -1276,11 +1292,13 @@ VirtualSky.prototype.createSky = function(){
 			s.y = "";
 			if(typeof s.callback.mouseout=="function") s.callback.mouseout.call(s);
 		}).on('mouseenter',{sky:this},function(e){
+			e.data.sky.debug('mouseenter')
 			var s = e.data.sky;
 			s.mouseover = true;
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
+			e.data.sky.debug('mousewheel')
 			var delta = -(e.originalEvent.deltaY || e.originalEvent.wheelDelta);
 			if(!delta) delta = 0;
 			var s = e.data.sky;
