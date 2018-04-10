@@ -1276,6 +1276,32 @@ VirtualSky.prototype.createSky = function(){
 		}).on('touchmove',{sky:this},function(e){
 			e.preventDefault();
 			e.data.sky.debug('touchmove');
+			var s = e.data.sky;
+			var x = e.originalEvent.layerX;
+			var y = e.originalEvent.layerY;
+			var theta,f,dr;
+			if(s.polartype){
+				theta = Math.atan2(y-s.tall/2,x-s.wide/2);
+				if(!s.theta) s.theta = theta;
+				s.az_off -= (s.theta-theta)*s.r2d;
+				s.theta = theta;
+			}else if(s.projection.id=="gnomic"){
+				f = 0.0015*(s.fov*s.d2r);
+				dr = 0;
+				if(typeof s.x=="number")
+					dr = Math.min(Math.abs(s.x-x)*f/(Math.cos(s.dc_off)),Math.PI/36);
+				if(typeof s.y=="number")
+					s.dc_off -= (s.y-y)*f;
+				s.ra_off -= (s.x-x > 0 ? 1 : -1)*dr;
+				s.dc_off = inrangeEl(s.dc_off);
+			}else{
+				if(typeof s.x=="number")
+					s.az_off += (s.x-x)/4;
+			}
+			s.az_off = s.az_off%360;
+			s.x = x;
+			s.y = y;
+			s.draw();
 		}).on('touchdown',{sky:this},function(e){
 			e.data.sky.debug('touchdowndown')
 			e.data.sky.dragging = true;
