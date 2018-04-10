@@ -1119,7 +1119,6 @@ VirtualSky.prototype.debug = function(msg){
 
 VirtualSky.prototype.createSky = function(){
 	this.container = S('#'+this.id);
-	//this.container.addTouch();
 	this.times = this.astronomicalTimes();
 
 	if(this.q.debug) S('body').append('<div style="position: absolute;bottom:0px;right:0px;padding: 0.25em 0.5em;background-color:white;color:black;max-width: 50%;" id="debug"></div>');
@@ -1298,7 +1297,7 @@ VirtualSky.prototype.createSky = function(){
 			var s = e.data.sky;
 			var x = e.originalEvent.touches[0].pageX;
 			var y = e.originalEvent.touches[0].pageX;
-			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y+'<br />');
+			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y+'');
 			var theta,f,dr;
 			if(s.dragging){
 				if(s.polartype){
@@ -1327,18 +1326,12 @@ VirtualSky.prototype.createSky = function(){
 		}).on('touchstart',{sky:this},function(e){
 			e.data.sky.debug('touchstart')
 			e.data.sky.dragging = true;
-		}).on('touchdown',{sky:this},function(e){
-			e.data.sky.debug('touchdown')
 		}).on('touchend',{sky:this},function(e){
 			e.data.sky.debug('touchend')
 			e.data.sky.dragging = false;
 			e.data.sky.x = "";
 			e.data.sky.y = "";
 			e.data.sky.theta = "";
-		}).on('touchenter',{sky:this},function(e){
-			e.data.sky.debug('touchenter')
-		}).on('touchleave',{sky:this},function(e){
-			e.data.sky.debug('touchleave')
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
 			e.data.sky.debug('mousewheel')
@@ -1941,8 +1934,6 @@ VirtualSky.prototype.draw = function(proj){
 	// Don't bother drawing anything if there is no physical area to draw on
 	if(this.wide <= 0 || this.tall <= 0) return this;
 	if(!(this.c && this.c.getContext)) return this;
-	if(this.drawing) return this;
-	this.drawing = true;
 
 	if(proj !== undefined) this.selectProjection(proj);
 	var white = this.col.white;
@@ -2174,7 +2165,6 @@ VirtualSky.prototype.draw = function(proj){
 		'background-color':'transparent',
 		color:'transparent'
 	});
-	this.drawing = false;
 	return this;
 } 
 
