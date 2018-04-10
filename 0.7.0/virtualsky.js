@@ -1336,7 +1336,9 @@ VirtualSky.prototype.createSky = function(){
 				s.draw();
 			}
 		}).on('touchdown',{sky:this},function(e){
-			e.data.sky.debug('touchdowndown')
+			e.data.sky.debug('touchdown')
+		}).on('touchup',{sky:this},function(e){
+			e.data.sky.debug('touchup')
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
 			e.data.sky.debug('mousewheel')
