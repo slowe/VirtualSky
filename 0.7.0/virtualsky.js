@@ -1309,7 +1309,7 @@ VirtualSky.prototype.createSky = function(){
 				s.y = "";
 				s.theta = "";
 			}
-			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y'<br />');
+			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y+'<br />');
 			var theta,f,dr;
 			if(s.dragging){
 				if(s.polartype){
