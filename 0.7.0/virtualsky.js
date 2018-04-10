@@ -1309,7 +1309,7 @@ VirtualSky.prototype.createSky = function(){
 				s.y = "";
 				s.theta = "";
 			}
-			//e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y);
+			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y'<br />');
 			var theta,f,dr;
 			if(s.dragging){
 				if(s.polartype){
@@ -1335,10 +1335,17 @@ VirtualSky.prototype.createSky = function(){
 				s.y = y;
 				s.draw();
 			}
+		}).on('touchstart',{sky:this},function(e){
+			e.data.sky.debug('touchstart')
+			e.data.sky.dragging = true;
 		}).on('touchdown',{sky:this},function(e){
 			e.data.sky.debug('touchdown')
 		}).on('touchend',{sky:this},function(e){
 			e.data.sky.debug('touchend')
+			e.data.sky.dragging = false;
+			e.data.sky.x = "";
+			e.data.sky.y = "";
+			e.data.sky.theta = "";
 		}).on('touchenter',{sky:this},function(e){
 			e.data.sky.debug('touchenter')
 		}).on('touchleave',{sky:this},function(e){
