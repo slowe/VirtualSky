@@ -1114,7 +1114,7 @@ VirtualSky.prototype.loadJSON = function(file,callback,complete,error){
 VirtualSky.prototype.debug = function(msg){
 	if(S('#debug').length==1){
 		var id = 'debug-'+(new Date()).valueOf();
-		S('#debug').append('<span id="'+id+'">'+msg+'</span>');
+		S('#debug').append('<span id="'+id+'">'+msg+'</span> ');
 		setTimeout(function(){ S('#'+id).remove(); },1000)
 	}
 	return this;
@@ -1125,7 +1125,7 @@ VirtualSky.prototype.createSky = function(){
 	//this.container.addTouch();
 	this.times = this.astronomicalTimes();
 
-	if(this.q.debug) S('body').append('<div style="position: absolute;bottom:0px;right:0px;padding: 0.25em 0.5em;background-color:white;color:black;" id="debug"></div>');
+	if(this.q.debug) S('body').append('<div style="position: absolute;bottom:0px;right:0px;padding: 0.25em 0.5em;background-color:white;color:black;max-width: 50%;" id="debug"></div>');
 	if(this.fntfam) this.container.css({'font-family':this.fntfam});
 	if(this.fntsze) this.container.css({'font-size':this.fntsze});
 
