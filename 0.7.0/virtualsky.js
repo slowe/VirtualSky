@@ -937,6 +937,36 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
 	}
 
+	function touchHandler(event){
+		var touches = event.changedTouches,
+			first = touches[0],
+			type = "";
+		switch(event.type){
+			case "touchstart": type = "mousedown"; break;
+			case "touchmove":  type = "mousemove"; break;        
+			case "touchend":   type = "mouseup";   break;
+			default:           return;
+		}
+
+		// initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+		//                screenX, screenY, clientX, clientY, ctrlKey, 
+		//                altKey, shiftKey, metaKey, button, relatedTarget);
+
+		var simulatedEvent = document.createEvent("MouseEvent");
+		simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+									  first.screenX, first.screenY, 
+									  first.clientX, first.clientY, false, 
+									  false, false, false, 0/*left*/, null);
+
+		first.target.dispatchEvent(simulatedEvent);
+		event.preventDefault();
+	}
+
+	document.addEventListener("touchstart", touchHandler, true);
+	document.addEventListener("touchmove", touchHandler, true);
+	document.addEventListener("touchend", touchHandler, true);
+	document.addEventListener("touchcancel", touchHandler, true);    
+
 	return this;
 }
 
@@ -1214,7 +1244,7 @@ VirtualSky.prototype.createSky = function(){
 		ctx.fillText(loading,(ctx.wide-ctx.measureText(loading).width)/2,(this.tall-fs)/2)
 		ctx.fill();
 
-		S("#"+this.idinner).on('click touch',{sky:this},function(e){
+		S("#"+this.idinner).on('click',{sky:this},function(e){
 			var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
 			var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
 			matched = e.data.sky.whichPointer(x,y);
@@ -1222,7 +1252,7 @@ VirtualSky.prototype.createSky = function(){
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
 		}).on('dblclick',{sky:this},function(e){
 			e.data.sky.toggleFullScreen();
-		}).on('mousemove touchmove',{sky:this},function(e){
+		}).on('mousemove',{sky:this},function(e){
 			e.preventDefault();
 			var s = e.data.sky;
 			var x = e.originalEvent.layerX;
@@ -1258,9 +1288,9 @@ VirtualSky.prototype.createSky = function(){
 				matched = s.whichPointer(x,y);
 				s.toggleInfoBox(matched);
 			}
-		}).on('mousedown touchstart',{sky:this},function(e){
+		}).on('mousedown',{sky:this},function(e){
 			e.data.sky.dragging = true;
-		}).on('mouseup touchend',{sky:this},function(e){
+		}).on('mouseup',{sky:this},function(e){
 			var s = e.data.sky;
 			s.dragging = false;
 			s.x = "";
@@ -1372,7 +1402,7 @@ VirtualSky.prototype.toggleHelp = function(){
 		for(var i = 0; i < this.keys.length ; i++){
 			if(this.keys[i].txt)
 				S('.'+v+'_'+this.keys[i].txt)
-					.on('click touch',{fn:this.keys[i].fn,me:this},function(e){
+					.on('click',{fn:this.keys[i].fn,me:this},function(e){
 						e.preventDefault(); e.data.fn.call(e.data.me);
 					});
 		}
@@ -1983,7 +2013,7 @@ VirtualSky.prototype.draw = function(proj){
 			}).find('a').css({
 				'text-decoration':'none',
 				color:txtcolour
-			}).on('click touch',{me:this},function(e){ e.data.me.toggleHelp(); });
+			}).on('click',{me:this},function(e){ e.data.me.toggleHelp(); });
 		d.find('.'+this.id+'_help').find('a').css({color:txtcolour});
 	}
 	// Make help button
