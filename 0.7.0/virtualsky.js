@@ -1941,6 +1941,8 @@ VirtualSky.prototype.draw = function(proj){
 	// Don't bother drawing anything if there is no physical area to draw on
 	if(this.wide <= 0 || this.tall <= 0) return this;
 	if(!(this.c && this.c.getContext)) return this;
+	if(this.drawing) return this;
+	this.drawing = true;
 
 	if(proj !== undefined) this.selectProjection(proj);
 	var white = this.col.white;
@@ -2172,7 +2174,7 @@ VirtualSky.prototype.draw = function(proj){
 		'background-color':'transparent',
 		color:'transparent'
 	});
-
+	this.drawing = false;
 	return this;
 } 
 
