@@ -1301,14 +1301,6 @@ VirtualSky.prototype.createSky = function(){
 			var s = e.data.sky;
 			var x = e.originalEvent.touches[0].pageX;
 			var y = e.originalEvent.touches[0].pageX;
-			if(Math.abs(x-s.x) < 10 && Math.abs(y-s.y) < 10){
-				s.dragging = true;
-			}else{
-				s.dragging = false;
-				s.x = "";
-				s.y = "";
-				s.theta = "";
-			}
 			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y+'<br />');
 			var theta,f,dr;
 			if(s.dragging){
