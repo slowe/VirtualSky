@@ -1276,8 +1276,8 @@ VirtualSky.prototype.createSky = function(){
 		}).on('touchmove',{sky:this},function(e){
 			e.preventDefault();
 			var s = e.data.sky;
-			var x = e.originalEvent.layerX || e.originalEvent.offsetX;
-			var y = e.originalEvent.layerY || e.originalEvent.offsetY;
+			var x = e.originalEvent.touches[0].pageX;
+			var y = e.originalEvent.touches[0].pageX;
 			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y);
 			var theta,f,dr;
 			if(s.polartype){
