@@ -2088,23 +2088,18 @@ VirtualSky.prototype.draw = function(proj){
 				if(s.wide < w) w = s.wide;
 				s.container.append(
 					'<div id="'+id+'_calendar" class="'+v+'form">'+
-						'<div style="" id="'+id+'_calendar_close" class="'+v+'_dismiss" title="'+e.data.sky.getPhrase('close')+'">&times;</div>'+
-						'<div style="text-align:center;margin:2px;">'+e.data.sky.getPhrase('date')+'</div>'+
+						'<div style="" id="'+id+'_calendar_close" class="'+v+'_dismiss" title="'+s.getPhrase('close')+'">&times;</div>'+
+						'<div style="text-align:center;margin:2px;">'+s.getPhrase('date')+'</div>'+
 						'<div style="text-align:center;">'+
-							'<input type="text" id="'+id+'_year" style="width:3.2em;" value="" />'+
-							'<div class="divider">/</div>'+
-							'<input type="text" id="'+id+'_month" style="width:1.6em;" value="" />'+
-							'<div class="divider">/</div>'+
-							'<input type="text" id="'+id+'_day" style="width:1.6em;" value="" />'+
-							'<div class="divider">&nbsp;</div>'+
-							'<input type="text" id="'+id+'_hours" style="width:1.6em;" value="" />'+
-							'<div class="divider">:</div>'+
-							'<input type="text" id="'+id+'_mins" style="width:1.6em;" value="" />'+
+							'<input type="date" id="'+id+'_date" value="'+(s.clock.getFullYear()+'-'+((s.clock.getMonth() < 9 ? "0":"")+(s.clock.getMonth()+1))+'-'+(s.clock.getDate() < 10 ? "0":"")+s.clock.getDate())+'" />' + 
+							'<input type="time" id="'+id+'_time" value="'+s.clock.getHours()+':'+s.clock.getMinutes()+'" />' + 
 						'</div>'+
 					'</div>');
 				S(hid+'_calendar').css({width:w});
 				S(hid+'_calendar input').on('change',{sky:s},function(e){
-					e.data.sky.updateClock(new Date(parseInt(S('#'+id+'_year').val()), parseInt(S('#'+id+'_month').val()-1 || "0"), parseInt(S('#'+id+'_day').val() || "0"), parseInt(S('#'+id+'_hours').val() || "0"), parseInt(S('#'+id+'_mins').val() || "0"), 0,0));
+					d = S('#'+id+'_date').val();
+					t = S('#'+id+'_time').val();
+					e.data.sky.updateClock(new Date(parseInt(d.substr(0,4)), parseInt(d.substr(5,2))-1, parseInt(d.substr(8,2)), parseInt(t.substr(0,2)), parseInt(t.substr(3,2)), 0,0));
 					e.data.sky.calendarUpdate();
 					e.data.sky.draw();
 				});
