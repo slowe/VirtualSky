@@ -1,5 +1,5 @@
 /*!
- * stuQuery v1.0.11
+ * stuQuery v1.0.14
  */
 // I don't like to pollute the global namespace 
 // but I can't get this to work any other way.
@@ -401,30 +401,48 @@ stuQuery.prototype.ajax = function(url,attrs){
 	if(typeof url!=="string") return false;
 	if(!attrs) attrs = {};
 	var cb = "",qs = "";
+	var oReq;
+	// If part of the URL is query string we split that first
+	if(url.indexOf("?") > 0){
+		urlbits = url.split("?");
+		if(urlbits.length){
+			url = urlbits[0];
+			qs = urlbits[1];
+		}
+	}
 	if(attrs['dataType']=="jsonp"){
-		if(url.indexOf('callback=') > 0) cb = url.match(/callback=[^\&]*/)[0].substr(9);
-		else cb = 'fn_'+(new Date()).getTime();
-		window[cb] = function(evt){ complete(evt); };
+		cb = 'fn_'+(new Date()).getTime();
+		window[cb] = function(rsp){
+			if(typeof attrs.success==="function") attrs.success.call((attrs['this'] ? attrs['this'] : this), rsp, attrs);
+		};
 	}
 	if(typeof attrs.cache==="boolean" && !attrs.cache) qs += (qs ? '&':'')+(new Date()).valueOf();
-	if(cb && url.indexOf('callback=') < 0) qs += (qs ? '&':'')+'callback='+cb;
+	if(cb) qs += (qs ? '&':'')+'callback='+cb;
 	if(attrs.data) qs += (qs ? '&':'')+attrs.data;
 
 	// Build the URL to query
-	attrs['url'] = url+(qs ? (url.indexOf('?') > 0 ? '&':'?')+qs:'');
-	
+	attrs['url'] = url+(qs ? '?'+qs:'');
+
+	if(attrs['dataType']=="jsonp"){
+		var script = document.createElement('script');
+		script.src = attrs['url'];
+		document.body.appendChild(script);
+		return this;
+	}
+
 	// code for IE7+/Firefox/Chrome/Opera/Safari or for IE6/IE5
-	var oReq = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+	oReq = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
 	oReq.addEventListener("load", window[cb] || complete);
 	oReq.addEventListener("error", error);
+	oReq.addEventListener("progress", progress);
+	if(attrs.beforeSend) oReq = attrs.beforeSend.call((attrs['this'] ? attrs['this'] : this), oReq, attrs);
 
 	function complete(evt) {
 		if(oReq.status === 200) {
 			attrs.header = oReq.getAllResponseHeaders();
-			var rsp = oReq.responseText;
+			var rsp = oReq.response || oReq.responseText;
 			// Parse out content in the appropriate callback
-			if(attrs['dataType']=="jsonp") rsp = rsp.replace(/[\n\r]/g,"\\n").replace(/^([^\(]+)\((.*)\)([^\)]*)$/,function(e,a,b,c){ return (a==cb) ? b:''; }).replace(/\\n/g,"\n");
-			if(attrs['dataType']=="json" || attrs['dataType']=="jsonp") rsp = JSON.parse(rsp);
+			if(attrs['dataType']=="json") try { rsp = JSON.parse(rsp.replace(/[\n\r]/g,"\\n").replace(/^([^\(]+)\((.*)\)([^\)]*)$/,function(e,a,b,c){ return (a==cb) ? b:''; }).replace(/\\n/g,"\n")) } catch(e){};
 			if(attrs['dataType']=="script"){
 				var fileref=document.createElement('script');
 				fileref.setAttribute("type","text/javascript");
@@ -443,6 +461,12 @@ stuQuery.prototype.ajax = function(url,attrs){
 	function error(evt){
 		if(typeof attrs.error==="function") attrs.error.call((attrs['this'] ? attrs['this'] : this),evt,attrs);
 	}
+	
+	function progress(evt){
+		if(typeof attrs.progress==="function") attrs.progress.call((attrs['this'] ? attrs['this'] : this),evt,attrs);
+	}
+
+	if(attrs['dataType']) oReq.responseType = attrs['dataType'];
 
 	try{ oReq.open('GET', attrs['url']); }
 	catch(err){ error(err); }
@@ -463,3 +487,4 @@ stuQuery.prototype.loadJSON = function(url,fn,attrs){
 function S(e) {
 	return new stuQuery(e);
 }
+
