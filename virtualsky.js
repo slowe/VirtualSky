@@ -858,9 +858,10 @@ function VirtualSky(input){
 }
 
 VirtualSky.prototype.init = function(d){
+
+	console.log('init input : ' + JSON.stringify(d));
 	if(!d) return this;
 	var q = location.search;
-	
 	if(q && q != '#'){
 		var bits = q.replace(/^\?|\&$/g,'').split('&'); // remove the leading ? and trailing &
 		var key,val;
@@ -909,19 +910,24 @@ VirtualSky.prototype.init = function(d){
 		background: s,
 		color: s,
 		fov: n,
-		objects: s,
+		objects: o,
 		base: s,
 		fullscreen: b,
 		credit: b,
 		transparent: b,
 		plugins: o,
-		lang: s
+		lang: s,
+    onClickObject: f,
+	};
+
+	for(key in pairs) {
+		if (is(d[key], pairs[key])) {
+      this[key] = d[key];
+      console.log(key + ' : ' + d[key]);
+		}
 	}
-	for(key in pairs)
-		if(is(d[key], pairs[key]))
-			this[key] = d[key];
-	
-	// Undirectly paired values
+
+  // Undirectly paired values
 	if(is(d.projection,s)) this.selectProjection(d.projection);
 	if(is(d.constellations,b)) this.constellation.lines = d.constellations;
 	if(is(d.constellationboundaries,b)) this.constellation.boundaries = d.constellationboundaries;
@@ -1161,43 +1167,19 @@ VirtualSky.prototype.createSky = function(){
 	// Get the faint star data
 	this.changeMagnitude(0);
 
-	// Add named objects to the display
-	if(this.objects){
-		// To stop lookUp being hammered, we'll only lookup a maximum of 5 objects
-		// If you need more objects (e.g. for the Messier catalogue) build a JSON
-		// file containing all the results one time only.
-		var ob = this.objects.split(';');
-
-		// Build the array of JSON requests
-		for(var o = 0; o < ob.length ; o++) ob[o] = ((ob[o].search(/\.json$/) >= 0) ? {'url':ob[o], 'src':'file', 'type':'json' } : {'url': 'http://www.strudel.org.uk/lookUP/json/?name='+ob[o],'src':'lookup','type':'jsonp'});
-
-		// Loop over the requests
-		var lookups = 0;
-		var ok = true;
-		for(var o = 0; o < ob.length ; o++){
-			if(ob[o].src == "lookup") lookups++;
-			if(lookups > 5) ok = false;
-			if(ok || ob[o].src != "lookup"){
-				$.ajax({ dataType: ob[o].type, url: ob[o].url, context: this, success: function(data){
-					// If we don't have a length property, we only have one result so make it an array
-					if(typeof data.length === "undefined") data = [data];
-					// Loop over the array of objects
-					for(var i = 0; i < data.length ; i++){
-						// The object needs an RA and Declination
-						if(data[i] && data[i].dec && data[i].ra){
-							this.addPointer({
-								ra: data[i].ra.decimal,
-								dec: data[i].dec.decimal,
-								label: data[i].target.name,
-								colour: this.col.pointers
-							});
-						}
-						// Update the sky with all the points we've added
-						this.draw();
-					}
-				}});
-			}
-		}
+	if(this.objects.length > 0) {
+		this.objects.forEach(object => {
+      if(object && object.dec && object.ra){
+        this.addPointer({
+          ra: object.ra.decimal,
+          dec: object.dec.decimal,
+          label: object.target.name,
+          colour: this.col.pointers,
+        }, () => this.onClickObject(object));
+      }
+      // Update the sky with all the points we've added
+      this.draw();
+		});
 	}
 
 	// If the Javascript function has been passed a width/height
@@ -1962,7 +1944,7 @@ VirtualSky.prototype.draw = function(proj){
 		var credit = this.getPhrase('power');
 		var metric_credit = this.drawText(credit,5,this.tall-5);
 		// Float a transparent link on top of the credit text
-		if(d.find('.'+this.id+'_credit').length == 0) d.append('<div class="'+this.id+'_credit"><a href="http://virtualsky.lco.global/" target="_parent" title="Las Cumbres Observatory Global Telescope">'+this.getPhrase('powered')+'</a></div>');
+		if(d.find('.'+this.id+'_credit').length == 0) d.append('<div class="'+this.id+'_credit"><a href="http://metadium.com/" target="_blank" title="Metadium">'+this.getPhrase('powered')+'</a></div>');
 		d.find('.'+this.id+'_credit').css({padding:0,zIndex:20,display:'block',overflow:'hidden',backgroundColor:'transparent'});
 		d.find('.'+this.id+'_credit a').css({display:'block',width:Math.ceil(metric_credit)+'px',height:fontsize+'px','font-size':fontsize+'px'});
 		this.positionCredit();
@@ -2719,9 +2701,9 @@ VirtualSky.prototype.highlight = function(i,colour){
 			c.beginPath();
 			// Draw a square to distinguish from other objects
 			// c.arc(p.x,p.y,p.d/2,0,2*Math.PI);
-			c.fillRect(p.x-p.d/2,p.y-p.d/2,p.d,p.d);
+			c.fillRect(p.x-p.d/2,p.y-p.d/2,p.d*0.8,p.d*0.8);
 			c.fill();
-			this.drawLabel(p.x,p.y,p.d,colour,p.label);
+			this.drawLabel(p.x,p.y,p.d,colour);
 		}
 	}
 	return this;
@@ -2939,9 +2921,8 @@ VirtualSky.prototype.toggleAzimuthMove = function(az){
 	}
 	return this;
 }
-VirtualSky.prototype.addPointer = function(input){
+VirtualSky.prototype.addPointer = function(input, cb){
 	// Check if we've already added this
-	var style,url,img,label,credit;
 	var matched = -1;
 	var p;
 	for(var i = 0 ; i < this.pointers.length ; i++){
@@ -2954,21 +2935,17 @@ VirtualSky.prototype.addPointer = function(input){
 		i = this.pointers.length;
 		p = input;
 		p.d = is(p.d, "number")?p.d:5;
-		if(typeof p.html !== "string"){
-			style = p.style || "width:128px;height:128px;";
-			url = p.url || "http://server1.wikisky.org/v2?ra="+(p.ra/15)+"&de="+(p.dec)+"&zoom=6&img_source=DSS2";
-			img = p.img || 'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra='+(p.ra/15)+'&de='+p.dec+'&angle=0.25&output=PNG';
-			label = p.credit || "View in Wikisky";
-			credit = p.credit || "DSS2/Wikisky";
+		if(typeof p.html !== "string") {
 			p.html =  p.html ||
-				'<div class="virtualsky_infocredit">'+
-					'<a href="'+url+'" style="color: white;">'+credit+'</a>'+
-				'</div>'+
-				'<a href="'+url+'" style="display:block;'+style+'">'+
-					'<img src="'+img+'" style="border:0px;'+style+'" title="'+label+'" />'+
-				'</a>';
+				'<div class="container">'+
+					'<a onClick="window.cbInfoList[' + i + ']();" style="color: black; cursor: pointer;">Buy this star(#' + input.label + ')</a>'+
+				'</div>';
 		}
 		this.pointers[i] = p;
+		if (window.cbInfoList == null) {
+      window.cbInfoList = [];
+		}
+    window.cbInfoList[i] = cb;
 	}
 	return (this.pointers.length);
 }
@@ -3078,12 +3055,16 @@ function convertTZ(s){
 }
 
 $.virtualsky = function(placeholder,input) {
+	console.log('$.virtualsky : ' + JSON.stringify(placeholder));
+	console.log('typeof placeholder : ' + typeof placeholder);
 	if(typeof input==="object") input.container = placeholder;
 	else {
 		if(typeof placeholder==="string") input = { container: placeholder };
 		else input = placeholder;
 	}
+	console.log('input a : ' + JSON.stringify(input));
 	input.plugins = $.virtualsky.plugins;
+  console.log('input b : ' + JSON.stringify(input));
 	return new VirtualSky(input);
 };
 
