@@ -2541,6 +2541,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
 	this.ctx.lineWidth = (this.constellation.boundaryWidth || 0.75);
+	this.ctx.lineCap = "round";
 	if(typeof this.boundaries!=="object") return this;
 	var posa, posb, a, b, l, c, d, atob,btoa, move, i, j, ra,dc,dra,ddc,b3;
 	// Keys defining a line in both directions
