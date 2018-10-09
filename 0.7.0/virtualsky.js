@@ -40,6 +40,8 @@
 		constellations (false) - show/hide the constellation lines
 		constellationlabels (false) - show/hide the constellation labels
 		constellationboundaries (false) - show/hide the constellation boundaries (IAU)
+		constellationwidth (0.75) - pixel width of the constellation lines
+		constellationboundarieswidth (0.75) - pixel width of the constellation boundary lines
 		showstars (true) - show/hide the stars
 		showstarlabels (false) - show/hide the star labels for brightest stars
 		showplanets (true) - show/hide the planets
@@ -55,6 +57,8 @@
 		gridlines_eq (false) - show/hide the RA/Dec grid lines
 		gridlines_gal (false) - show/hide the Galactic Coordinate grid lines
 		gridstep (30) - the size of the grid step when showing grid lines
+		gridlineswidth (0.75) - pixel width of the grid lines
+		galaxywidth (0.75) - pixel width of the galaxy outline
 		live (false) - update the display in real time
 		fontsize - set the font size in pixels if you want to over-ride the auto sizing
 		fontfamily - set the font family using a CSS style font-family string otherwise it inherits from the container element
@@ -279,6 +283,7 @@ function VirtualSky(input){
 	this.scalestars = 1;				// A scale factor by which to increase the star sizes
 	this.ground = false;
 	this.grid = { az: false, eq: false, gal: false, step: 30 };	// Display grids
+	this.gal = { 'processed':false, 'lineWidth':0.75 };
 	this.ecliptic = false;				// Display the Ecliptic
 	this.meridian = false;				// Display the Meridian
 	this.keyboard = true;				// Allow keyboard controls
@@ -907,10 +912,14 @@ VirtualSky.prototype.init = function(d){
 	if(is(d.constellations,b)) this.constellation.lines = d.constellations;
 	if(is(d.constellationboundaries,b)) this.constellation.boundaries = d.constellationboundaries;
 	if(is(d.constellationlabels,b)) this.constellation.labels = d.constellationlabels;
+	if(is(d.constellationwidth,n)) this.constellation.lineWidth = d.constellationwidth;
+	if(is(d.constellationboundarieswidth,n)) this.constellation.boundaryWidth = d.constellationboundarieswidth;
 	if(is(d.gridlines_az,b)) this.grid.az = d.gridlines_az;
 	if(is(d.gridlines_eq,b)) this.grid.eq = d.gridlines_eq;
 	if(is(d.gridlines_gal,b)) this.grid.gal = d.gridlines_gal;
 	if(is(d.gridstep,n)) this.grid.step = d.gridstep;
+	if(is(d.gridlineswidth,n)) this.grid.lineWidth = d.gridlineswidth;
+	if(is(d.galaxywidth,n)) this.gal.lineWidth = d.galaxywidth;
 	if(is(d.longitude,n)) this.setLongitude(d.longitude);
 	if(is(d.latitude,n)) this.setLatitude(d.latitude);
 	if(is(d.clock,s)) this.updateClock(new Date(d.clock.replace(/%20/g,' ')));
@@ -1840,10 +1849,10 @@ VirtualSky.prototype.radec2xy = function(ra,dec){
 	else{
 		var coords = this.coord2horizon(ra, dec);
 		// Only return coordinates above the horizon
-		if(coords[0] > 0){
+		//if(coords[0] > 0){
 			var pos = this.azel2xy(coords[1]-(this.az_off*this.d2r),coords[0],this.wide,this.tall);
 			return {x:pos.x,y:pos.y,az:coords[1]*this.r2d,el:coords[0]*this.r2d};
-		}
+		//}
 	}
 	return 0;
 }
@@ -1983,7 +1992,8 @@ VirtualSky.prototype.draw = function(proj){
 		}
 	}
 	
-	this.drawGridlines("az")
+	this.startClip()
+		.drawGridlines("az")
 		.drawGridlines("eq")
 		.drawGridlines("gal")
 		.drawGalaxy()
@@ -1994,6 +2004,7 @@ VirtualSky.prototype.draw = function(proj){
 		.drawMeridian()
 		.drawPlanets()
 		.drawMeteorShowers()
+		.endClip()
 		.drawCardinalPoints();
 
 	for(var i = 0; i < this.pointers.length ; i++) this.highlight(i);
@@ -2168,7 +2179,19 @@ VirtualSky.prototype.draw = function(proj){
 	});
 	return this;
 } 
-
+VirtualSky.prototype.startClip = function(){
+	if(this.polartype){
+		this.ctx.save();
+		this.ctx.beginPath();
+		this.ctx.arc(this.wide/2,this.tall/2,-0.5+this.tall/2,0,Math.PI*2,true);
+		this.ctx.clip();
+	}
+	return this;
+}
+VirtualSky.prototype.endClip = function(){
+	if(this.polartype) this.ctx.restore();
+	return this;
+}
 VirtualSky.prototype.createLightbox = function(lb,opts){
 	if(!lb.length) return this;
 	if(!opts) opts = {};
@@ -2441,7 +2464,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 	x.beginPath();
 	x.strokeStyle = colour;
 	x.fillStyle = colour;
-	x.lineWidth = 0.75
+	x.lineWidth = (this.constellation.lineWidth || 0.75)
 	var fontsize = this.fontsize();
 	this.setFont();
 	if(typeof this.lines!=="object") return this;
@@ -2517,7 +2540,7 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
-	this.ctx.lineWidth = 0.75;
+	this.ctx.lineWidth = (this.constellation.boundaryWidth || 0.75);
 	if(typeof this.boundaries!=="object") return this;
 	var posa, posb, a, b, l, c, d, atob,btoa, move, i, j, ra,dc,dra,ddc,b3;
 	// Keys defining a line in both directions
@@ -2605,14 +2628,17 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 	this.ctx.beginPath();
 	this.ctx.strokeStyle = colour;
 	this.ctx.fillStyle = colour;
-	this.ctx.lineWidth = 1;
-	var p, pa, pb, i, c, old, maxl;
+	this.ctx.lineWidth = (this.gal.lineWidth || 0.75);
+	this.ctx.lineJoin = "round";
+	var p, pa, pb, i, c, old, maxl, dx, dy;
 	maxl = this.maxLine(5);
 
 	for(c = 0; c < this.galaxy.length; c++){
 
 		// We will convert all the galaxy outline coordinates to radians
-		if(!this.galaxyprocessed) for(i = 1; i < this.galaxy[c].length; i++) this.galaxy[c][i] *= this.d2r;
+		if(!this.gal.processed){
+			for(i = 1; i < this.galaxy[c].length; i++) this.galaxy[c][i] *= this.d2r;
+		}
 
 		// Get a copy of the current shape
 		p = this.galaxy[c].slice(0);
@@ -2625,18 +2651,23 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 		// Now loop over joining the points
 		for(i = 0; i < p.length; i+=2){
 			pb = this.radec2xy(p[i], p[i+1]);
-			if(pa){
-				// Basic error checking: if the line is very long we need to normalize to other side of sky
-				if(Math.abs(pa.x-pb.x) < maxl && Math.abs(pa.y-pb.y) < maxl){
-					this.ctx.moveTo(pa.x,pa.y);
+			if(i==0) this.ctx.moveTo(pb.x,pb.y);
+			else{
+				dx = Math.abs(pa.x-pb.x);
+				dy = Math.abs(pa.y-pb.y);
+				if(!isNaN(dx) && !isNaN(dy)){
+					// Basic error checking: if the line is very long we need to normalize to other side of sky
+					if(dx >= maxl || dy >= maxl) this.ctx.moveTo(pb.x,pb.y); 
 					this.ctx.lineTo(pb.x,pb.y);
+				}else{
+					this.ctx.moveTo(pb.x,pb.y);
 				}
 			}
 			pa = pb;
 		}
 	}
 	// We've converted the galaxy to radians
-	this.galaxyprocessed = true;
+	this.gal.processed = true;
 	this.ctx.stroke();
 	return this;
 }
@@ -2648,7 +2679,7 @@ VirtualSky.prototype.drawMeteorShowers = function(colour){
 	c.beginPath();
 	c.strokeStyle = colour;
 	c.fillStyle = colour;
-	c.lineWidth = 0.75;
+	c.lineWidth = (this.grid.lineWidth || 0.75);
 	var fs = this.fontsize();
 	this.setFont();
 	var y = this.clock.getFullYear();
@@ -2726,7 +2757,7 @@ VirtualSky.prototype.drawGridlines = function(type,step,colour){
 	oldy = 0;
 	c.beginPath(); 
 	c.strokeStyle = colour;
-	c.lineWidth = 1.0;
+	c.lineWidth = (this.grid.lineWidth || 1);
 	bstep = 2;
 	if(type=="az"){
 		maxb = (typeof this.projection.maxb==="number") ? this.projection.maxb : 90-bstep;
