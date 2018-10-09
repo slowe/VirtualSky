@@ -77,4 +77,4 @@ The following options can be specified (defaults in brackets):
 
 Author
 ------
-Stuart Lowe developed this at [Las Cumbres Observatory Global Telescope](http://lcogt.net/). LCOGT is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
+Stuart Lowe developed this at [Las Cumbres Observatory](https://lco.global/). LCO is a private operating foundation, building a global network of telescopes for professional research and citizen investigations.
