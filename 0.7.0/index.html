@@ -79,7 +79,9 @@
 		// Set up the prettification of code blocks
 		prettyPrint();
 
+
 		var vs = S.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
+
 		var planetariumbg = S.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
 		var planetarium = S.virtualsky({id:'starmap1'});
 		var planetarium2 = S.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[

@@ -68,6 +68,7 @@
 	}
 	li.example { margin-bottom: 4em; }
 	.planetarium { max-width: 100%; height: 0;}
+	h2 { margin-top: 3em; padding-top: 3em; border-top: 1px solid #999; }
 	</style>
 	<!--[if lt IE 9]><script src="excanvas.min.js"></script><![endif]-->
 	<script src="stuquery.js"></script>
@@ -80,6 +81,9 @@
 		prettyPrint();
 
 		var vs = S.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
+
+		S('h1').append(' <span style="font-size: 1em;">v'+vs.version+'</span>');
+
 		var planetariumbg = S.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
 		var planetarium = S.virtualsky({id:'starmap1'});
 		var planetarium2 = S.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
@@ -171,7 +175,9 @@
 
 		<div id="starmap" class="planetarium" style="width:100%;height:300px;"></div>
 
+		<h2>Contents</h2>
 		<ul>
+			<li><a href="#new">What's new?</a></li>
 			<li><a href="#keys">Keyboard shortcuts</a></li>
 			<li><a href="#instructions">Instructions for embedding</a>
 				<ul>
@@ -190,6 +196,22 @@
 			<li><a href="#options">Options</a>
 			<li><a href="#tech">Technical details</a>
 		</ul>
+
+		<h2 id="new">What's new?</h2>
+		<h3>Version 0.7.0 / 15 October 2018</h3>
+		<p>There has been a major overhaul to remove the need for jQuery (replaced with <a href="http://slowe.github.io/stuquery/">stuQuery</a>). This has reduced the initial page load from 337kB to 200kB so it should hopefully load more quickly and save bandwidth. Also:</p>
+		<ul>
+			<li>Can set the width of gridlines (<code>gridlineswidth=5</code>) <a href="https://github.com/slowe/VirtualSky/issues/46">#46</a></li>
+			<li>Can set the width of constellation lines (<code>constellationwidth=5</code>)</li>
+			<li>Can set the width of constellation boundaries (<code>constellationboundarieswidth=5</code>)</li>
+			<li>Can set the width of the galaxy (<code>galaxywidth=5</code>)</li>
+			<li>Help screen can be accessed with the mouse</li>
+			<li>The place-search API was deprecated by Yahoo so the place lookup now uses static files split by starting letter (to keep it quick)</li>
+			<li>Switched to date/time input fields to make date selection easier with controls native to the browser</li>
+			<li>Bug fix: manually set constellation boundaries work again. <a href="https://github.com/slowe/VirtualSky/issues/41">#41</a></li>
+		</ul>
+		<p>Please <a href="https://github.com/slowe/VirtualSky/issues">report any bugs on Github</a> giving your browser make/version. You can also suggest new features there (although they may not happen for ages).</p>
+		
 
 		<h2 id="keys">Keyboard shortcuts</h2>
 		<p>Press the "?" key (with your mouse over VirtualSky) to see the full list of keyboard controls.</p>
@@ -463,7 +485,9 @@ S(document).ready(function() {
 			<li><code>cardinalpoints</code> (true) - show/hide the N/E/S/W labels</li>
 			<li><code>constellations</code> (false) - show/hide the constellation lines</li>
 			<li><code>constellationlabels</code> (false) - show/hide the constellation labels</li>
+			<li><code>constellationwidth</code> (0.7) - set the width of the constellations in pixels</li>
 			<li><code>constellationboundaries</code> (false) - show/hide the constellation boundaries</li>
+			<li><code>constellationboundarieswidth</code> (0.7) - set the width of the constellation boundaries in pixels</li>
 			<li><code>meteorshowers</code> (false) - show/hide current meteor shower radiants</li>
 			<li><code>showplanets</code> (true) - show/hide the planets</li>
 			<li><code>showplanetlabels</code> (true) - show/hide the planet labels</li>
@@ -476,10 +500,12 @@ S(document).ready(function() {
 			<li><code>gridlines_az</code> (false) - show/hide the azimuth/elevation grid lines</li>
 			<li><code>gridlines_eq</code> (false) - show/hide the RA/Dec grid lines</li>
 			<li><code>gridlines_gal</code> (false) - show/hide the Galactic grid lines</li>
+			<li><code>gridlineswidth</code> (0.7) - set the width of the gridlines in pixels</li>
 			<li><code>gridstep</code> (30) - the size of the grid step when showing grid lines</li>
 			<li><code>ecliptic</code> (false) - show the line of the Ecliptic</li>
 			<li><code>meridian</code> (false) - show the line of the Meridian</li>
 			<li><code>showgalaxy</code> (false) - show an outline of the Milky Way</li>
+			<li><code>galaxywidth</code> (0.7) - set the width of the Milky Way outline in pixels</li>
 			<li><code>live</code> (false) - update the display in real time</li>
 			<li><code>fontsize</code> - if, from a design point of view, you need a very specific font size (currently only in pixels), this is how you override the automatic font scaling. e.g. "10px"</li>
 			<li><code>fontfamily</code> - VirtualSky inherits the font family when it is added to an element on a page but can't when using an iframe. To solve that situation, you can provide a CSS <code>font-family</code> string.</li>
