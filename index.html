@@ -70,28 +70,28 @@
 	.planetarium { max-width: 100%; height: 0;}
 	</style>
 	<!--[if lt IE 9]><script src="excanvas.min.js"></script><![endif]-->
-	<script src="jquery-1.10.0.min.js"></script>
+	<script src="stuquery.js"></script>
 	<script src="virtualsky.js" type="text/javascript"></script>
 	<script src="extra/prettify.js" type="text/javascript"></script>
 	<script>
-	$(document).ready(function() {
+	S(document).ready(function() {
 
 		// Set up the prettification of code blocks
 		prettyPrint();
 
-		var vs = $.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
-		var planetariumbg = $.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
-		var planetarium = $.virtualsky({id:'starmap1'});
-		var planetarium2 = $.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
-			["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
-			["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
-				],clock:new Date("July 17, 2013 18:39:00 GMT")
+		var vs = S.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
+		var planetariumbg = S.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
+		var planetarium = S.virtualsky({id:'starmap1'});
+		var planetarium2 = S.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
+				["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+				["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+			],clock:new Date("July 17, 2013 18:39:00 GMT")
 		});
-		var planetarium3 = $.virtualsky({id:'starmap3', projection:'stereo', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
-		var planetarium4 = $.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
-		var planetarium5 = $.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:135, latitude:38.25, longitude:-122.6, meridian: true, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
-		var planetarium6 = $.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
-		var planetarium7 = $.virtualsky({
+		var planetarium3 = S.virtualsky({id:'starmap3', projection:'stereo', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
+		var planetarium4 = S.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
+		var planetarium5 = S.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:135, latitude:38.25, longitude:-122.6, meridian: true, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
+		var planetarium6 = S.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
+		var planetarium7 = S.virtualsky({
 			id: 'starmap7',
 			projection: 'stereo',
 			clock:new Date("July 17, 2013 18:39:00 GMT")
@@ -107,7 +107,7 @@
 			colour:'rgb(255,220,220)'
 		});
 
-		var planetarium8 = $.virtualsky({
+		var planetarium8 = S.virtualsky({
 			id: 'starmap8',
 			projection: 'gnomic',
 			ra: 83.8220833,
@@ -117,7 +117,7 @@
 			fov: 15
 		});
 
-		var planetarium9 = $.virtualsky({
+		var planetarium9 = S.virtualsky({
 			id: 'starmap9',
 			projection: 'gnomic',
 			ra: 83.8220833,
@@ -127,26 +127,26 @@
 			fov: 15
 		});
 
-		$('button#pleiades').on('click',function(){
+		S('button#pleiades').on('click',function(){
 			planetarium9.panTo(56.8690917,24.1053111,3000)
 		});
-		$('button#M82').on('click',function(){
+		S('button#M82').on('click',function(){
 			planetarium9.panTo(148.9684583,69.6797028,3000)
 		});
-		$('button#M1').on('click',function(){
+		S('button#M1').on('click',function(){
 			planetarium9.panTo(83.6330833,22.0145000,3000)
 		});
-		$('button#M42').on('click',function(){
+		S('button#M42').on('click',function(){
 			planetarium9.panTo(83.8220833,-5.3911111,3000)
 		});
 
-		var planetarium10 = $.virtualsky({
+		var planetarium10 = S.virtualsky({
 			id: 'starmap10',
 			projection: 'stereo',
 			lang: 'ar'
 		});
 
-		var planetarium11 = $.virtualsky({
+		var planetarium11 = S.virtualsky({
 			id: 'starmap11',
 			projection: 'stereo',
 			constellations: true,
@@ -167,7 +167,7 @@
 		<a id="forkme_banner" href="https://github.com/slowe/VirtualSky">Fork Me on GitHub</a>
 		<h1>VirtualSky</h1>
 
-		<p>VirtualSky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="https://virtualsky.lco.global/embed/custom.html">customized and included on your own website</a> (via LCO), blog etc. It is provided freely for educational and non-profit use.</p>
+		<p>VirtualSky a browser-based planetarium from <a href="http://lcogt.net/">LCOGT</a> that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
 
 		<div id="starmap" class="planetarium" style="width:100%;height:300px;"></div>
 
@@ -200,12 +200,12 @@
 		
 		<pre class="prettyprint lang-html lang-js">
 &lt;!--[if lt IE 9]&gt;&lt;script src="excanvas.min.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
-&lt;script src="jquery-1.10.0.min.js"&gt;&lt;/script&gt;
+&lt;script src="stuquery.js"&gt;&lt;/script&gt;
 &lt;script src="virtualsky.min.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script&gt;
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap1'
 	});
 
@@ -224,9 +224,9 @@ $(document).ready(function() {
 		<ol>
 			<li class="example" id="ex1">A <code>stereo</code> projection set for Santa Barbara's lat/long:
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'stereo', 
 		latitude: 34.4326, 
@@ -241,9 +241,9 @@ $(document).ready(function() {
 			<li class="example" id="ex2">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
 		
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap', 
 		projection: 'lambert', 
 		mouse: true,
@@ -262,9 +262,9 @@ $(document).ready(function() {
 			</li>
 			<li class="example" id="ex3">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid and the Meridian line displayed. The view is facing south east from Hill Valley, California at 1:21 am on October 25, 1985.
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'stereo',
 		keyboard: false, 
@@ -284,9 +284,9 @@ $(document).ready(function() {
 			</li>
 			<li class="example" id="ex4">A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'mollweide',
 		showstarlabels: true,
@@ -300,9 +300,9 @@ $(document).ready(function() {
 			</li>
 			<li class="example" id="ex5">A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		az: 225,
 		projection: 'stereo',
@@ -323,9 +323,9 @@ $(document).ready(function() {
 			</li>
 			<li class="example" id="ex6">A default view using <code>stereo</code> projection with a place marker
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'stereo',
 	});
@@ -350,9 +350,9 @@ $(document).ready(function() {
 
 			<li class="example" id="ex7">A default view using <code>gnomic-tan</code> projection centred on M42
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		'id': 'starmap',
 		'projection': 'gnomic',
 		'ra': 83.8220833,
@@ -372,9 +372,9 @@ $(document).ready(function() {
 
 			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		'id': 'starmap',
 		'projection': 'gnomic',
 		'ra': 83.8220833,
@@ -384,7 +384,7 @@ $(document).ready(function() {
 		'fov': 15
 	});
 	
-	$('button#moveit').on('click',function(){
+	S('button#moveit').on('click',function(){
 		planetarium.panTo(56.8690917,24.1053111,3000)
 	});
 
@@ -403,9 +403,9 @@ $(document).ready(function() {
 
 			<li class="example" id="ex9">A default view using <code>stereo</code> projection in Arabic
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'stereo',
 		lang: 'ar'
@@ -420,9 +420,9 @@ $(document).ready(function() {
 
 			<li class="example" id="ex10">A default view using <code>stereo</code> projection showing <code>objects</code> (in this case the Messier catalogue) included from a <a href="messier.json">local JSON file</a>:
 				<pre class="prettyprint lang-js">
-$(document).ready(function() {
+S(document).ready(function() {
 
-	var planetarium = $.virtualsky({
+	var planetarium = S.virtualsky({
 		id: 'starmap',
 		projection: 'stereo',
 		objects: 'messier.json'

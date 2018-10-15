@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Virtual Sky</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+	<!--
+		Virtual Sky <canvas> application
+		(c) 2010-2012 Stuart Lowe (Las Cumbras Observatory Global Telescope)
+	-->
+	<style>
+	html,body { height: 100%; }
+	body {
+		font-family: Helvetica, sans-serif;
+		color: black;
+		margin: 0px;
+		padding: 0px;
+		height: 100%;
+		width: 100%;
+		font-size: 1em;
+	}
+	#starmapper { height: 100%; width:100%; position: relative; }
+	#virtualskyinfobox{
+		font-size: 12px;
+		display:none;
+		background-color:rgba(200,200,200,1);
+		color:black;
+		padding:5px;
+		max-width:150px;
+		border-radius:0.5em;
+		-moz-border-radius: 0.5em;
+		-webkit-border-radius: 0.5em;
+		box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-moz-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+		-webkit-box-shadow:0px 0px 20px rgba(255,255,255,0.5);
+	}
+	.virtualskyinfocredit{
+		font-size:0.5em;
+		float:left;
+		position:absolute;
+		padding:5px;
+		color: white;
+	}
+	#virtualskyinfobox img { width: 128px; height: 128px; }
+	</style>
+	<!-- IE seems to get very confused if it loads Javascript from within a Javascript when in an iframe. We'll have to load it here -->
+	<!--[if IE]><script src="excanvas.min.js"></script><![endif]-->
+	<script src="jquery-1.10.0.min.js"></script>
+	<script src="virtualsky.js" type="text/javascript"></script>
+	<script>
+		function geoIP(){
+			if($('#'+this.id+'_geoip').length == 0){
+				var eg = "e.g. Cardiff, UK";
+				$('#'+this.id+'_geo').append('<div style="text-align:center;margin-top:4px;"><form id="'+this.id+'_geoip"><input id="'+this.id+'_location" value="'+eg+'" style="width:12em;"> <input id="'+this.id+'_geoip_btn" type="submit" value="Search" /><br /><span id="'+this.id+'_geoip_message"><\/span><\/form><\/div>');
+				// Store current state of the keyboard variable
+				// When we're in the input field, we don't want to change the sky
+				$('#'+this.id+'_location').bind('focus',{sky:this},function(e){
+					e.data.sky.keyboard = false;
+					if($('#'+e.data.sky.id+'_location').val() == eg) $('#'+e.data.sky.id+'_location').val('');
+				}).bind('blur',{sky:this,key:this.keyboard},function(e){
+					e.data.sky.keyboard = e.data.key;
+					if(!$('#'+e.data.sky.id+'_location').val()){
+						$('#'+e.data.sky.id+'_location').val(eg);
+						$('#'+e.data.sky.id+'_geoip_message').html('');
+						e.data.sky.lightbox($('#'+e.data.sky.id+'_geo'));
+					}
+				});
+				$('#'+this.id+'_geoip').bind('submit',{sky:this},function(e){
+					e.preventDefault();
+					if($('#'+e.data.sky.id+'_location').val() == eg){
+						$('#'+e.data.sky.id+'_geoip_message').html('You need to enter a place to search for.');
+						return false;
+					}
+					var _object = e.data.sky;
+					$('#'+e.data.sky.id+'_geoip_message').html('Trying to identify location...')
+					loc = escape($('#'+e.data.sky.id+'_location').val());
+					$.ajax({
+						dataType: "json", 
+						url:'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.places%20where%20text%3D%22'+loc+'%22&format=json&diagnostics=true&callback=?',
+						context: _object,
+						success: function(data){
+							failed = false;
+							if(data.query.results && typeof data.query.results.place=="object"){
+								place = data.query.results.place;
+								if(place.length > 1){
+									var str = '<form><select><option value="-1">Select...<\/option>';
+									$('#'+_object.id+'_geoip_message').html();
+									for(i = 0; i < place.length ; i++){
+										str += '<option value="'+i+'">'+place[i].name+', '+place[i].admin1.content+', '+place[i].country.content+'<\/option>';
+									}
+									str += '<\/select><\/form>';
+									$('#'+_object.id+'_geoip_message').append(str);
+									$('#'+_object.id+'_geoip_message select').on('change',{sky:this,place:place},function(e){
+										var i = $(this).find(':selected').val();
+										if(i >= 0){
+											var sky = e.data.sky;
+											sky.latitude = parseFloat(e.data.place[i].centroid.latitude);
+											sky.longitude = parseFloat(e.data.place[i].centroid.longitude);
+											$('#'+sky.id+'_lat').val(sky.latitude);
+											$('#'+sky.id+'_long').val(sky.longitude);
+											sky.draw();
+											sky.setClock(0);
+										}
+									});
+
+									this.lightbox($('#'+this.id+'_geo'));
+								}else{
+									if(data.query.results.place.centroid){
+										lat = data.query.results.place.centroid.latitude;
+										lon = data.query.results.place.centroid.longitude;
+										place = data.query.results.place.placeTypeName.content+' in '+data.query.results.place.country.content
+										_object.latitude = parseFloat(lat);
+										_object.longitude = parseFloat(lon);
+										$('#'+_object.id+'_lat').val(this.latitude);
+										$('#'+_object.id+'_long').val(this.longitude);
+										$('#'+_object.id+'_geoip_message').html(place);
+										_object.draw();
+										_object.setClock(0);
+									}else{
+										failed = true;
+									}
+								}
+							}else failed = true;
+							if(failed){
+								$('#'+this.id+'_geoip_message').html('Failed to find the location');
+							}
+						}
+					});
+				});
+			}
+		}
+		window.onload = function(){
+			//planetarium = new VirtualSky({id:'starmapper',callback:{geo:geoIP}});
+			planetarium = $.virtualsky({id:'starmapper',callback:{geo:geoIP},fullscreen:true});
+			planetarium.draw();
+		};
+	</script>
+</head>
+
+<body>
+<div id="starmapper"></div>
+</body>
+</html>
