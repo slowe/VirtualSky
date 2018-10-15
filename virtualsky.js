@@ -1427,8 +1427,9 @@ VirtualSky.prototype.toggleHelp = function(){
 					'</li>'; }
 		this.container.append('<div class="'+v+'_help">'+
 			'<div class="'+v+'_dismiss" title="'+this.getPhrase('close')+'">&times;</div>'+
-			'<span>'+this.getPhrase('keyboard')+'</span>'+
+			'<div style="margin-bottom: 0.5em;">'+this.getPhrase('keyboard')+'</div>'+
 			'<div class="'+v+'_helpinner"><ul></ul></div>'+	
+			'<div style="font-size:0.8em;margin-top: 0.5em;">'+this.lang.title+': '+this.version+'</div>'+
 		'</div>');
 
 		var hlp = S('.'+v+'_help');
