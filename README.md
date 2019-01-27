@@ -3,29 +3,6 @@ VirtualSky
 
 A browser-based planetarium that can be [customized and embedded in web pages](http://lcogt.net/virtualsky/embed/custom.html). View as [full-window](http://lcogt.net/virtualsky/embed/index.html?projection=stereo). Some [examples with code excerpts](http://slowe.github.io/VirtualSky/) and some [unit tests](http://slowe.github.io/VirtualSky/tests.html).
 
-Usage
------
-    <html>
-    <head>
-    <!--[if lt IE 9]><script src="excanvas.js" type="text/javascript"></script><![endif]-->
-    <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
-    <script src="virtualsky.js" type="text/javascript"></script>
-    <script type="text/javascript">
-    <!--
-        $(document).ready(function(){
-            planetarium = $.virtualsky({id:'starmap',projection:'polar'}); // Assumes you want to draw this to a <div> with the id 'starmapper'
-        });
-18
-
-
-    </head>
-    <body>
-    
-        <div id="starmap" style="width:944x;height:400px;"></div>
-    
-    </body>
-    </html>
-
 Options
 --------
 The following options can be specified (defaults in brackets):
