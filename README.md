@@ -15,8 +15,8 @@ Usage
         $(document).ready(function(){
             planetarium = $.virtualsky({id:'starmap',projection:'polar'}); // Assumes you want to draw this to a <div> with the id 'starmapper'
         });
-    // -->
-    </script>
+18
+
 
     </head>
     <body>
