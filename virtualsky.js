@@ -212,7 +212,7 @@ window.fullScreenApi = fullScreenApi;
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.7.1";
+	this.version = "0.7.2";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -1148,7 +1148,7 @@ VirtualSky.prototype.createSky = function(){
 	if(this.container.length == 0){
 		// No appropriate container exists. So we'll make one.
 		S('body').append('<div id="'+this.id+'"></div>');
-		this.container = $('#'+this.id);
+		this.container = S('#'+this.id);
 	}
 	this.container.css('position','relative');
 	var _obj = this;
