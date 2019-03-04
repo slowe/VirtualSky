@@ -15,10 +15,9 @@
 
 			langs = {};
 			for(var l in planetarium.langs){
-				langs[l] = { "name": planetarium.langs[l].name, "file": l+".json" };
+				langs[l] = { "name": planetarium.langs[l].language.name, "file": l+".json" };
 				if(l=="en") langs[l]['default'] = true;
 			}
-
 			translator = new Translator({
 				'id':'form',
 				'help': 'master.json',
@@ -26,7 +25,6 @@
 				'callback': {
 					'update': function(a){
 						a.json = JSON.parse(a.json.replace(/\&quot;/g,"\""));
-						//planetarium.langs[a.lang] = a.json;
 						planetarium.lang = a.json;
 						planetarium.langcode = a.lang;
 						planetarium.draw();

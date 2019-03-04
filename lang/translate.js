@@ -108,7 +108,9 @@
 		}
 
 		html = "<form id=\"langchoice\"><label>Select language (not all are complete):</label><select name=\"lang\">"
-		for(var l in this.langs) html += '<option name="'+l+'" value="'+l+'"'+(this.lang==l ? " selected" : "")+'>'+this.langs[l].name+'</option>';
+		for(var l in this.langs){
+			html += '<option name="'+l+'" value="'+l+'"'+(this.lang==l ? " selected" : "")+'>'+sanitize(this.langs[l].name)+'</option>';
+		}
 		html += "</select> <button id=\"newlang\">Create new language</button></form>";
 
 
@@ -285,7 +287,7 @@
 		k = "";
 		done = {};
 		var el = S('form#language');
-		var id,subkey;
+		var id,subkey,def;
 
 		// Loop over the help file keys
 		for(key in this.form){
@@ -319,7 +321,12 @@
 							if(this.form[key][subkey]){
 								if(subkey.indexOf('_')!=0 && this.form[key][subkey]._text && this.form[key][subkey]._type){
 									id = key+'-'+subkey;
-									html += this.buildField(JSON.parse(JSON.stringify(this.form[key][subkey])),{'key':subkey+'','id':id,'value':this.phrasebook[this.lang][key][subkey],'default':(this.phrasebook[this.langdefault] && this.phrasebook[this.langdefault][key] ? this.phrasebook[this.langdefault][key][subkey] : "")+""});
+									console.log(this.form[key][subkey])
+									def = "";
+									if(this.phrasebook[this.langdefault] && this.phrasebook[this.langdefault][key] && this.phrasebook[this.langdefault][key][subkey]) def = this.phrasebook[this.langdefault][key][subkey]+'';
+									v = "";
+									if(this.phrasebook[this.lang] && this.phrasebook[this.lang][key] && this.phrasebook[this.lang][key][subkey]) v = this.phrasebook[this.lang][key][subkey];
+									html += this.buildField(JSON.parse(JSON.stringify(this.form[key][subkey])),{'key':subkey+'','id':id,'value':v,'default':def});
 									done[id] = true;
 								}
 							}

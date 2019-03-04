@@ -761,7 +761,7 @@ function VirtualSky(input){
 	var fromqs = (typeof this.q.lang==="string" || typeof this.setlang==="string");
 	this.langs = {
 		'ar': { "language": {"name": "&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;","alignment": "right" } },
-		'cs': { "language": {"name": "Čeština","alignment": "left" } },
+		'cs': { "language": {"name": "&#268;e&#353;tina","alignment": "left" } },
 		'en': { "language": {"name": "English","alignment": "left" } },
 		'es': { "language": {"name": "Espa&#241;ol","alignment": "left" } },
 		'fr': { "language": {"name": "Fran&#231;ais","alignment": "left" } },
