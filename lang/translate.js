@@ -409,7 +409,7 @@
 					val = converter(S('#phrasebook-'+key+'-'+subkey)[0].value || "");
 					if(sk > 0) output.json += ',\n';
 					output.json += '\t\t"'+subkey+'": "'+val+'"';
-					ojson[key][subkey] = (S('#phrasebook-'+key+'-'+subkey)[0].value||"");
+					ojson[key][subkey] = (S('#phrasebook-'+key+'-'+subkey)[0].value||"").replace(/\\n/g,"\n");
 					if(val) this.count.done++;
 					this.count.total++;
 					sk++;
