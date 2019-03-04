@@ -4,17 +4,7 @@
 	A browser planetarium using HTML5's <canvas>.
 */
 /*
-	USAGE:
-		<!--[if lt IE 9]><script src="http://http://virtualsky.lco.global/embed/excanvas.js" type="text/javascript"></script><![endif]-->
-		<script src="http://virtualsky.lco.global/embed/jquery-1.7.1.min.js" type="text/javascript"></script>
-		<script src="http://virtualsky.lco.global/embed/virtualsky.js" type="text/javascript"></script>
-		<script type="text/javascript">
-		<!--
-			$(document).ready(function(){
-				planetarium = $.virtualsky({id:'starmapper',projection:'polar'});	// Assumes you want to draw this to a <div> with the id 'starmapper'
-			});
-		// -->
-		</script>
+	USAGE: See http://slowe.github.io/VirtualSky/
 		
 	OPTIONS (default values in brackets):
 		id ('starmap') - The ID for the HTML element where you want the sky inserted
@@ -222,7 +212,7 @@ window.fullScreenApi = fullScreenApi;
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.7.0";
+	this.version = "0.7.1";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
