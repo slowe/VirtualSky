@@ -776,6 +776,7 @@ function VirtualSky(input){
 		'es': { "language": {"name": "Espa&#241;ol","alignment": "left" } },
 		'fr': { "language": {"name": "Fran&#231;ais","alignment": "left" } },
 		'it': { "language": {"name": "Italiano","alignment": "left" } },
+		'nl': { "language": {"name": "Nederlands","alignment": "left" } },
 		'pt': { "language": {"name": "Portugu&#234;s","alignment": "left" } },
 	}; // The contents of the language will be loaded from the JSON language file
 	this.lang = this.langs['en'];	// default
