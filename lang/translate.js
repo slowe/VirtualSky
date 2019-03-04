@@ -321,7 +321,6 @@
 							if(this.form[key][subkey]){
 								if(subkey.indexOf('_')!=0 && this.form[key][subkey]._text && this.form[key][subkey]._type){
 									id = key+'-'+subkey;
-									console.log(this.form[key][subkey])
 									def = "";
 									if(this.phrasebook[this.langdefault] && this.phrasebook[this.langdefault][key] && this.phrasebook[this.langdefault][key][subkey]) def = this.phrasebook[this.langdefault][key][subkey]+'';
 									v = "";
@@ -391,6 +390,7 @@
 		if(S('#output').length == 0) S('#translation').after('<div id="output"></div>');
 
 		output = {'file':this.langs[this.langdefault].file.replace(new RegExp("(^|[^A-Za-z])"+this.langdefault+"([^A-Za-z])"),function(m,p1,p2){ return p1+lang+p2; }),'json':''};
+		ojson = JSON.parse(JSON.stringify(this.phrasebook.en));
 		k = 0;
 		// Loop over every element and add it to an appropriate JSON for each output file
 		for(key in this.phrasebook[this.langdefault]){
@@ -398,6 +398,7 @@
 			if(typeof this.phrasebook[this.langdefault][key]==="string"){
 				val = converter(S('#phrasebook-'+key)[0].value || "");
 				output.json += '\t"'+key+'": "'+val+'"';
+				ojson[key] = (S('#phrasebook-'+key)[0].value || "");
 				if(val) this.count.done++;
 				this.count.total++;
 			}else{
@@ -408,6 +409,7 @@
 					val = converter(S('#phrasebook-'+key+'-'+subkey)[0].value || "");
 					if(sk > 0) output.json += ',\n';
 					output.json += '\t\t"'+subkey+'": "'+val+'"';
+					ojson[key][subkey] = (S('#phrasebook-'+key+'-'+subkey)[0].value||"");
 					if(val) this.count.done++;
 					this.count.total++;
 					sk++;
@@ -425,7 +427,7 @@
 		css = (json) ? ' style="height:20em;overflow-x:hidden;font-family:monospace;"' : ''
 		out = '<textarea onfocus="this.select()"'+css+' wrap="off">'+json+"</textarea>";
 		
-		if(typeof this.callback.update==="function") this.callback.update.call(this,{'json':json,'lang':lang});
+		if(typeof this.callback.update==="function") this.callback.update.call(this,{'json':ojson,'lang':lang});
 
 		var email;
 		this.page.html().replace(/\(([a-zA-Z0-9\.\-]+) AT ([a-zA-Z0-9\.\-]+)\)/,function(m,p1,p2){

@@ -24,7 +24,7 @@
 				'langs': langs,
 				'callback': {
 					'update': function(a){
-						a.json = JSON.parse(a.json.replace(/\&quot;/g,"\""));
+						//a.json = JSON.parse(a.json.replace(/\&quot;/g,"\""));
 						planetarium.lang = a.json;
 						planetarium.langcode = a.lang;
 						planetarium.draw();
