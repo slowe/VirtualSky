@@ -331,6 +331,19 @@ function VirtualSky(input){
 				var r = radius*Math.sin(((Math.PI/2)-el)/2)/0.70710678;	// the field of view is bigger than 180 degrees
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
 			},
+			xy2azel: function(x, y, w, h) {
+				var radius = h/2;
+
+				var X = w/2-x;
+				var Y = radius - y;
+				r = Math.sqrt(X*X + Y*Y);
+				if (r > radius) {
+					return undefined;
+				}
+				var el = Math.PI/2 - 2 * Math.asin(r * 0.70710678 / radius);
+				var az = Math.atan2(X, Y);
+				return [az, el];
+			},
 			polartype:true,
 			atmos: true
 		},
@@ -340,6 +353,19 @@ function VirtualSky(input){
 				var radius = h/2;
 				var r = radius*Math.cos(el);
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
+			},
+			xy2azel: function(x, y, w, h) {
+				var radius = h/2;
+
+				var X = w/2-x;
+				var Y = radius - y;
+				r = Math.sqrt(X*X + Y*Y);
+				if (r > radius) {
+					return undefined;
+				}
+				var el = Math.acos(r / radius);
+				var az = Math.atan2(X, Y);
+				return [az, el];
 			},
 			polartype:true,
 			atmos: true
@@ -357,6 +383,22 @@ function VirtualSky(input){
 				var k = 2/(1+sinel1*sinel+cosel1*cosel*cosaz);
 				return {x:(w/2+f*k*h*cosel*sinaz),y:(h-f*k*h*(cosel1*sinel-sinel1*cosel*cosaz)),el:el};
 			},
+			xy2azel: function(x, y, w, h) {
+				var f = 0.42;
+				var sinel1 = 0;
+				var cosel1 = 1;
+				var X = (x - w/2) / h;
+				var Y = (h - y)/h;
+				var R = f;
+
+				var P = Math.sqrt(X * X + Y * Y);
+				var c = 2 * Math.atan2(P, 2*R);
+
+				var el = Math.asin(Math.cos(c)*sinel1 + Y * Math.sin(c) * cosel1 / P)
+				var az = Math.PI + Math.atan2(X * Math.sin(c), P * cosel1 * Math.cos(c) - Y * sinel1 * Math.sin(c));
+
+				return [az, el];
+			},
 			atmos: true
 		},
 		'lambert':{
@@ -368,6 +410,21 @@ function VirtualSky(input){
 				var cosel = Math.cos(el);
 				var k = Math.sqrt(2/(1+cosel*cosaz));
 				return {x:(w/2+0.6*h*k*cosel*sinaz),y:(h-0.6*h*k*(sinel)),el:el};
+			},
+			xy2azel: function(x, y, w, h) {
+				var X = (x - w/2) / (0.6 * h);
+				var Y = (h - y) / (0.6 * h);
+
+				var p = Math.sqrt(X * X + Y * Y);
+				if (p > 2 || p < -2) {
+					return undefined;
+				}
+				var c = 2 * Math.asin(p / 2);
+
+				var el = Math.asin(Y * Math.sin(c)/p);
+				var az = Math.PI + Math.atan2(X * Math.sin(c), p * Math.cos(c));
+
+				return [az, el];
 			},
 			atmos: true
 		},
@@ -458,6 +515,14 @@ function VirtualSky(input){
 				az = (az)%(Math.PI*2);
 				return {x:(((az-Math.PI)/(Math.PI/2))*h + w/2),y:(h-(el/(Math.PI/2))*h),el:el};
 			},
+			xy2azel: function(x, y, w, h) {
+				var az = (Math.PI/2) * (x - w / 2) / h + Math.PI;
+				if (az < 0 || az > 2 * Math.PI) {
+					return undefined;
+				}
+				var el = (Math.PI/2) * (h - y) / h;
+				return [az, el];
+			},
 			maxb: 90,
 			atmos: true
 		},
@@ -481,6 +546,19 @@ function VirtualSky(input){
 				y = -sign*Math.sin(thetap/2)*this.tall/2 + this.tall/2;
 				coords = this.coord2horizon(ra, dec);
 				return {x:(outside ? -100 : x%this.wide),y:y,el:coords[0]*this.r2d};
+			},
+			xy2radec: function(x, y) {
+				var X  = (this.wide/2 - x) * Math.sqrt(2) * 2 / this.tall;
+				var Y = (this.tall/2 - y) * Math.sqrt(2) * 2 / this.tall;
+
+				var theta = Math.asin(Y / Math.sqrt(2));
+				var dec = Math.asin((2 * theta + Math.sin(2 * theta)) / Math.PI);
+				if (Math.abs(X) > 2 * Math.sqrt(2) * Math.cos(theta)) {
+					// Out of bounds
+					return undefined;
+				}
+				var ra = Math.PI - (this.d2r*this.az_off) + Math.PI * X / (2 * Math.sqrt(2) * Math.cos(theta));
+				return {ra: ra, dec: dec};
 			},
 			draw: function(){
 				var c = this.ctx;
@@ -521,6 +599,15 @@ function VirtualSky(input){
 				var y = -(dec/Math.PI)*this.tall+ this.tall/2;
 				var coords = this.coord2horizon(ra, dec);
 				return {x:x,y:y,el:coords[0]*this.r2d};
+			},
+			xy2radec: function(x, y) {
+				var normra = (this.wide / 2 - x)* 2 * Math.PI / (this.tall * 2);
+				if (Math.abs(normra) > Math.PI) {
+					return undefined;
+				}
+				var ra = normra + Math.PI - this.d2r*this.az_off;
+				var dec = Math.PI * (this.tall / 2 - y) / this.tall
+				return {ra: ra, dec: dec};
 			},
 			draw: function(){
 				if(!this.transparent){
