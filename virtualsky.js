@@ -283,7 +283,7 @@ function VirtualSky(input){
 	this.transparent = false;			// Show the sky background or not
 	this.fps = 10;						// Number of frames per second when animating
 	this.credit = (location.host == "lco.global" && location.href.indexOf("/embed") < 0) ? false : true;
-	this.callback = { geo:'', mouseenter:'', mouseout:'' };
+	this.callback = { geo:'', mouseenter:'', mouseout:'', rightclick: '' };
 	this.keys = new Array();
 	this.base = "";
 	this.az_step = 0;
@@ -303,6 +303,23 @@ function VirtualSky(input){
 				var radius = h/2;
 				var r = radius*((Math.PI/2)-el)/(Math.PI/2);
 				return {x:(w/2-r*Math.sin(az)),y:(radius-r*Math.cos(az)),el:el};
+			},
+			xy2azel: function(x, y, w, h) {
+				var radius = h/2;
+
+				var X = w/2-x;
+				var Y = radius - y;
+				// X = r * Math.sin(az)
+				// Y = r * Math.cos(az)
+				r = Math.sqrt(X*X + Y*Y);
+				// r = radius*((Math.PI/2)-el)/(Math.PI/2);
+				// el = (Math.PI/2) - r * (Math.PI/2) / radius
+				var el = (Math.PI/2) - r * (Math.PI/2) / radius;
+				if (el < 0) {
+					return undefined;
+				}
+				var az = Math.atan2(X, Y);
+				return [az, el];
 			},
 			polartype: true,
 			atmos: true
@@ -393,6 +410,33 @@ function VirtualSky(input){
 				F = scale*this.r2d/(sd0*sd + A*cd0);
 
 				return {x:(this.wide/2)-F*cd*Math.sin(dA),y:(this.tall/2) -F*(cd0*sd - A*sd0),el:coords[0]*this.r2d};
+			},
+			xy2radec: function(x,y){
+
+				var fov, cd, cd0, sd, sd0, dA, A, F, scale, twopi;
+				// number of pixels per degree in the map
+				scale = this.tall/this.fov;
+
+				var X = ((this.wide/2) - x) / (scale*this.r2d)
+				var Y = ((this.tall/2) - y) / (scale*this.r2d)
+
+				var p = Math.sqrt(X*X + Y*Y);
+				var c = Math.atan(p);
+
+				var dec = Math.asin(Math.cos(c)*Math.sin(this.dc_off) + Y * Math.sin(c) * Math.cos(this.dc_off)/ p);
+				var ra = this.ra_off + Math.atan2(X * Math.sin(c), (p * Math.cos(this.dc_off) * Math.cos(c) - Y * Math.sin(this.dc_off) * Math.sin(c)));
+
+				// Only want to project the sky around the map centre
+				if(Math.abs(dec-this.dc_off) > this.maxangle) return undefined;
+				var ang = this.greatCircle(this.ra_off,this.dc_off,ra,dec);
+				if(ang > this.maxangle) return undefined;
+
+				var coords = this.coord2horizon(ra, dec);
+
+				// Should we show things below the horizon?
+				if(this.ground && coords[0] < -1e-6) return undefined;
+
+				return {ra: ra, dec: dec};
 			},
 			draw: function(){
 				if(!this.transparent){
@@ -934,6 +978,7 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.geo,f)) this.callback.geo = d.callback.geo;
 		if(is(d.callback.mouseenter,f)) this.callback.mouseenter = d.callback.mouseenter;
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
+		if(is(d.callback.rightclick,f)) this.callback.rightclick = d.callback.rightclick;
 	}
 
 	return this;
@@ -1236,6 +1281,10 @@ VirtualSky.prototype.createSky = function(){
 			matched = e.data.sky.whichPointer(x,y);
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
+		}).on('contextmenu',{sky:this},function(e){
+			if (e.data.sky.callback.rightclick) {
+				e.preventDefault();
+			}
 		}).on('dblclick',{sky:this},function(e){
 			e.data.sky.debug('dblclick')
 			e.data.sky.toggleFullScreen();
@@ -1277,6 +1326,26 @@ VirtualSky.prototype.createSky = function(){
 				s.toggleInfoBox(matched);
 			}
 		}).on('mousedown',{sky:this},function(e){
+			if (e.data.sky.callback.rightclick && e.originalEvent.buttons === 2) {
+				e.preventDefault();
+
+				var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
+				var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
+
+				matched = e.data.sky.whichPointer(x,y);
+				e.data.canvasx = x;
+				e.data.canvasy = y;
+				e.data.matched = matched;
+				var skyPos = e.data.sky.xy2radec(x, y);
+				if (skyPos) {
+					e.data.skyPos = {
+						ra: skyPos.ra / e.data.sky.d2r,
+						dec: skyPos.dec / e.data.sky.d2r,
+					}
+				}
+				e.data.sky.callback.rightclick(e);
+				return;
+			}
 			e.data.sky.debug('mousedown')
 			e.data.sky.dragging = true;
 		}).on('mouseup',{sky:this},function(e){
@@ -1539,6 +1608,74 @@ VirtualSky.prototype.coord2horizon = function(ra, dec){
 	if (Math.sin(ha) > 0) az = 2*Math.PI - az;
 	return [alt,az];
 }
+
+// compute ra,dec coordinates from utc, horizon coords
+// ra, dec in radians
+// results returned in hrz_altitude, hrz_azimuth
+VirtualSky.prototype.horizon2coord = function(coords){
+	// Return angle in [0, 2 * PI[
+	function Map2PI(angle) {
+		var pipi = Math.PI * 2;
+		if (angle < 0.0) {
+			var n = Math.floor(angle / pipi);
+			return (angle - n * pipi);
+		}
+		else if (angle >= pipi) {
+			var n = Math.floor(angle / pipi);
+			return (angle - n * pipi);
+		}
+		else {
+			return (angle);
+		}
+	}
+
+	// Return angle in [-PI, PI[
+	function MapPI(angle) {
+		var angle2PI = Map2PI(angle);
+		if (angle2PI >= Math.PI) {
+			return (angle2PI - 2 * Math.PI);
+		}
+		else {
+			return (angle2PI);
+		}
+	}
+
+	function convertAltAzToALTAZ3D(i /* {alt: number, az:number}*/) /*: number[]*/ {
+		let x = Math.sin(i.alt);
+		const cs = Math.cos(i.alt)
+		let z = cs * Math.cos(i.az);
+		let y = cs * Math.sin(i.az);
+		return [x, y, z];
+	}
+
+	function rotate(xyz/*: number[]*/, axis/*: RotationDefinition*/, angle/*:number*/)
+	{
+		const axes = [[1,2],[0,2],[0,1]];
+		const a = axes[axis.id][0];
+		const b = axes[axis.id][1];
+		const cos = Math.cos(angle);
+		const sin = Math.sin(angle);
+		const ret = [...xyz];
+
+		ret[a] = xyz[a] * cos - xyz[b] * sin;
+		ret[b] = xyz[b] * cos + xyz[a] * sin;
+
+		return ret;
+	}
+
+	function convertALTAZ3DToAltAz(xyz /*: number[]*/)/*:{alt: number, az:number}*/ {
+		const az = Map2PI(Math.atan2(xyz[1], xyz[2]));
+		const alt = MapPI(Math.asin(xyz[0]));
+		return {alt,az};
+	}
+
+	const xyz = convertAltAzToALTAZ3D({az: coords[1], alt: coords[0]});
+	const rotated = rotate(xyz, {id: 1}, Math.PI/2 + this.latitude);
+	const res = convertALTAZ3DToAltAz(rotated);
+
+	return {ra: MapPI(res.az) + (Math.PI*this.times.LST/12), dec: -res.alt};
+}
+
 function inrangeAz(a,deg){
 	if(deg){
 		while(a < 0) a += 360;
@@ -1847,6 +1984,23 @@ VirtualSky.prototype.radec2xy = function(ra,dec){
 		//}
 	}
 	return 0;
+}
+
+// Returns {ra (rad), dec (rad)}
+VirtualSky.prototype.xy2radec = function(x, y){
+	if (typeof this.projection.xy2radec==="function") return this.projection.xy2radec.call(this,x,y);
+	else if (typeof this.projection.xy2azel === "function") {
+		var azel = this.projection.xy2azel(x, y,this.wide,this.tall);
+		if (azel === undefined) {
+			return undefined;
+		}
+
+		var coords = [azel[1], azel[0] + (this.az_off*this.d2r)];
+
+		return this.horizon2coord(coords);
+	} else {
+		return undefined;
+	}
 }
 
 // Dummy function - overwritten in selectProjection
