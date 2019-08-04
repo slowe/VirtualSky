@@ -128,7 +128,21 @@
 			dec:-5.3911111,
 			ground:false,
 			constellations: true,
-			fov: 15
+			fov: 15,
+			callback: {
+				rightclick:function(e) {
+					console.log('rightclick callback', e);
+					if (e.skyPos) {
+						planetarium9.addPointer({
+								ra: e.skyPos.ra,
+								dec: e.skyPos.dec,
+								label: "Clicked here",
+								colour: "#ffffff",
+							});
+						planetarium9.draw();
+					}
+				}
+			}
 		});
 
 		S('button#pleiades').on('click',function(){
@@ -392,7 +406,7 @@ S(document).ready(function() {
 			<div id="starmap8" class="planetarium" style="width:944x;height:400px;"></div>
 			</li>
 
-			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move
+			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move, and a handler for rightclick (try the right button...)
 				<pre class="prettyprint lang-js">
 S(document).ready(function() {
 
@@ -403,7 +417,21 @@ S(document).ready(function() {
 		'dec': -5.3911111,
 		'ground': false,
 		'constellations': true,
-		'fov': 15
+		'fov': 15,
+		'callback': {
+			'rightclick': function(e) {
+				console.log('rightclick callback', e);
+				if (e.skyPos) {
+					planetarium.addPointer({
+							ra: e.skyPos.ra,
+							dec: e.skyPos.dec,
+							label: "Clicked here",
+							colour: "#ffffff",
+						});
+					planetarium.draw();
+				}
+			}
+		}
 	});
 	
 	S('button#moveit').on('click',function(){
@@ -510,6 +538,7 @@ S(document).ready(function() {
 			<li><code>fontsize</code> - if, from a design point of view, you need a very specific font size (currently only in pixels), this is how you override the automatic font scaling. e.g. "10px"</li>
 			<li><code>fontfamily</code> - VirtualSky inherits the font family when it is added to an element on a page but can't when using an iframe. To solve that situation, you can provide a CSS <code>font-family</code> string.</li>
 			<li><code>lang</code> - VirtualSky will attempt to auto-detect the preferred language of the person's browser but you can specify a language explicitly</li>
+			<li><code>callback.rightclick</code> - VirtualSky will invoke the given callback on right click or long press on the map. The event sent to the callback includes the RA,DEC coordinates in the skyPos property, if applicable.</li>
 		</ul>
 		
 		<h2 id="tech">Technical details</h2>
