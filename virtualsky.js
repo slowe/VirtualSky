@@ -987,7 +987,7 @@ VirtualSky.prototype.changeLanguage = function(code,fn){
 		else {
 			this.lang = this.langs[code];
 			this.langcode = code;
-			this.draw();
+			this.drawImmediate();
 			if(typeof fn==="function") fn.call(this);
 		}
 		return this;
@@ -1393,7 +1393,7 @@ VirtualSky.prototype.createSky = function(){
 	this.registerKey(40,function(){ this.changeMagnitude(-0.25);},'magdown'); // down
 	this.registerKey(63,function(){ this.toggleHelp(); });
 
-	this.draw();
+	this.drawImmediate();
 }
 VirtualSky.prototype.changeMagnitude = function(m){
 	if(typeof m!=="number")
@@ -1652,7 +1652,7 @@ VirtualSky.prototype.cycleProjection = function(){
 		i++;
 	}
 	if(proj == this.projection.id) proj = firstkey;
-	this.draw(proj);
+	this.drawImmediate(proj);
 }
 // Update the sky colours
 VirtualSky.prototype.updateColours = function(){
@@ -1937,8 +1937,22 @@ VirtualSky.prototype.updateSkyGradient = function(){
 	this.skygrad = s;
 	return this;
 }
-VirtualSky.prototype.draw = function(proj){
+
+VirtualSky.prototype.draw = function() {
+	// Redraw within 20ms. Used to avoid redraw pilling up, introducing vast lag
+	if (this.pendingRefresh !== undefined) {
+		return;
+	}
+	this.pendingRefresh = window.setTimeout(this.drawImmediate.bind(this), 20);
+}
+
+VirtualSky.prototype.drawImmediate = function(proj){
 	// Don't bother drawing anything if there is no physical area to draw on
+	if (this.pendingRefresh !== undefined) {
+		window.clearTimeout(this.pendingRefresh);
+		this.pendingRefresh = undefined;
+	}
+
 	if(this.wide <= 0 || this.tall <= 0) return this;
 	if(!(this.c && this.c.getContext)) return this;
 
