@@ -1361,6 +1361,44 @@ VirtualSky.prototype.createSky = function(){
 		ctx.fillText(loading,(ctx.wide-ctx.measureText(loading).width)/2,(this.tall-fs)/2)
 		ctx.fill();
 
+		var rightClickHandler = (!this.callback.rightclick) ? undefined : {
+			click: (function(x, y) {
+				var matched = this.whichPointer(x,y);
+				var e = {};
+				e.canvasx = x;
+				e.canvasy = y;
+				e.matched = matched;
+				var skyPos = this.xy2radec(x, y);
+				if (skyPos) {
+					e.skyPos = {
+						ra: skyPos.ra / this.d2r,
+						dec: skyPos.dec / this.d2r,
+					}
+				}
+				this.callback.rightclick(e);
+			}).bind(this),
+
+			longPressStart: function(x, y) {
+				rightClickHandler.longPressStop();
+				this.longPressTimer =  window.setTimeout(function() {
+					this.longPressTimer = undefined;
+					this.dragging = false;
+					this.x = "";
+					this.y = "";
+					this.theta = "";
+					rightClickHandler.click(x, y);
+				}, 400 /** 400ms for long press */);
+			}.bind(this),
+
+			longPressStop: function() {
+				if (this.longPressTimer !== undefined) {
+					window.clearTimeout(this.longPressTimer);
+					this.longPressTimer = undefined;
+				}
+			}.bind(this)
+		};
+
+
 		S("#"+this.idinner).on('click',{sky:this},function(e){
 			e.data.sky.debug('click')
 			var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
@@ -1369,7 +1407,7 @@ VirtualSky.prototype.createSky = function(){
 			e.data.sky.toggleInfoBox(matched);
 			if(matched >= 0) S(e.data.sky.canvas).css({cursor:'pointer'});
 		}).on('contextmenu',{sky:this},function(e){
-			if (e.data.sky.callback.rightclick) {
+			if (rightClickHandler) {
 				e.preventDefault();
 			}
 		}).on('dblclick',{sky:this},function(e){
@@ -1413,24 +1451,13 @@ VirtualSky.prototype.createSky = function(){
 				s.toggleInfoBox(matched);
 			}
 		}).on('mousedown',{sky:this},function(e){
-			if (e.data.sky.callback.rightclick && e.originalEvent.buttons === 2) {
+			if (rightClickHandler && e.originalEvent.buttons === 2) {
 				e.preventDefault();
 
 				var x = e.originalEvent.pageX - this.offset().left - window.scrollX;
 				var y = e.originalEvent.pageY - this.offset().top - window.scrollY;
 
-				matched = e.data.sky.whichPointer(x,y);
-				e.data.canvasx = x;
-				e.data.canvasy = y;
-				e.data.matched = matched;
-				var skyPos = e.data.sky.xy2radec(x, y);
-				if (skyPos) {
-					e.data.skyPos = {
-						ra: skyPos.ra / e.data.sky.d2r,
-						dec: skyPos.dec / e.data.sky.d2r,
-					}
-				}
-				e.data.sky.callback.rightclick(e);
+				rightClickHandler.click(x, y);
 				return;
 			}
 			e.data.sky.debug('mousedown')
@@ -1457,6 +1484,9 @@ VirtualSky.prototype.createSky = function(){
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		}).on('touchmove',{sky:this},function(e){
 			e.preventDefault();
+			if (rightClickHandler) {
+				rightClickHandler.longPressStop();
+			}
 			var s = e.data.sky;
 			var x = e.originalEvent.touches[0].pageX;
 			var y = e.originalEvent.touches[0].pageY;
@@ -1489,12 +1519,22 @@ VirtualSky.prototype.createSky = function(){
 		}).on('touchstart',{sky:this},function(e){
 			e.data.sky.debug('touchstart')
 			e.data.sky.dragging = true;
+			if (rightClickHandler) {
+				var x = e.originalEvent.touches[0].pageX;
+				var y = e.originalEvent.touches[0].pageY;
+				x = x - this.offset().left - window.scrollX;
+				y = y - this.offset().top - window.scrollY;
+				rightClickHandler.longPressStart(x, y);
+			}
 		}).on('touchend',{sky:this},function(e){
 			e.data.sky.debug('touchend')
 			e.data.sky.dragging = false;
 			e.data.sky.x = "";
 			e.data.sky.y = "";
 			e.data.sky.theta = "";
+			if (rightClickHandler) {
+				rightClickHandler.longPressStop();
+			}
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
 			e.data.sky.debug('mousewheel')
@@ -2652,11 +2692,15 @@ VirtualSky.prototype.drawPlanets = function(){
 		}
 		var pos;
 		// Draw the Sun
-		pos = this.ecliptic2xy(this.sun.lon*this.d2r,this.sun.lat*this.d2r,this.times.LST);
-		if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"sun");
+		if (this.sun) {
+			pos = this.ecliptic2xy(this.sun.lon*this.d2r,this.sun.lat*this.d2r,this.times.LST);
+			if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.sun,"sun");
+		}
 		// Draw Moon last as it is closest
-		pos = this.ecliptic2xy(this.moon.lon*this.d2r,this.moon.lat*this.d2r,this.times.LST);
-		if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"moon");
+		if (this.moon) {
+			pos = this.ecliptic2xy(this.moon.lon*this.d2r,this.moon.lat*this.d2r,this.times.LST);
+			if(this.isVisible(pos.el) && !this.isPointBad(pos)) this.drawPlanet(pos.x,pos.y,5,this.col.moon,"moon");
+		}
 
 	}
 	return this;
