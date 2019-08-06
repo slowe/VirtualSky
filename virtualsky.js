@@ -1401,17 +1401,19 @@ VirtualSky.prototype.createSky = function(){
 			}.bind(this)
 		};
 
-		
-		function getXY(sky,o,el,e){
-			e.x = o.pageX - el.offset().left - window.scrollX;
-			e.y = o.pageY - el.offset().top - window.scrollY;
+		function getXYProperties(e,sky){
 			e.matched = sky.whichPointer(e.x,e.y);
 			var skyPos = sky.xy2radec(e.x,e.y);
 			if(skyPos){
 				e.ra = skyPos.ra / sky.d2r;
 				e.dec = skyPos.dec / sky.d2r;
 			}
-			return e;
+			return e;			
+		}
+		function getXY(sky,o,el,e){
+			e.x = o.pageX - el.offset().left - window.scrollX;
+			e.y = o.pageY - el.offset().top - window.scrollY;
+			return getXYProperties(e,sky);
 		}
 
 		S("#"+this.idinner).on('click',{sky:this},function(e){
@@ -1533,6 +1535,11 @@ VirtualSky.prototype.createSky = function(){
 				x = x - this.offset().left - window.scrollX;
 				y = y - this.offset().top - window.scrollY;
 				contextMenuHandler.longPressStart(x, y);
+				if(e.data.sky.callback.click){
+					e.x = x;
+					e.y = y;
+					e.data.sky.callback.click.call(e.data.sky,getXYProperties(e,e.data.sky));
+				}
 			}
 		}).on('touchend',{sky:this},function(e){
 			e.data.sky.debug('touchend');
