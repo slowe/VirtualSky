@@ -350,10 +350,10 @@
 							'callback': {
 								'contextmenu': function(e){
 									console.log('contextmenu callback', e);
-									if(e.skyPos){
+									if(e.ra && e.dec){
 										planetarium8.addPointer({
-											ra: e.skyPos.ra,
-											dec: e.skyPos.dec,
+											ra: e.ra,
+											dec: e.dec,
 											label: "Clicked here",
 											colour: "#ffffff",
 										});
@@ -362,7 +362,7 @@
 								},
 								'click': function(e){
 									e.nearest = e.data.sky.nearestObject(e.x,e.y);
-									console.log(e);
+									console.log(e.nearest,e.ra,e.dec);
 								}
 							}
 						});

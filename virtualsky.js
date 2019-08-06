@@ -1408,10 +1408,8 @@ VirtualSky.prototype.createSky = function(){
 			e.matched = sky.whichPointer(e.x,e.y);
 			var skyPos = sky.xy2radec(e.x,e.y);
 			if(skyPos){
-				e.skyPos = {
-					ra: skyPos.ra / sky.d2r,
-					dec: skyPos.dec / sky.d2r,
-				};
+				e.ra = skyPos.ra / sky.d2r;
+				e.dec = skyPos.dec / sky.d2r;
 			}
 			return e;
 		}
