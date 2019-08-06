@@ -80,20 +80,20 @@ function isEventSupported(eventName) {
 
 
 // Add extra stuQuery functions
-S.prototype.val = function(v){
+stuQuery.prototype.val = function(v){
 	if(this[0]){
 		if(typeof v==="undefined") return this[0].value || S(this[0]).attr('value');
 		else return S(this[0]).attr('value',v || '');
 	}
 	return "";
 };
-S.prototype.hide = function(){
+stuQuery.prototype.hide = function(){
 	for(var i = 0; i < this.length; i++) S(this[i]).css({'display':'none'});
 };
-S.prototype.show = function(){
+stuQuery.prototype.show = function(){
 	for(var i = 0; i < this.length; i++) S(this[i]).css({'display':'block'});
 };
-S.prototype.animate = function(end,ms,fn){
+stuQuery.prototype.animate = function(end,ms,fn){
 	var anim,i,p;
 	var initial = new Array(this.length);
 	var els = new Array(this.length);
@@ -131,10 +131,10 @@ S.prototype.animate = function(end,ms,fn){
 	anim = setInterval(change,25);
 	return;
 };
-S.prototype.fadeIn = function(ms,fn){
+stuQuery.prototype.fadeIn = function(ms,fn){
 	return this.animate({'opacity':1},ms,fn);
 };
-S.prototype.fadeOut = function(ms,fn){
+stuQuery.prototype.fadeOut = function(ms,fn){
 	return this.animate({'opacity':0},ms,fn);
 };
 
@@ -1110,8 +1110,10 @@ VirtualSky.prototype.loadLanguage = function(l,fn,fromquerystring){
 		},
 		function(data){ },
 		function(e){
-			// If we tried to load the short version of the language and it failed, default to English
-			this.loadLanguage('en',fn);
+			// If we tried to load the short version of the language and it failed, 
+			// default to English (unless we were trying to get English in which 
+			// case something is very wrong).
+			if(l!="en") this.loadLanguage('en',fn);
 		}
 	);
 	return this;
@@ -2468,7 +2470,7 @@ VirtualSky.prototype.createLightbox = function(lb,opts){
 		var n = "virtualsky_bg";
 		if(this.vs.container.find('.'+n).length == 0) this.vs.container.append('<div class="'+n+'" style="position:absolute;z-index:99;left:0px;top:0px;right:0px;bottom:0px;background-color:rgba(0,0,0,0.7);"></div>');
 		var bg = this.vs.container.find('.'+n);
-		bg.show();
+		if(bg.length > 0) bg.show();
 		this.bg = bg;
 		this.vs.container.find('.virtualsky_dismiss').on('click',{lb:this},function(e){ e.data.lb.close(); });
 		bg.on('click',{lightbox:this},function(e){ e.data.lightbox.close(); });
