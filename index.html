@@ -361,8 +361,8 @@
 									}
 								},
 								'click': function(e){
-									var n = e.data.sky.nearestObject(e.x,e.y);
-									console.log(n);
+									e.nearest = e.data.sky.nearestObject(e.x,e.y);
+									console.log(e);
 								}
 							}
 						});
