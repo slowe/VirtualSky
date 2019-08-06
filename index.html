@@ -7,7 +7,6 @@
 		VirtualSky <canvas> application
 		(c) 2010 Stuart Lowe (Las Cumbras Observatory Global Telescope)
 	-->
-    <link rel="stylesheet" type="text/css" media="screen" href="extra/prettify.css">
 	<style>
 	body {
 		font-family: 'Trebuchet MS',Tahoma,Helvetica,Verdana,sans-serif;
@@ -69,112 +68,23 @@
 	li.example { margin-bottom: 4em; }
 	.planetarium { max-width: 100%; height: 0;}
 	h2 { margin-top: 3em; padding-top: 3em; border-top: 1px solid #999; }
+	.hljs { background: #111111; padding: 1em; display:block; overflow-x:auto; margin: 1em auto; background:#111; tab-size: 4; -moz-tab-size: 4; }
+	.hljs a { color: inherit; }
+	.hljs, .hljs-subst { color:#fff; }
+	.hljs-name, .hljs-tag { color: #89bdff; }
+	.hljs-string { color: #65B042; }
+	.hljs-meta, .hljs-symbol, .hljs-template-tag, .hljs-template-variable, .hljs-addition { color:#0DBC37; }
+	.hljs-comment, .hljs-quote {color:#aaa; }
+	.hljs-number, .hljs-built_in { color: #3387CC; }
+	.hljs-regexp, .hljs-literal, .hljs-bullet, .hljs-link { color:#31a354; }
+	.hljs-deletion, .hljs-variable { color:#88f; }
+	.hljs-selector-tag, .hljs-title, .hljs-section, .hljs-doctag, .hljs-type, .hljs-selector-id, .hljs-selector-class, .hljs-strong { color:#2254F4; }
+	.hljs-keyword { color: #E28964; }
+	.hljs-emphasis { font-style:italic; }
+	.hljs-attribute { color:#D73058; }
+	.hljs-attr { color: #bdb76b; } 
 	</style>
-	<!--[if lt IE 9]><script src="excanvas.min.js"></script><![endif]-->
-	<script src="stuquery.js"></script>
-	<script src="virtualsky.js" type="text/javascript"></script>
-	<script src="extra/prettify.js" type="text/javascript"></script>
-	<script>
-	S(document).ready(function() {
-
-		// Set up the prettification of code blocks
-		prettyPrint();
-
-		var vs = S.virtualsky({id:'starmap',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
-
-		S('h1').append(' <span style="font-size: 1em;">v'+vs.version+'</span>');
-
-		var planetariumbg = S.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
-		var planetarium = S.virtualsky({id:'starmap1'});
-		var planetarium2 = S.virtualsky({id:'starmap2',projection:'stereo',az:225,constellations:true,constellationboundaries:true,boundaries:[
-				["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
-				["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
-			],clock:new Date("July 17, 2013 18:39:00 GMT")
-		});
-		var planetarium3 = S.virtualsky({id:'starmap3', projection:'stereo', mouse:true, keyboard:true, latitude:34.4326, longitude:-119.86286});
-		var planetarium4 = S.virtualsky({id:'starmap4', projection:'lambert', mouse:true, keyboard:false, az:0, negative:true, constellations:true, latitude:53.5, longitude:-2.5});
-		var planetarium5 = S.virtualsky({id:'starmap5', projection:'stereo', keyboard:false, mouse:false, az:135, latitude:38.25, longitude:-122.6, meridian: true, clock:new Date("October 25, 1985 01:21:00"), gridlines_gal: true});
-		var planetarium6 = S.virtualsky({id:'starmap6', projection:'mollweide', showstarlabels:true, az:180, ground:true});
-		var planetarium7 = S.virtualsky({
-			id: 'starmap7',
-			projection: 'stereo',
-			clock:new Date("July 17, 2013 18:39:00 GMT")
-		});
-	
-		planetarium7.addPointer({
-			'ra':83.8220792,
-			'dec':-5.3911111,
-			'label':'Orion Nebula',
-			'img':'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra=5.58813861333333&de=-5.3911111&angle=1.25&output=PNG',
-			'url':'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=M42',
-			'credit':'Wikisky',
-			colour:'rgb(255,220,220)'
-		});
-
-		var planetarium8 = S.virtualsky({
-			id: 'starmap8',
-			projection: 'gnomic',
-			ra: 83.8220833,
-			dec:-5.3911111,
-			ground:false,
-			constellations: true,
-			fov: 15
-		});
-
-		var planetarium9 = S.virtualsky({
-			id: 'starmap9',
-			projection: 'gnomic',
-			ra: 83.8220833,
-			dec:-5.3911111,
-			ground:false,
-			constellations: true,
-			fov: 15,
-			callback: {
-				rightclick:function(e) {
-					console.log('rightclick callback', e);
-					if (e.skyPos) {
-						planetarium9.addPointer({
-								ra: e.skyPos.ra,
-								dec: e.skyPos.dec,
-								label: "Clicked here",
-								colour: "#ffffff",
-							});
-						planetarium9.draw();
-					}
-				}
-			}
-		});
-
-		S('button#pleiades').on('click',function(){
-			planetarium9.panTo(56.8690917,24.1053111,3000)
-		});
-		S('button#M82').on('click',function(){
-			planetarium9.panTo(148.9684583,69.6797028,3000)
-		});
-		S('button#M1').on('click',function(){
-			planetarium9.panTo(83.6330833,22.0145000,3000)
-		});
-		S('button#M42').on('click',function(){
-			planetarium9.panTo(83.8220833,-5.3911111,3000)
-		});
-
-		var planetarium10 = S.virtualsky({
-			id: 'starmap10',
-			projection: 'stereo',
-			lang: 'ar'
-		});
-
-		var planetarium11 = S.virtualsky({
-			id: 'starmap11',
-			projection: 'stereo',
-			constellations: true,
-			objects: 'messier.json',
-			fov: 15
-		});
-
-
-	});
-	</script>
+	<script src="extra/highlight.pack.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -187,7 +97,7 @@
 
 		<p>VirtualSky a browser-based planetarium that lets you see what is visible in the sky from any location on Earth. It can be <a href="http://lcogt.net/virtualsky/embed/custom.html">customized and included on your own website</a>, blog etc. It is provided freely for educational and non-profit use.</p>
 
-		<div id="starmap" class="planetarium" style="width:100%;height:300px;"></div>
+		<div id="starmap-splash" class="planetarium" style="width:100%;height:300px;"></div>
 
 		<h2>Contents</h2>
 		<ul>
@@ -212,6 +122,14 @@
 		</ul>
 
 		<h2 id="new">What's new?</h2>
+		<h3 id="0.7.3">Version 0.7.3 / 6 August 2019</h3>
+		<p>There have been some improvements to the code:</p>
+		<ul>
+			<li>Fixed <a href="https://github.com/slowe/VirtualSky/issues/52">issue #52</a> to improve touch move handling</li>
+			<li>Improved performance of drawing</li>
+			<li>Fixed part of <a href="https://github.com/slowe/VirtualSky/issues/25">issue #25</a> to get RA/dec of cursor position</li>
+		</ul>
+		
 		<h3 id="0.7.0">Version 0.7.0 / 15 October 2018</h3>
 		<p>There has been a major overhaul to remove the need for jQuery (replaced with <a href="http://slowe.github.io/stuquery/">stuQuery</a>). This has reduced the initial page load from 337kB to 200kB so it should hopefully load more quickly and save bandwidth. Also:</p>
 		<ul>
@@ -232,258 +150,266 @@
 		
 		<h2 id="instructions">Instructions for embedding</h2>
 		<p>The <a href="http://lcogt.net/virtualsky/embed/custom.html">easiest way to include VirtualSky</a> on your website is to use the custom form to create an embed link (uses an <code>&lt;iframe&gt;</code>).</p>
-		<p>Sometimes an <code>&lt;iframe&gt;</code> just doesn't give you the flexibility you need (or you might want to include it in an offline page during a public talk). In that case you could download a copy of <a href="https://github.com/slowe/VirtualSky">the source from GitHub</a> and include VirtualSky in your page using Javascript. You will need to include the following code block in the <code>&lt;head&gt;</code> of your page:</p>
+		<p>Sometimes an <code>&lt;iframe&gt;</code> just doesn't give you the flexibility you need (or you might want to include it in an offline page during a public talk). In that case you could download a copy of <a href="https://github.com/slowe/VirtualSky">the source from GitHub</a> and include VirtualSky in your page using Javascript. You will need to include the following in your page:</p>
 		
-		<pre class="prettyprint lang-html lang-js">
-&lt;!--[if lt IE 9]&gt;&lt;script src="excanvas.min.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
-&lt;script src="stuquery.js"&gt;&lt;/script&gt;
-&lt;script src="virtualsky.min.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script&gt;
-S(document).ready(function() {
+		<div class="example-code">
+			<!-- Make sure the scripts point to the correct locations for the Javascript files. -->
+			<script src="stuquery.min.js"></script>
+			<script src="virtualsky.min.js" type="text/javascript"></script>
+			<script>
+			var planetarium;
 
-	var planetarium = S.virtualsky({
-		id: 'starmap1'
-	});
+			S(document).ready(function() {
 
-});
-&lt;/script&gt;
-</pre>
-<p>Make sure the scripts point to the correct locations for the Javascript files. In the <code>&lt;body&gt;</code> you need to include the DOM element you've referenced by ID:</p>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap1" style="width:400px;height:400px;"&gt;&lt;/div&gt;
-</pre>
+				planetarium = S.virtualsky({
+					id: 'starmap'	// This should match the ID used in the DOM
+				});
 
-		<p>The result is:</p>
-		<div id="starmap1" class="planetarium" style="width:400px;height:400px;"></div>
+			});
+			</script>
+			<div id="starmap" style="width:400px;height:400px;"></div>
+		</div>
+		<script>
+		S(document).ready(function() {
+
+			var vs = S.virtualsky({id:'starmap-splash',projection:'stereo',gridlines_az:true,gridlines_eq:true,constellations:true,live:true,az:90});
+
+			// Add version number to title
+			S('h1').append(' <span style="font-size: 1em;">v'+vs.version+'</span>');
+
+			var planetariumbg = S.virtualsky({id:'bg',az:120,gridlines_eq:true,showorbits:true,showstarlabels:true,meteorshowers:true,constellations:true,projection:'stereo',credit:false,showdate:false,showposition:false});
+
+		});
+		</script>
 
 		<p>That is a version of VirtualSky with all the default options. However, one of the great things about VirtualSky is that it can be customised. Here are some examples to give you some ideas:</p>
 		<ol>
 			<li class="example" id="ex1">A <code>stereo</code> projection set for Santa Barbara's lat/long:
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
-
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'stereo', 
-		latitude: 34.4326, 
-		longitude: -119.86286
-	});
-});</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:100%;height:500px;"&gt;&lt;/div&gt;
-</pre>
-				<div id="starmap3" class="planetarium" style="width:100%;height:500px;"></div>
+				<div class="example-code">
+					<script>
+					var planetarium1;
+					S(document).ready(function() {
+						var planetarium1 = S.virtualsky({
+								id: 'starmap1',
+								projection: 'stereo', 
+								latitude: 34.4326, 
+								longitude: -119.86286
+						});
+					});
+					</script>
+					<div id="starmap1" style="width:100%;height:500px;"></div>
+				</div>
 			</li>
 			<li class="example" id="ex2">A <code>lambert</code> projection, with constellations shown, no keyboard control and a black-on-white view. It is based in Manchester,UK and facing north:
-		
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
-
-	var planetarium = S.virtualsky({
-		id: 'starmap', 
-		projection: 'lambert', 
-		mouse: true,
-		keyboard: false, 
-		az: 0, 
-		negative: true, 
-		constellations: true, 
-		latitude: 53.5,
-		longitude: -2.5
-	});
-});</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:500px;height:300px;"&gt;&lt;/div&gt;
-</pre>
-				<div id="starmap4" class="planetarium" style="width:500px;height:300px;"></div>
+				<div class="example-code">
+					<script>
+					var planetarium2;
+					S(document).ready(function() {
+						planetarium2 = S.virtualsky({
+							id: 'starmap2', 
+							projection: 'lambert', 
+							mouse: true,
+							keyboard: false, 
+							az: 0, 
+							negative: true, 
+							constellations: true, 
+							latitude: 53.5,
+							longitude: -2.5
+						});
+					});
+					</script>
+					<div id="starmap2" style="width:500px;height:300px;"></div>
+				</div>
 			</li>
 			<li class="example" id="ex3">A <code>stereo</code> projection with no keyboard or mouse input and with a Galactic grid and the Meridian line displayed. The view is facing south east from Hill Valley, California at 1:21 am on October 25, 1985.
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+				<div class="example-code">
+					<script>
+					var planetarium3;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'stereo',
-		keyboard: false, 
-		mouse: false, 
-		az: 135,
-		meridian: true,
-		latitude: 38.25, 
-		longitude: -122.6, 
-		clock: new Date("October 25, 1985 01:21:00"),
-		gridlines_gal: true
-	});
-});</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:650px;height:300px;"&gt;&lt;/div&gt;
-</pre>
-				<div id="starmap5" class="planetarium" style="width:650px;height:300px;"></div>
+						planetarium3 = S.virtualsky({
+							id: 'starmap3',
+							projection: 'stereo',
+							keyboard: false, 
+							mouse: false, 
+							az: 135,
+							meridian: true,
+							latitude: 38.25, 
+							longitude: -122.6, 
+							clock: new Date("October 25, 1985 01:21:00"),
+							gridlines_gal: true
+						});
+					});
+					</script>
+					<div id="starmap3" style="width:650px;height:300px;"></div>
+				</div>
 			</li>
 			<li class="example" id="ex4">A <code>mollweide</code> projection with with star labels drawn and the ground blocking half the sky.
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
-
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'mollweide',
-		showstarlabels: true,
-		ground: true
-	});
-});</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:920px;height:460px;"&gt;&lt;/div&gt;
-</pre>
-				<div id="starmap6" class="planetarium" style="width:920px;height:460px;"></div>
+				<div class="example-code">
+					<script>
+					var planetarium4;
+					S(document).ready(function() {
+						planetarium4 = S.virtualsky({
+							id: 'starmap4',
+							projection: 'mollweide',
+							showstarlabels: true,
+							ground: true
+						});
+					});
+					</script>
+					<div id="starmap4" style="width:920px;height:460px;"></div>
+				</div>
 			</li>
 			<li class="example" id="ex5">A default view with a <code>stereo</code> projection, constellation lines and two manually specified constellation boundaries (note that RA/Dec for boundaries are assumed to be in B1875).
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+				<div class="example-code">
+					<script>
+					var planetarium5;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		az: 225,
-		projection: 'stereo',
-		constellations: true,
-		constellationboundaries: true,
-		boundaries: [
-			["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
-			["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
-		],
-		clock:new Date("July 17, 2013 18:39:00 GMT")
-	});
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-</pre>
-			<div id="starmap2" class="planetarium" style="width:944x;height:400px;"></div>
+						planetarium5 = S.virtualsky({
+							id: 'starmap5',
+							az: 225,
+							projection: 'stereo',
+							constellations: true,
+							constellationboundaries: true,
+							boundaries: [
+								["And",343,34.5,343,52.5,350,52.5,350,50,353.75,50,353.75,48,2.5,48,2.5,46,13,46,13,48,16.75,48,16.75,50,20.5,50,25,50,25,47,30.625,47,30.625,50.5,37.75,50.5,37.75,36.75,30,36.75,30,35,21.125,35,21.125,33,10.75,33,10.75,23.75,12.75,23.75,12.75,21,2.125,21,2.125,22,1,22,1,28,0,28,0,31.33333,356.25,31.33333,356.25,32.08333,352.5,32.08333,352.5,34.5,343,34.5],
+								["Ori",69.25,0,69.25,15.5,74.5,15.5,74.5,16,80,16,80,15.5,84,15.5,84,12.5,86.5,12.5,86.5,18,85.5,18,85.5,22.83333,88.25,22.83333,88.25,21.5,93.25,21.5,93.25,17.5,94.625,17.5,94.625,12,94.625,10,93.625,10,93.625,0,93.625,-4,87.5,-4,87.5,-11,76.25,-11,76.25,-4,70,-4,70,0,69.25,0]
+							],
+							clock:new Date("July 17, 2013 18:39:00 GMT")
+						});
+					});
+					</script>
+					<div id="starmap5" style="width:944px;height:400px;"></div>
+				</div>
 			</li>
 			<li class="example" id="ex6">A default view using <code>stereo</code> projection with a place marker
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+				<div class="example-code">
+					<script>
+					var planetarium6;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'stereo',
-	});
+						planetarium6 = S.virtualsky({
+							id: 'starmap6',
+							projection: 'stereo',
+							clock:new Date("July 17, 2019 18:39:00 GMT")
+						});
 
-	planetarium.addPointer({
-		'ra':83.8220792,
-		'dec':-5.3911111,
-		'label':'Orion Nebula',
-		'img':'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra=5.58813861333333&de=-5.3911111&angle=1.25&output=PNG',
-		'url':'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=M42',
-		'credit':'Wikisky',
-		'colour':'rgb(255,220,220)'
-	})
+						planetarium6.addPointer({
+							'ra':83.8220792,
+							'dec':-5.3911111,
+							'label':'Orion Nebula',
+							'img':'http://server7.sky-map.org/imgcut?survey=DSS2&w=128&h=128&ra=5.58813861333333&de=-5.3911111&angle=1.25&output=PNG',
+							'url':'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=M42',
+							'credit':'Wikisky',
+							'colour':'rgb(255,220,220)'
+						})
 
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-</pre>
-			<div id="starmap7" class="planetarium" style="width:944x;height:400px;"></div>
+					});
+					</script>
+					<div id="starmap6" style="width:944px;height:400px;"></div>
+				</div>
 			</li>
 
 			<li class="example" id="ex7">A default view using <code>gnomic-tan</code> projection centred on M42
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+				<div class="example-code">
+					<script>
+					var planetarium7;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		'id': 'starmap',
-		'projection': 'gnomic',
-		'ra': 83.8220833,
-		'dec': -5.3911111,
-		'ground': false,
-		'constellations': true,
-		'fov': 15
-	});
+						planetarium7 = S.virtualsky({
+							'id': 'starmap7',
+							'projection': 'gnomic',
+							'ra': 83.8220833,
+							'dec': -5.3911111,
+							'ground': false,
+							'constellations': true,
+							'fov': 15
+						});
 
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-</pre>
-			<div id="starmap8" class="planetarium" style="width:944x;height:400px;"></div>
+					});
+					</script>
+					<div id="starmap7" style="width:944px;height:400px;"></div>
+				</div>
 			</li>
 
-			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move, and a handler for rightclick (try the right button...)
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+			<li class="example" id="ex8">A default view using <code>gnomic-tan</code> projection centred on Orion with a button to move, and a handler for <code>contextmenu</code> (try the right mouse button...)
+				<div class="example-code">
+					<script>
+					var planetarium8;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		'id': 'starmap',
-		'projection': 'gnomic',
-		'ra': 83.8220833,
-		'dec': -5.3911111,
-		'ground': false,
-		'constellations': true,
-		'fov': 15,
-		'callback': {
-			'rightclick': function(e) {
-				console.log('rightclick callback', e);
-				if (e.skyPos) {
-					planetarium.addPointer({
-							ra: e.skyPos.ra,
-							dec: e.skyPos.dec,
-							label: "Clicked here",
-							colour: "#ffffff",
+						planetarium8 = S.virtualsky({
+							'id': 'starmap8',
+							'projection': 'gnomic',
+							'ra': 83.8220833,
+							'dec': -5.3911111,
+							'ground': false,
+							'constellations': true,
+							'fov': 15,
+							'callback': {
+								'contextmenu': function(e){
+									console.log('contextmenu callback', e);
+									if(e.skyPos){
+										planetarium8.addPointer({
+											ra: e.skyPos.ra,
+											dec: e.skyPos.dec,
+											label: "Clicked here",
+											colour: "#ffffff",
+										});
+										planetarium8.draw();
+									}
+								}
+							}
 						});
-					planetarium.draw();
-				}
-			}
-		}
-	});
 	
-	S('button#moveit').on('click',function(){
-		planetarium.panTo(56.8690917,24.1053111,3000)
-	});
+						S('button#pleiades').on('click',function(){ planetarium8.panTo(56.8690917,24.1053111,3000); });
+						S('button#M82').on('click',function(){ planetarium8.panTo(148.9684583,69.6797028,3000); });
+						S('button#M1').on('click',function(){ planetarium8.panTo(83.6330833,22.0145000,3000); });
+						S('button#M42').on('click',function(){ planetarium8.panTo(83.8220833,-5.3911111,3000); });
 
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-&lt;button id="moveit"&gt;Move to The Pleiades&lt;/button&gt;
-</pre>
-			<div id="starmap9" class="planetarium" style="width:944x;height:400px;"></div>
-			<button id="pleiades">Move to The Pleiades</button>
-			<button id="M1">Move to M1</button>
-			<button id="M82">Move to M82</button>
-			<button id="M42">Move to M42</button>
+					});
+					</script>
+					<div id="starmap8" style="width:944px;height:400px;"></div>
+					<button id="pleiades">Move to The Pleiades</button>
+					<button id="M1">Move to M1</button>
+					<button id="M82">Move to M82</button>
+					<button id="M42">Move to M42</button>
+				</div>
 			</li>
 
 			<li class="example" id="ex9">A default view using <code>stereo</code> projection in Arabic
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
+				<div class="example-code">
+					<script>
+					var planetarium9;
+					S(document).ready(function() {
 
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'stereo',
-		lang: 'ar'
-	});
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-</pre>
-			<div id="starmap10" class="planetarium" style="width:944x;height:400px;"></div>
+						planetarium9 = S.virtualsky({
+							id: 'starmap9',
+							projection: 'stereo',
+							lang: 'ar'
+						});
+					});
+					</script>
+					<div id="starmap9" style="width:944px;height:400px;"></div>
+				</div>
 			</li>
 
 			<li class="example" id="ex10">A default view using <code>stereo</code> projection showing <code>objects</code> (in this case the Messier catalogue) included from a <a href="messier.json">local JSON file</a>:
-				<pre class="prettyprint lang-js">
-S(document).ready(function() {
-
-	var planetarium = S.virtualsky({
-		id: 'starmap',
-		projection: 'stereo',
-		objects: 'messier.json'
-	});
-});
-			</pre>
-<pre class="prettyprint lang-html">
-&lt;div id="starmap" style="width:944px;height:400px;"&gt;&lt;/div&gt;
-</pre>
-			<div id="starmap11" class="planetarium" style="width:944x;height:400px;"></div>
-			If you have multiple files of objects you can separate them with semi-colons e.g. <code>objects: 'messier.json;caldwell.json'</code>.
+				<p>If you have multiple files of objects you can separate them with semi-colons e.g. <code>objects: 'messier.json;caldwell.json'</code>.</p>
+				<div class="example-code">
+					<script>
+					var planetarium10;
+					S(document).ready(function(){
+						planetarium10 = S.virtualsky({
+							id: 'starmap10',
+							projection: 'stereo',
+							objects: 'messier.json'
+						});
+					});
+					</script>
+					<div id="starmap10" style="width:944px;height:400px;"></div>
+				</div>
 			</li>
 
 
@@ -538,7 +464,7 @@ S(document).ready(function() {
 			<li><code>fontsize</code> - if, from a design point of view, you need a very specific font size (currently only in pixels), this is how you override the automatic font scaling. e.g. "10px"</li>
 			<li><code>fontfamily</code> - VirtualSky inherits the font family when it is added to an element on a page but can't when using an iframe. To solve that situation, you can provide a CSS <code>font-family</code> string.</li>
 			<li><code>lang</code> - VirtualSky will attempt to auto-detect the preferred language of the person's browser but you can specify a language explicitly</li>
-			<li><code>callback.rightclick</code> - VirtualSky will invoke the given callback on right click or long press on the map. The event sent to the callback includes the RA,DEC coordinates in the skyPos property, if applicable.</li>
+			<li><code>callback.contextmenu</code> - VirtualSky will invoke the given callback on right click or long press on the map. The event sent to the callback includes the RA,DEC coordinates in the skyPos property, if applicable.</li>
 		</ul>
 		
 		<h2 id="tech">Technical details</h2>
@@ -549,6 +475,9 @@ S(document).ready(function() {
 
 		
 	</div>
+
+	<script language="javascript" type="text/javascript" src="formatexamples.js"></script>
+
 </body>
 </html>
 
