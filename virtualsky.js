@@ -1381,27 +1381,60 @@ VirtualSky.prototype.createSky = function(){
 		ctx.fillText(loading,(ctx.wide-ctx.measureText(loading).width)/2,(this.tall-fs)/2);
 		ctx.fill();
 
-		var contextMenuHandler = (!this.callback.contextmenu) ? undefined : {
-			longPressStart: function(x,y){
-				contextMenuHandler.longPressStop();
-				this.longPressTimer =  window.setTimeout(function() {
-					this.longPressTimer = undefined;
-					this.dragging = false;
-					this.x = "";
-					this.y = "";
-					this.theta = "";
-					contextMenuHandler.click(x,y);
-				}, 400 /** 400ms for long press */);
-			}.bind(this),
-			longPressStop: function(){
-				if (this.longPressTimer !== undefined) {
-					window.clearTimeout(this.longPressTimer);
-					this.longPressTimer = undefined;
+		var touchClickHandler = (!this.callback.contextmenu && !this.callback.click) ? undefined : {
+			// Indicate an immobile press is occuring. It will lead to context menu or click depending on its duration
+			clickActive: false,
+			clickDone:  false,
+			// Timer that differentiate between long/short press
+			longPressTimer: undefined,
+
+			clickStart: function(e){
+				e.originalEvent.preventDefault();
+				touchClickHandler.clickCancel();
+				touchClickHandler.clickActive = true;
+				touchClickHandler.clickDone = false;
+				touchClickHandler.initialTouchEvent = e;
+				if (this.callback.contextmenu) {
+					touchClickHandler.longPressTimer =  window.setTimeout(function() {
+						touchClickHandler.clickActive = false;
+						touchClickHandler.longPressTimer = undefined;
+						this.dragging = false;
+						this.x = "";
+						this.y = "";
+						this.theta = "";
+
+						if (this.callback.contextmenu) {
+							touchClickHandler.clickDone = true;
+							this.callback.contextmenu.call(e.data.sky, e);
+						}
+					}.bind(this), 400 /** 400ms for long press */);
 				}
-			}.bind(this)
+			}.bind(this),
+
+			clickEnd: function(e) {
+				if (touchClickHandler.clickActive) {
+					var initialTouchEvent = touchClickHandler.initialTouchEvent;
+					touchClickHandler.clickCancel();
+
+					if(e.data.sky.callback.click){
+						touchClickHandler.clickDone = true;
+						e.data.sky.callback.click.call(initialTouchEvent.data.sky, initialTouchEvent);
+					}
+				}
+			}.bind(this),
+
+			clickCancel: function(){
+				touchClickHandler.clickActive = false;
+				touchClickHandler.initialTouchEvent = undefined;
+				if (touchClickHandler.longPressTimer !== undefined) {
+					window.clearTimeout(touchClickHandler.longPressTimer);
+					touchClickHandler.longPressTimer = undefined;
+				}
+				return !touchClickHandler.clickDone;
+			}.bind(this),
 		};
 
-		function getXYProperties(e,sky){
+		getXYProperties =function (e,sky){
 			e.matched = sky.whichPointer(e.x,e.y);
 			var skyPos = sky.xy2radec(e.x,e.y);
 			if(skyPos){
@@ -1413,6 +1446,11 @@ VirtualSky.prototype.createSky = function(){
 		function getXY(sky,o,el,e){
 			e.x = o.pageX - el.offset().left - window.scrollX;
 			e.y = o.pageY - el.offset().top - window.scrollY;
+			return getXYProperties(e,sky);
+		}
+		function getTouchXY(sky,o,el,e) {
+			e.x = o.touches[0].pageX - el.offset().left - window.scrollX;
+			e.y = o.touches[0].pageY - el.offset().top - window.scrollY;
 			return getXYProperties(e,sky);
 		}
 
@@ -1496,7 +1534,11 @@ VirtualSky.prototype.createSky = function(){
 			if(typeof s.callback.mouseenter=="function") s.callback.mouseenter.call(s);
 		}).on('touchmove',{sky:this},function(e){
 			e.preventDefault();
-			if(contextMenuHandler) contextMenuHandler.longPressStop();
+			if(touchClickHandler) {
+				if (!touchClickHandler.clickCancel()) {
+					return;
+				}
+			}
 			var s = e.data.sky;
 			var x = e.originalEvent.touches[0].pageX;
 			var y = e.originalEvent.touches[0].pageY;
@@ -1529,17 +1571,8 @@ VirtualSky.prototype.createSky = function(){
 		}).on('touchstart',{sky:this},function(e){
 			e.data.sky.debug('touchstart');
 			e.data.sky.dragging = true;
-			if(contextMenuHandler){
-				var x = e.originalEvent.touches[0].pageX;
-				var y = e.originalEvent.touches[0].pageY;
-				x = x - this.offset().left - window.scrollX;
-				y = y - this.offset().top - window.scrollY;
-				contextMenuHandler.longPressStart(x, y);
-				if(e.data.sky.callback.click){
-					e.x = x;
-					e.y = y;
-					e.data.sky.callback.click.call(e.data.sky,getXYProperties(e,e.data.sky));
-				}
+			if(touchClickHandler){
+				touchClickHandler.clickStart(getTouchXY(e.data.sky,e.originalEvent,this,e));
 			}
 		}).on('touchend',{sky:this},function(e){
 			e.data.sky.debug('touchend');
@@ -1547,7 +1580,9 @@ VirtualSky.prototype.createSky = function(){
 			e.data.sky.x = "";
 			e.data.sky.y = "";
 			e.data.sky.theta = "";
-			if(contextMenuHandler) contextMenuHandler.longPressStop();
+			if(touchClickHandler) {
+				touchClickHandler.clickEnd(e);
+			}
 		}).on((isEventSupported('mousewheel') ? 'mousewheel' : 'wheel'),{sky:this},function(e) {
 			e.preventDefault();
 			e.data.sky.debug('mousewheel');
