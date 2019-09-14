@@ -88,7 +88,7 @@
 				if(dim.length == 2){
 					planetarium.resize(dim[0],dim[1]);
 					el = document.getElementById(planetarium.id);
-					$('#'+planetarium.id).css({'height':planetarium.tall,'width':planetarium.wide})
+					S('#'+planetarium.id).css({'height':planetarium.tall+'px','width':planetarium.wide+'px'})
 				}
 			}
 			el = document.getElementById('dimensions');
@@ -417,7 +417,7 @@
 
 	<li>
 		<h2>Preview</h2>
-		<div id="preview" style="margin-bottom:10px;"></div>
+		<div id="preview"></div>
 	</li>
 	<li>
 		<h2>Embed</h2>

@@ -1170,6 +1170,9 @@ VirtualSky.prototype.resize = function(w,h){
 			h = this.container.outerHeight();
 			this.canvas.css({'width':w+'px','height':h+'px'});
 		}
+	}else{
+		// Set the container size
+		this.container.css({'width':w+'px','height':h+'px'});
 	}
 	if(w == this.wide && h == this.tall) return;
 	this.setWH(w,h);
