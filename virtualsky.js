@@ -1352,11 +1352,9 @@ VirtualSky.prototype.createSky = function(){
 
 	// If the Javascript function has been passed a width/height
 	// those take precedence over the CSS-set values
-	if(this.wide > 0)
-		this.container.css('width',this.wide+'px');
+	if(this.wide > 0) this.container.css({'width':this.wide+'px'});
 	this.wide = this.container.width();
-	if(this.tall > 0)
-		this.container.css('height',this.tall+'px');
+	if(this.tall > 0) this.container.css({'height':this.tall+'px'});
 	this.tall = this.container.height()-0;
 
 	// Add a <canvas> to it with the original ID
@@ -1768,8 +1766,8 @@ VirtualSky.prototype.coord2horizon = function(ra, dec){
 	// compute hour angle in degrees
 	ha = (Math.PI*this.times.LST/12) - ra;
 	sd = Math.sin(dec);
-	sl = Math.sin(this.latitude);
-	cl = Math.cos(this.latitude);
+	sl = Math.sin(this.latitude.rad);
+	cl = Math.cos(this.latitude.rad);
 	// compute altitude in radians
 	alt = Math.asin(sd*sl + Math.cos(dec)*cl*Math.cos(ha));
 	// compute azimuth in radians
@@ -1830,7 +1828,7 @@ VirtualSky.prototype.horizon2coord = function(coords){
 		return {'alt':MapPI(Math.asin(xyz[0])),'az':Map2PI(Math.atan2(xyz[1], xyz[2]))};
 	}
 	const xyz = convertAltAzToALTAZ3D({az: coords[1], alt: coords[0]});
-	const rotated = rotate(xyz, {id: 1}, Math.PI/2 + this.latitude);
+	const rotated = rotate(xyz, {id: 1}, Math.PI/2 + this.latitude.rad);
 	const res = convertALTAZ3DToAltAz(rotated);
 
 	return {ra: MapPI(res.az) + (Math.PI*this.times.LST/12), dec: -res.alt};
@@ -1887,7 +1885,7 @@ VirtualSky.prototype.selectProjection = function(proj){
 		}else{
 			this.azel2radec = function(az,el){
 				var xt,yt,r,l;
-				l = this.latitude;
+				l = this.latitude.rad;
 				xt  =  Math.asin( Math.sin(el) * Math.sin(l) + Math.cos(el) * Math.cos(l) * Math.cos(az) );
 				r = ( Math.sin(el) - Math.sin(l) * Math.sin(xt) ) / ( Math.cos(l) * Math.cos(xt) );
 				if(r > 1) r = 1;
@@ -1978,7 +1976,7 @@ VirtualSky.prototype.isPointBad = function(p){
 // Return a structure with the Julian Date, Local Sidereal Time and Greenwich Sidereal Time
 VirtualSky.prototype.astronomicalTimes = function(clock,lon){
 	clock = clock || this.clock;
-	lon = lon || this.longitude*this.r2d;
+	lon = lon || this.longitude.deg;
 	var JD,JD0,S,T,T0,UT,A,GST,d,LST;
 	JD = this.getJD(clock);
 	JD0 = Math.floor(JD-0.5)+0.5;
@@ -2070,7 +2068,7 @@ VirtualSky.prototype.ecliptic2azel = function(l,b,LST,lat){
 		this.times = this.astronomicalTimes();
 		LST = this.times.LST;
 	}
-	if(!lat) lat = this.latitude;
+	if(!lat) lat = this.latitude.rad;
 	var sl,cl,sb,cb,v,e,ce,se,Cprime,s,ST,cST,sST,B,r,sphi,cphi,A,w,theta,psi;
 	sl = Math.sin(l);
 	cl = Math.cos(l);
@@ -2350,7 +2348,7 @@ VirtualSky.prototype.drawImmediate = function(proj){
 
 	// Position line
 	if(this.showposition){
-		positionstring = Math.abs(this.latitude*this.r2d).toFixed(2) + ((this.latitude>0) ? this.getPhrase('N') : this.getPhrase('S')) + ', ' + Math.abs(this.longitude*this.r2d).toFixed(2) + ((this.longitude>0) ? this.getPhrase('E') : this.getPhrase('W'));
+		positionstring = Math.abs(this.latitude.deg).toFixed(2) + ((this.latitude.rad>0) ? this.getPhrase('N') : this.getPhrase('S')) + ', ' + Math.abs(this.longitude.deg).toFixed(2) + ((this.longitude.rad>0) ? this.getPhrase('E') : this.getPhrase('W'));
 		metric_pos = this.drawText(positionstring,this.padding,this.padding+fontsize+fontsize);
 	}
 
@@ -2480,8 +2478,8 @@ VirtualSky.prototype.drawImmediate = function(proj){
 					if(this.vs) this.vs.setGeo(S(hid+'_lat').val()+','+S(hid+'_long').val()).setClock(0).draw();
 				}
 			});
-			S(hid+'_lat').val(s.latitude*s.r2d);
-			S(hid+'_long').val(s.longitude*s.r2d);
+			S(hid+'_lat').val(s.latitude.deg);
+			S(hid+'_long').val(s.longitude.deg);
 			if(typeof s.callback.geo=="function") s.callback.geo.call(s);
 		});
 	}
@@ -2694,7 +2692,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			ra = this.planets[p][2];
 			dec = this.planets[p][3];
 		}
-		this.lookup.planet.push({'ra':ra*this.d2r,'dec':dec*this.d2r,'label':this.lang.planets[this.planets[p][0]]});
+		this.lookup.planet.push({'ra':ra*this.d2r,'dec':dec*this.d2r,'label':this.lang.planets[this.planets[p][0]]||"?"});
 		pos = this.radec2xy(ra*this.d2r,dec*this.d2r);
 
 		if(!this.negative) colour = this.planets[p][1];
@@ -3247,15 +3245,15 @@ VirtualSky.prototype.setGeo = function(pos){
 
 // Input: latitude (deg)
 VirtualSky.prototype.setLatitude = function(l){
-	this.latitude = inrangeEl(parseFloat(l)*this.d2r);
+	this.latitude = {'deg':parseFloat(l),'rad':inrangeEl(parseFloat(l)*this.d2r)};
 	return this; 
 };
 
 // Input: longitude (deg)
 VirtualSky.prototype.setLongitude = function(l){
-	this.longitude = parseFloat(l)*this.d2r;
-	while(this.longitude <= -Math.PI) this.longitude += 2*Math.PI;
-	while(this.longitude > Math.PI) this.longitude -= 2*Math.PI;
+	this.longitude = {'deg':parseFloat(l),'rad':parseFloat(l)*this.d2r};
+	while(this.longitude.rad <= -Math.PI) this.longitude.rad += 2*Math.PI;
+	while(this.longitude.rad > Math.PI) this.longitude.rad -= 2*Math.PI;
 	return this; 
 };
 
@@ -3573,6 +3571,7 @@ S.virtualsky = function(placeholder,input) {
 		if(typeof placeholder==="string") input = { container: placeholder };
 		else input = placeholder;
 	}
+	if(!input) input = {};
 	input.plugins = S.virtualsky.plugins;
 	return new VirtualSky(input);
 };
