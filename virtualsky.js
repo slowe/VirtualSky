@@ -2538,15 +2538,14 @@ VirtualSky.prototype.createLightbox = function(lb,opts){
 		return this;
 	}
 	Lightbox.prototype.resize = function(){
-
 		function columize(wide,tall){
 			// Make each li as wide as it needs to be so we can calculate the widest
-			lb.find('li').css({'display':'inline-block','margin-left':'0px','width':'auto'});
+			this.lb.find('li').css({'display':'inline-block','margin-left':'0px','width':'auto'});
 			// Remove positioning so we can work out sizes
-			lb.find('ul').css({'width':'auto'});
-			var w = lb.outerWidth();
+			this.lb.find('ul').css({'width':'auto'});
+			var w = this.lb.outerWidth();
 			var bar = 24;
-			var li = lb.find('ul li');
+			var li = this.lb.find('ul li');
 			var mx = 1;
 			for(var i = 0 ; i < li.length; i++){
 				if(S(li[i]).width() > mx) mx = S(li[i]).width();
@@ -2556,17 +2555,16 @@ VirtualSky.prototype.createLightbox = function(lb,opts){
 			var n = Math.floor(w/(mx+bar));
 			if(n > 1){
 				if(n > 3) n = 3;
-				lb.find('li').css({'width':(100/n)+'%','border-left':Math.floor(bar/2)+'px solid transparent','box-sizing':'border-box'});
-				lb.find('li:nth-child('+n+'n+1)').css({'margin-left':'0px'});
+				this.lb.find('li').css({'width':(100/n)+'%','border-left':Math.floor(bar/2)+'px solid transparent','box-sizing':'border-box'});
+				this.lb.find('li:nth-child('+n+'n+1)').css({'margin-left':'0px'});
 			}else{
-				lb.find('li').css({'display':'block','width':'auto'});
+				this.lb.find('li').css({'display':'block','width':'auto'});
 			}
-			lb.find('ul').css({'width':'100%'}).parent().css({'width':(w <= 500 ? '100%' : Math.min(w-bar,(mx+bar/2)*n + bar)+'px')});
+			this.lb.find('ul').css({'width':'100%'}).parent().css({'width':(w <= 500 ? '100%' : Math.min(w-bar,(mx+bar/2)*n + bar)+'px')});
+			this.lb.css({'width':(w <= 500 ? '100%':'')});
 		}
-		columize.call(this.vs.wide,this.vs.tall);
-
+		columize.call(this,this.vs.wide,this.vs.tall);
 		this.lb.css({'position':'relative',left:'50%',top:'50%','transform':'translate3d(-50%,-50%,0)','max-height':'100%','box-sizing':'border-box','z-index': 100,'position': 'absolute'});
-		if(lb.outerWidth() <= 500) this.lb.css({'width':'100%'});	
 		return this;
 	};
 	Lightbox.prototype.close = function(){
@@ -3515,10 +3513,8 @@ VirtualSky.prototype.greatCircle = function(l1,d1,l2,d2){
 
 // Bind events
 VirtualSky.prototype.on = function(ev,fn){
-	if(typeof ev!=="string" || typeof fn!=="function")
-		return this;
-	if(this.events[ev])
-		this.events[ev].push(fn);
+	if(typeof ev!=="string" || typeof fn!=="function") return this;
+	if(this.events[ev]) this.events[ev].push(fn);
 	else this.events[ev] = [fn];
 	return this;
 };
