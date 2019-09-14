@@ -212,7 +212,7 @@ window.fullScreenApi = fullScreenApi;
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.7.3";
+	this.version = "0.7.4";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -1175,7 +1175,7 @@ VirtualSky.prototype.resize = function(w,h){
 	this.setWH(w,h);
 	this.positionCredit();
 	this.updateSkyGradient();
-	this.draw();
+	this.drawImmediate();
 	this.container.css({'font-size':this.fontsize()+'px'});
 	this.trigger('resize',{vs:this});
 };
@@ -2254,17 +2254,15 @@ VirtualSky.prototype.updateSkyGradient = function(){
 	return this;
 };
 
-VirtualSky.prototype.draw = function() {
+VirtualSky.prototype.draw = function(){
 	// Redraw within 20ms. Used to avoid redraw pilling up, introducing vast lag
-	if (this.pendingRefresh !== undefined) {
-		return;
-	}
+	if(this.pendingRefresh !== undefined) return;
 	this.pendingRefresh = window.setTimeout(this.drawImmediate.bind(this), 20);
 };
 
 VirtualSky.prototype.drawImmediate = function(proj){
 	// Don't bother drawing anything if there is no physical area to draw on
-	if (this.pendingRefresh !== undefined) {
+	if(this.pendingRefresh !== undefined){
 		window.clearTimeout(this.pendingRefresh);
 		this.pendingRefresh = undefined;
 	}
@@ -2303,7 +2301,7 @@ VirtualSky.prototype.drawImmediate = function(proj){
 	}else if(typeof this.projection.draw==="function") this.projection.draw.call(this);
 
 	if(this.hasGradient()){
-		if(this.skygrad===undefined){
+		if(!this.skygrad){
 			this.updateSkyGradient();
 		}else{
 			c.beginPath();
@@ -2692,7 +2690,7 @@ VirtualSky.prototype.drawPlanets = function(){
 			ra = this.planets[p][2];
 			dec = this.planets[p][3];
 		}
-		this.lookup.planet.push({'ra':ra*this.d2r,'dec':dec*this.d2r,'label':this.lang.planets[this.planets[p][0]]||"?"});
+		this.lookup.planet.push({'ra':ra*this.d2r,'dec':dec*this.d2r,'label':(this.lang.planets ? this.lang.planets[this.planets[p][0]] : "?")});
 		pos = this.radec2xy(ra*this.d2r,dec*this.d2r);
 
 		if(!this.negative) colour = this.planets[p][1];
