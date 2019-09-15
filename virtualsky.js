@@ -2540,16 +2540,14 @@ VirtualSky.prototype.createLightbox = function(lb,opts){
 	Lightbox.prototype.resize = function(){
 		function columize(wide,tall){
 			// Make each li as wide as it needs to be so we can calculate the widest
-			this.lb.find('li').css({'display':'inline-block','margin-left':'0px','width':'auto'});
+			this.lb.css({'width':'100%'});
 			// Remove positioning so we can work out sizes
-			this.lb.find('ul').css({'width':'auto'});
-			var w = this.lb.outerWidth();
+			this.lb.find('ul').css({'width':''}).find('li').css({'display':'inline-block','margin-left':'0px','width':''});
+			var w = this.lb.parent().width();
 			var bar = 24;
 			var li = this.lb.find('ul li');
 			var mx = 1;
-			for(var i = 0 ; i < li.length; i++){
-				if(S(li[i]).width() > mx) mx = S(li[i]).width();
-			}
+			for(var i = 0 ; i < li.length; i++) mx = Math.max(mx,S(li[i]).outerWidth());
 			// If the list items are wider than the space we have we turn them
 			// into block items otherwise set their widths to the maximum width.
 			var n = Math.floor(w/(mx+bar));
@@ -2558,7 +2556,7 @@ VirtualSky.prototype.createLightbox = function(lb,opts){
 				this.lb.find('li').css({'width':(100/n)+'%','border-left':Math.floor(bar/2)+'px solid transparent','box-sizing':'border-box'});
 				this.lb.find('li:nth-child('+n+'n+1)').css({'margin-left':'0px'});
 			}else{
-				this.lb.find('li').css({'display':'block','width':'auto'});
+				this.lb.find('li').css({'display':'block','width':''});
 			}
 			this.lb.find('ul').css({'width':'100%'}).parent().css({'width':(w <= 500 ? '100%' : Math.min(w-bar,(mx+bar/2)*n + bar)+'px')});
 			this.lb.css({'width':(w <= 500 ? '100%':'')});
