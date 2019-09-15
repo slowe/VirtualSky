@@ -2425,7 +2425,7 @@ VirtualSky.prototype.drawImmediate = function(proj){
 						'<div style="text-align:center;margin:2px;">'+s.getPhrase('date')+'</div>'+
 						'<div style="text-align:center;">'+
 							'<input type="date" id="'+id+'_date" value="'+(s.clock.getFullYear()+'-'+((s.clock.getMonth() < 9 ? "0":"")+(s.clock.getMonth()+1))+'-'+(s.clock.getDate() < 10 ? "0":"")+s.clock.getDate())+'" />' + 
-							'<input type="time" id="'+id+'_time" value="'+s.clock.getHours()+':'+s.clock.getMinutes()+'" />' + 
+							'<input type="time" id="'+id+'_time" value="'+(s.clock.getHours() < 10 ? '0':'')+s.clock.getHours()+':'+(s.clock.getMinutes() < 10 ? '0':'')+s.clock.getMinutes()+'" />' + 
 						'</div>'+
 					'</div>');
 				S(hid+'_calendar').css({width:w});
