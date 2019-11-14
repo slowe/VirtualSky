@@ -172,6 +172,9 @@ var fullScreenApi = {
 // check for native support
 if(typeof document.cancelFullScreen != 'undefined') {
 	fullScreenApi.supportsFullScreen = true;
+} else if (typeof document['msExitFullscreen'] != 'undefined') {
+	fullScreenApi.prefix = 'ms';
+	fullScreenApi.supportsFullScreen = true;
 }else{
 	// check for fullscreen support by vendor prefix
 	for(var i = 0, il = browserPrefixes.length; i < il; i++ ) {
@@ -193,15 +196,24 @@ if(fullScreenApi.supportsFullScreen) {
 				return document.fullScreen;
 			case 'webkit':
 				return document.webkitIsFullScreen;
+			case 'ms':
+				return document.msFullscreenElement != null;
 			default:
 				return document[this.prefix + 'FullScreen'];
 		}
 	};
 	fullScreenApi.requestFullScreen = function(el) {
-		return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
+		return (this.prefix === '') ? el.requestFullScreen() : ((this.prefix === 'ms') ? el.msRequestFullscreen() : el[this.prefix + 'RequestFullScreen']());
 	};
 	fullScreenApi.cancelFullScreen = function(el) {
-		return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
+		switch (this.prefix) {
+			case '':
+				return document.cancelFullScreen();
+			case 'ms':
+				return document.msExitFullscreen();
+			default:
+				return document[this.prefix + 'CancelFullScreen']();
+		}
 	};
 }
 
