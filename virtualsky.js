@@ -283,7 +283,7 @@ function VirtualSky(input){
 	this.transparent = false;			// Show the sky background or not
 	this.fps = 10;						// Number of frames per second when animating
 	this.credit = (location.host == "lco.global" && location.href.indexOf("/embed") < 0) ? false : true;
-	this.callback = { geo:'', mouseenter:'', mouseout:'', contextmenu: '', cursor: '', click:'' };
+	this.callback = { geo:'', mouseenter:'', mouseout:'', contextmenu: '', cursor: '', click:'', draw: '' };
 	this.lookup = {};
 	this.keys = [];
 	this.base = "";
@@ -1073,6 +1073,7 @@ VirtualSky.prototype.init = function(d){
 		if(is(d.callback.mouseout,f)) this.callback.mouseout = d.callback.mouseout;
 		if(is(d.callback.cursor,f)) this.callback.cursor = d.callback.cursor;
 		if(is(d.callback.contextmenu,f)) this.callback.contextmenu = d.callback.contextmenu;
+		if(is(d.callback.draw,f)) this.callback.draw = d.callback.draw;
 	}
 	return this;
 };
@@ -2299,6 +2300,16 @@ VirtualSky.prototype.draw = function() {
 	this.pendingRefresh = window.setTimeout(this.drawImmediate.bind(this), 20);
 };
 
+VirtualSky.prototype.invokeDrawCb = function(visible){
+	if (typeof this.callback.draw) {
+		var self = this;
+		function callCb() {
+			self.callback.draw(visible);
+		}
+		window.setTimeout(callCb, 0);
+	}
+}
+
 VirtualSky.prototype.drawImmediate = function(proj){
 	// Don't bother drawing anything if there is no physical area to draw on
 	if (this.pendingRefresh !== undefined) {
@@ -2306,8 +2317,14 @@ VirtualSky.prototype.drawImmediate = function(proj){
 		this.pendingRefresh = undefined;
 	}
 
-	if(this.wide <= 0 || this.tall <= 0) return this;
-	if(!(this.c && this.c.getContext)) return this;
+	if(this.wide <= 0 || this.tall <= 0) {
+		this.invokeDrawCb(false);
+		return this;
+	}
+	if(!(this.c && this.c.getContext)) {
+		this.invokeDrawCb(false);
+		return this;
+	}
 
 	if(proj !== undefined) this.selectProjection(proj);
 	var white = this.col.white;
@@ -2520,7 +2537,7 @@ VirtualSky.prototype.drawImmediate = function(proj){
 			if(typeof s.callback.geo=="function") s.callback.geo.call(s);
 		});
 	}
-	
+	this.invokeDrawCb(true);
 	off = S('#'+this.idinner).position();
 	S('.'+this.id+'_position').css({
 		position:'absolute',
