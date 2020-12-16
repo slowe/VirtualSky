@@ -224,7 +224,7 @@ window.fullScreenApi = fullScreenApi;
 /*! VirtualSky */
 function VirtualSky(input){
 
-	this.version = "0.7.4";
+	this.version = "0.7.5";
 
 	this.ie = false;
 	this.excanvas = (typeof G_vmlCanvasManager != 'undefined') ? true : false;
@@ -912,6 +912,7 @@ function VirtualSky(input){
 		'en': { "language": {"name": "English","alignment": "left" } },
 		'es': { "language": {"name": "Espa&#241;ol","alignment": "left" } },
 		'fr': { "language": {"name": "Fran&#231;ais","alignment": "left" } },
+		'gl': { "language": {"name": "Galego","alignment": "left" } },
 		'it': { "language": {"name": "Italiano","alignment": "left" } },
 		'nl': { "language": {"name": "Nederlands","alignment": "left" } },
 		'pt': { "language": {"name": "Portugu&#234;s","alignment": "left" } },
