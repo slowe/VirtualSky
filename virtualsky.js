@@ -2356,7 +2356,7 @@ VirtualSky.prototype.drawImmediate = function(proj){
 
 	// Time line
 	if(this.showdate){
-		clockstring = this.clock.toDateString()+' '+this.clock.toLocaleTimeString();
+		clockstring = this.clock.toLocaleDateString(this.langcode,{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })+' '+this.clock.toLocaleTimeString(this.langcode);
 		metric_clock = this.drawText(clockstring,this.padding,this.padding+fontsize);
 	}
 
