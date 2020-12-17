@@ -98,6 +98,7 @@
 			if(property == 'color') planetarium.color = value;
 			if(property == 'magnitude') planetarium.magnitude = parseFloat(value);
 			if(property == 'scalestars') planetarium.scalestars = parseFloat(value);
+			if(property == 'lang') planetarium.loadLanguage(value);
 
 			if(property == 'az_off') planetarium.az_off = value;
 			el = document.getElementById('az_off');
@@ -143,6 +144,7 @@
 			if(skydefault.magnitude != planetarium.magnitude) uri += "&magnitude="+planetarium.magnitude;
 			if(skydefault.islive != planetarium.islive) uri += "&live="+planetarium.islive;
 			if(skydefault.az_off != planetarium.az_off) uri += "&az="+((planetarium.az_off+180)%360);
+			if(skydefault.langcode != planetarium.langcode) uri += "&lang="+planetarium.langcode;
 			if(changedtime) uri += "&clock="+planetarium.clock;
 			str += encodeURI(uri);
 			str += "\" allowTransparency=\"true\"></iframe>";
@@ -172,6 +174,23 @@
 					<option>mollweide</option>
 					<option>planechart</option>
 				</select>
+			</div>
+		</div>
+		<div class="i">
+			<label class="p" for="lang">Language</label>
+			<div class="o">
+				<select name="lang" id="lang" onChange="update(this)">
+					<option value="" selected>---</option>
+					<option value="ar">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
+					<option value="cs">Čeština</option>
+					<option value="en">English</option>
+					<option value="es">Espa&#241;ol</option>
+					<option value="fr">Fran&#231;ais</option>
+					<option value="gl">Galego</option>
+					<option value="it">Italiano</option>
+					<option value="nl">Nederlands</option>
+					<option value="pt">Portugu&#234;s</option>
+				</select> only set this if you <em>have</em> to explicitly specify a language. 
 			</div>
 		</div>
 		<div class="i">
