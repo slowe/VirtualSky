@@ -93,12 +93,13 @@
 			}
 			el = document.getElementById('dimensions');
 			el.value = planetarium.wide+'x'+planetarium.tall;
+			var langcode = planetarium.langcode;
 			if(property == 'position') planetarium.setGeo(value);
 			if(property == 'background') planetarium.background = value;
 			if(property == 'color') planetarium.color = value;
 			if(property == 'magnitude') planetarium.magnitude = parseFloat(value);
 			if(property == 'scalestars') planetarium.scalestars = parseFloat(value);
-			if(property == 'lang') planetarium.loadLanguage(value);
+			if(property == 'lang'){ langcode = value; planetarium.loadLanguage(value); }
 
 			if(property == 'az_off') planetarium.az_off = value;
 			el = document.getElementById('az_off');
@@ -144,11 +145,10 @@
 			if(skydefault.magnitude != planetarium.magnitude) uri += "&magnitude="+planetarium.magnitude;
 			if(skydefault.islive != planetarium.islive) uri += "&live="+planetarium.islive;
 			if(skydefault.az_off != planetarium.az_off) uri += "&az="+((planetarium.az_off+180)%360);
-			if(skydefault.langcode != planetarium.langcode) uri += "&lang="+planetarium.langcode;
+			if(skydefault.langcode != langcode) uri += "&lang="+langcode;
 			if(changedtime) uri += "&clock="+planetarium.clock;
 			str += encodeURI(uri);
 			str += "\" allowTransparency=\"true\"></iframe>";
-
 			el = document.getElementById('embedcode');
 			el.value = str
 		}
