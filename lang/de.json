@@ -158,11 +158,11 @@
 		"polar": "Polare Projektion",
 		"fisheye": "Fischaugen-Projektion",
 		"ortho": "Orthographische Projektion",
-		"stereo": "Stereo Projektion",
-		"lambert": "Lambert Projektion",
+		"stereo": "Stereo-Projektion",
+		"lambert": "Lambert-Projektion",
 		"gnomic": "Gnomonische Projektion",
 		"equirectangular": "Rektangularprojektion",
-		"mollweide": "Mollweide Projektion",
+		"mollweide": "Mollweide-Projektion",
 		"planechart": "Planare Projektion"
 	},
 	"starnames":{
