@@ -22,7 +22,7 @@
 					this.trigger('loadedPlanets');
 					this.draw();
 				}
-			})
+			});
 			this.draw();
 		});
 	}
@@ -34,6 +34,13 @@
 		// Uncertainties in RA (pre 2050) should be: <400" (Jupiter); <600" (Saturn); <50" everything else
 		// See also: https://ssd.jpl.nasa.gov/txt/p_elem_t1.txt
 		//           https://ssd.jpl.nasa.gov/?planet_pos
+		// i = inclination (deg)
+		// o = longitude of the ascending node (deg)
+		// p = longitude of perihelion (deg)
+		// a = distance from Sun (AU)
+		// n = daily motion (deg/day)
+		// e = eccentricity
+		// L = mean longitude (deg)
 		this.planets = [{
 			"name": "Me",
 			"radius":2439.7,	// km
@@ -98,7 +105,8 @@
 				{"jd":2456440.5,"i":1.3033,"o":100.627,"p":14.586,"a":5.20259,"n":0.083096,"e":0.048892,"L":81.3228},
 				{"jd":2456520.5,"i":1.3033,"o":100.629,"p":14.556,"a":5.20245,"n":0.083099,"e":0.048892,"L":87.9728},
 				{"jd":2456600.5,"i":1.3033,"o":100.631,"p":14.576,"a":5.20254,"n":0.083097,"e":0.048907,"L":94.6223},
-				{"jd":2456680.5,"i":1.3033,"o":100.633,"p":14.592,"a":5.20259,"n":0.083096,"e":0.048891,"L":101.2751}
+				{"jd":2456680.5,"i":1.3033,"o":100.633,"p":14.592,"a":5.20259,"n":0.083096,"e":0.048891,"L":101.2751},
+				{"jd":2456681,"i":1.3033,"o":100.633,"p":14.592,"a":5.20259,"n":0.083096,"e":0.048891,"L":100.29282654}	// Added fudge factor on 2022-11-02 otherwise Jupiter moved quickly across the sky - not sure why it is so sensitive 
 			]
 		},{
 			"name":"S",
@@ -171,7 +179,7 @@
 			if(this.planets[a].colour) arr[b++] = this.buildPlanet(a,jd,days);
 		}
 		return arr;
-	}
+	};
 	
 	// Build the data array for a particular planet
 	// Inputs:
@@ -198,8 +206,8 @@
 		// [Planet name,colour,[jd_1, ra_1, dec_1, mag_1, jd_2, ra_2, dec_2, mag_2....]]
 		n = Math.floor(days/interval);
 		var arr = new Array(3);
-		arr[0] = this.planets[p]["name"];
-		arr[1] = this.planets[p]["colour"];
+		arr[0] = this.planets[p].name;
+		arr[1] = this.planets[p].colour;
 		arr[2] = new Array(n*4);
 
 		jdcurr = jd;
@@ -212,7 +220,7 @@
 			arr[2][i*4+3] = coord[2];
 		}
 		return arr;
-	}
+	};
 	
 	
 	// Get the ephemeris for the specified planet number
@@ -260,7 +268,7 @@
 		R = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]);
 	
 		// Calculate the magnitude (http://stjarnhimlen.se/comp/tutorial.html)
-		var angdiam = (this.planets[i].radius*2/(R*this.AUinkm));
+		//var angdiam = (this.planets[i].radius*2/(R*this.AUinkm));
 		mag = 1;
 	
 		// planet's heliocentric distance, v.r, its geocentric distance, R, and the distance to the Sun, e.r.
@@ -269,7 +277,7 @@
 		mag = this.planets[i].magnitude({a:v.r,r:v.r,R:R,FV:FV*this.r2d,x:x,y:y,z:z,jd:day,d2r:this.d2r});
 
 		return [ra,dc,mag];
-	}
+	};
 	
 	Planets.prototype.getHeliocentric = function(planet,jd,i){
 		var min = 1e10;
@@ -286,17 +294,17 @@
 				}
 			}
 		}
-		p = planet.elements[i];
+		p = clone(planet.elements[i]);
 
 		// The day number is the number of days (decimal) since epoch of elements.
 		d = (jd - p.jd);
-	
+
 		// Heliocentric coordinates of planet
-		M = this.meanAnomaly(p.n,d,p.L,p.p)
+		M = this.meanAnomaly(p.n,d,p.L,p.p);
 		v = this.trueAnomaly(M*this.d2r,p.e,10);
 		r = p.a * (1 - Math.pow(p.e,2)) / (1 + p.e * Math.cos(v*this.d2r));
 		return {xyz: this.heliocentric(v*this.d2r,r,p.p*this.d2r,p.o*this.d2r,p.i*this.d2r), M:M, v:v, r:r, i:i, d:d, elements:p};
-	}
+	};
 	
 	// Find the Mean Anomaly (M, degrees) of the planet where
 	//  n is daily motion
@@ -309,7 +317,7 @@
 		while(M < 0){ M += 360; }
 		while(M >= 360){ M -= 360; }
 		return M;
-	}
+	};
 	
 	// Heliocentric coordinates of the planet where:	
 	//  o is longitude of ascending node (radians)
@@ -324,33 +332,34 @@
 		var so = Math.sin(o);
 		var ci = Math.cos(i);
 		var si = Math.sin(i);
-		return [r * (co * cvpo - so * svpo * ci),r * (so * cvpo + co * svpo * ci),r * (svpo * si)]
-	}
+		return [r * (co * cvpo - so * svpo * ci),r * (so * cvpo + co * svpo * ci),r * (svpo * si)];
+	};
 	
 	/*
 		Find the True Anomaly given
 		m  -  the 'mean anomaly' in orbit theory (in radians)
 		ecc - the eccentricity of the orbit
+		eps - the precision parameter - solution will be within 10^-eps of the true value. Don't set eps above 14, as convergence can't be guaranteed
 	*/
 	Planets.prototype.trueAnomaly = function(m,ecc,eps){
+    var v;
 		var e = m;        // first guess
 	
 		if(typeof eps==="number"){
 			var delta = 0.05; // set delta equal to a dummy value
-			var eps = 10;     // eps - the precision parameter - solution will be within 10^-eps of the true value. Don't set eps above 14, as convergence can't be guaranteed
 		
 			while(Math.abs(delta) >= Math.pow(10,-eps)){    // converged?
 				delta = e - ecc * Math.sin(e) - m;          // new error
 				e -= delta / (1 - ecc * Math.cos(e));    // corrected guess
 			}
-			var v = 2 * Math.atan(Math.pow(((1 + ecc) / (1 - ecc)),0.5) * Math.tan(0.5 * e));
+			v = 2 * Math.atan(Math.pow(((1 + ecc) / (1 - ecc)),0.5) * Math.tan(0.5 * e));
 			if(v < 0) v+= Math.PI*2;
 		}else{
 			v = m + ( (2 * ecc - Math.pow(ecc,3)/4)*Math.sin(m) + 1.25*Math.pow(ecc,2)*Math.sin(2*m) + (13/12)*Math.pow(ecc,3)*Math.sin(3*m) );
 		}
 		return v*this.r2d; // return estimate
-	}
-	
+	};
+	/*
 	function formatRADec(ra,dec){
 		var rah,ram,ras,dcd,dcm,dcs;
 		ra /= 15;
@@ -369,7 +378,10 @@
 	}
 	
 	function rev(x) {
-	  return  x - Math.floor(x/360.0)*360.0
+	  return  x - Math.floor(x/360.0)*360.0;
+	}*/
+	function clone(d){
+		return JSON.parse(JSON.stringify(d));
 	}
 	
 	function log10(x) {
